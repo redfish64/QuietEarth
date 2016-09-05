@@ -1,0 +1,19 @@
+name: QuietCraft
+version: 0.0001
+author: Tim Engler
+main: com.rareventure.quietcraft.QuietCraftPlugin
+database: true
+commands:
+  runquery:
+    aliases: [rq]
+    description: Runs any old query the player wants and returns the results
+    usage: |
+           /<command> <name> [player]
+           Example: /<command> "select * from QCPlayer"
+  kill:
+    aliases: []
+    description: Kills you
+    usage: |
+           /kill
+           Example: /kill
+              ... and you die
