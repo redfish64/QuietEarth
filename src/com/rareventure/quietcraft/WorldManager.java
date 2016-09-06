@@ -17,7 +17,7 @@ import java.util.Set;
  * Created by tim on 7/10/16.
  */
 public class WorldManager {
-    private static final int MAX_WORLDS = 30;
+    private static final int MAX_WORLDS = 3;
     private final QuietCraftPlugin qcp;
 
     public List<QCWorld> worlds;

@@ -139,11 +139,65 @@
 <node CREATED="1468004655573" ID="ID_20847600" MODIFIED="1468004670355" TEXT="Would only occur if a new world was built for the player personally"/>
 </node>
 </node>
-<node CREATED="1473080306960" ID="ID_1727806319" MODIFIED="1473080309500" TEXT="spawning">
+<node CREATED="1473080306960" ID="ID_1727806319" MODIFIED="1473099187029" TEXT="spawning">
 <node CREATED="1473080310848" ID="ID_722706054" MODIFIED="1473080328740" TEXT="when a player dies, they go to the next world they haven&apos;t visited yet">
 <node CREATED="1473080329800" ID="ID_11412421" MODIFIED="1473080334965" TEXT="If the player has visited all the worlds then">
 <node CREATED="1473080335880" ID="ID_1533665923" MODIFIED="1473080348765" TEXT="If there are any worlds that haven&apos;t been visited in a month, the player can join those"/>
 <node CREATED="1473080349120" ID="ID_133161436" MODIFIED="1473080365052" TEXT="Otherwise the player goes to nether"/>
+</node>
+</node>
+</node>
+<node CREATED="1473099187689" ID="ID_1690179985" MODIFIED="1473099211850" TEXT="server">
+<node CREATED="1473099211830" ID="ID_744280517" MODIFIED="1473099213036" TEXT="vultr">
+<node CREATED="1473099195536" ID="ID_1971885085" MODIFIED="1473099200787" TEXT="$60 per month">
+<node CREATED="1473099202033" ID="ID_386042811" MODIFIED="1473099203621" TEXT="8 gig"/>
+<node CREATED="1473099204552" ID="ID_1739776195" MODIFIED="1473099205660" TEXT="2 cpu"/>
+<node CREATED="1473099206328" ID="ID_15722012" MODIFIED="1473099209084" TEXT="120 GB"/>
+<node CREATED="1473099339832" ID="ID_253230457" MODIFIED="1473099343213" TEXT="10 TB bandwidth"/>
+</node>
+<node CREATED="1473099286913" ID="ID_1878431273" MODIFIED="1473099290772" TEXT="about 100 players"/>
+</node>
+</node>
+<node CREATED="1473099421192" ID="ID_842966636" MODIFIED="1473147407697" TEXT="thoughts">
+<node CREATED="1473099425896" ID="ID_1629893461" MODIFIED="1473099480125" TEXT="If we have a maximum of 50 worlds, it seems more like we are just a perma death server with extra lives">
+<node CREATED="1473099481585" ID="ID_1603276191" MODIFIED="1473099510045" TEXT="All we need to do is prevent the high death users from joining servers populated by more friendly people."/>
+<node CREATED="1473099517672" ID="ID_1960633103" MODIFIED="1473099540868" TEXT="Which means we can reuse as many worlds as we want. "/>
+</node>
+<node CREATED="1473147408517" ID="ID_1217376109" MODIFIED="1473147436571" TEXT="If the player dies and goes to the nether, then what? Is he nether forever?">
+<node CREATED="1473147526518" ID="ID_1953966969" MODIFIED="1473147544482" TEXT="As time goes by and worlds are abandoned, they become revistable"/>
+<node CREATED="1473147546509" ID="ID_545265495" MODIFIED="1473147561155" TEXT="People are banned from worlds for a limited period of time???">
+<node CREATED="1473147567109" ID="ID_817469872" MODIFIED="1473147578497" TEXT="Banned until they are abandoned for a particular period of time"/>
+</node>
+<node CREATED="1473147590037" ID="ID_473333231" MODIFIED="1473147605913" TEXT="So people get a set of worlds they are allowed to visit when they die"/>
+<node CREATED="1473147608173" ID="ID_574352667" MODIFIED="1473147621378" TEXT="Everytime they die they lose the ability to revisit the world through death">
+<node CREATED="1473147622662" ID="ID_138449464" MODIFIED="1473147635986" TEXT="If the world is abandoned long enough, it resets for all players?">
+<node CREATED="1473147682101" ID="ID_868913248" MODIFIED="1473147701730" TEXT="Yes, and probably gets a new spawn point, nearby, but not too close to the original spawn point"/>
+<node CREATED="1473147723501" ID="ID_1865020102" MODIFIED="1473147739443" TEXT="So a world gets a visit_id">
+<node COLOR="#999999" CREATED="1473147740797" ID="ID_996779680" MODIFIED="1473147814165">
+<richcontent TYPE="NODE"><html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      Each player starts with a visit_id of 0
+    </p>
+  </body>
+</html>
+</richcontent>
+<font NAME="SansSerif" SIZE="10"/>
+</node>
+<node CREATED="1473147863533" ID="ID_54278056" MODIFIED="1473147892603" TEXT="Player logs record which visit_ids the player has seen"/>
+<node CREATED="1473147893133" ID="ID_1851855622" MODIFIED="1473147913227" TEXT="If a player runs out of visit_ids, they go to nether"/>
+</node>
+</node>
+</node>
+</node>
+<node CREATED="1473148032502" ID="ID_663027019" MODIFIED="1473148035937" TEXT="monetizing">
+<node CREATED="1473148037638" ID="ID_1447795321" MODIFIED="1473148042634" TEXT="beta period then subscription fee">
+<node CREATED="1473148049678" ID="ID_1028255873" MODIFIED="1473148058569" TEXT="don&apos;t mention subscription period until beta ends"/>
+<node CREATED="1473148071613" ID="ID_1653948769" MODIFIED="1473148107355" TEXT="subscription cheap. $4.99 a month or something?"/>
+<node CREATED="1473148108350" ID="ID_1594113529" MODIFIED="1473148115635" TEXT="newcomers get trial period"/>
 </node>
 </node>
 </node>
