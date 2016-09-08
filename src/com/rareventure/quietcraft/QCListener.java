@@ -3,6 +3,7 @@ package com.rareventure.quietcraft;
 import com.avaje.ebean.EbeanServer;
 import com.avaje.ebean.Transaction;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -12,6 +13,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.world.PortalCreateEvent;
 
 import java.util.Date;
 import java.util.logging.Level;
@@ -44,16 +46,23 @@ public class QCListener implements Listener {
         if(e.getEntityType() != EntityType.PLAYER)
             return;
 
+        e.getDrops().clear(); //HACK, filter for souls
+
         qcp.pm.onPlayerDeath(e.getEntity());
     }
 
     @EventHandler(priority= EventPriority.NORMAL)
     public void onRespawn(PlayerRespawnEvent e) {
-        QCPlayer player = qcp.pm.getQCPlayer(e.getPlayer());
-        QCWorld world = qcp.wm.getQCWorld(player.getWorldId());
 
-        e.setRespawnLocation(Bukkit.getWorld(world.getName()).getSpawnLocation());
-        e.getPlayer().sendMessage("You have been reborn into "+world.getName());
+        Location l = qcp.pm.onRespawn(e.getPlayer());
+
+        e.setRespawnLocation(l);
     }
 
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void onPortalCreate(PortalCreateEvent event) {
+        String world = event.getWorld().getName();
+        //qcp.getLogger().info("denied portal creation");
+        //event.setCancelled(true);
+    }
 }

@@ -11,6 +11,7 @@ public class QCWorld {
     /**
      * Current number of players in the world
      */
+    //TODO 2 populate
     @Transient
     public int currentPlayerCount;
 
@@ -34,7 +35,14 @@ public class QCWorld {
     @NotNull
     private String name;
 
-    public QCWorld() {}
+    public QCWorld()
+    {}
+
+    public QCWorld(long id, long visitId, String name) {
+        this.id = id;
+        this.visitId = visitId;
+        this.name = name;
+    }
 
     public long getId() {
         return id;
@@ -42,6 +50,14 @@ public class QCWorld {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public long getVisitId() {
+        return visitId;
+    }
+
+    public void setVisitId(long visitId) {
+        this.visitId = visitId;
     }
 
     public String getName() {
@@ -54,7 +70,7 @@ public class QCWorld {
 
     public int getWorldVisitedCount(QuietCraftPlugin qcp) {
         //TODO 2 FIXME
-        return 0;
+        return  timesVisited = 0;
     }
 }
 

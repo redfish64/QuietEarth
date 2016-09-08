@@ -47,6 +47,15 @@ public class QCPlayerLog {
     @NotNull
     private Date timestamp;
 
+    /**
+     * The visitId of the world
+     */
+    @NotNull
+    private long worldVisitId;
+
+    /**
+     * The id of the world
+     */
     @NotNull
     private long worldId;
 
@@ -55,10 +64,11 @@ public class QCPlayerLog {
 
     public QCPlayerLog() {}
 
-    public QCPlayerLog(String playerUuid, Date timestamp, long worldId, Action action) {
+    public QCPlayerLog(String playerUuid, Date timestamp, long worldId, long worldVisitId, Action action) {
         this.playerUuid = playerUuid;
         this.timestamp = timestamp;
         this.worldId = worldId;
+        this.worldVisitId = worldVisitId;
         this.action = action;
     }
 
@@ -84,6 +94,14 @@ public class QCPlayerLog {
 
     public void setWorldId(long worldId) {
         this.worldId = worldId;
+    }
+
+    public long getWorldVisitId() {
+        return worldVisitId;
+    }
+
+    public void setWorldVisitId(long worldVisitId) {
+        this.worldVisitId = worldVisitId;
     }
 
     public Action getAction() {

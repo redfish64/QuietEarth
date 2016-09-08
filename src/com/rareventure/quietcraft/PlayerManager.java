@@ -3,16 +3,32 @@ package com.rareventure.quietcraft;
 import com.avaje.ebean.EbeanServer;
 import com.avaje.ebean.Transaction;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.WorldCreator;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.Date;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Contains standard procedures for handling interaction with the system state and database
  */
 public class PlayerManager {
+    private static final int SOULS_PER_REBIRTH = 4;
+    private static final Material SOUL_MATERIAL_TYPE = Material.DIAMOND;
+    private static final String SOUL_DISPLAY_NAME = "Soul";
+    private static final List<String> SOUL_LORE = Arrays.asList(
+            ("Oh ye who go about saying unto each:  \"Hello sailor\":\n" +
+            "Dost thou know the magnitude of thy sin before the gods?\n" +
+            "Yea, verily, thou shalt be ground between two stones.\n" +
+            "Shall the angry gods cast thy body into the whirlpool?\n" +
+            "Surely, thy eye shall be put out with a sharp stick!\n" +
+            "Even unto the ends of the earth shalt thou wander and\n" +
+            "unto the land of the dead shalt thou be sent at last.\n" +
+            "Surely thou shalt repent of thy cunning.").split("\n"));
     private final QuietCraftPlugin qcp;
     private final EbeanServer db;
 
@@ -24,8 +40,9 @@ public class PlayerManager {
 
     private void addToPlayerLog(Player player, QCPlayerLog.Action action)
     {
+        QCWorld w = getPlayersWorld(player);
         db.insert(new QCPlayerLog(player.getUniqueId().toString(),new Date(),
-                getPlayersWorld(player).getId(),
+                w.getId(), w.getVisitId(),
                 action));
     }
 
@@ -46,28 +63,36 @@ public class PlayerManager {
     public void onPlayerDeath(Player p) {
         EbeanServer db = qcp.getDatabase();
 
-        Transaction transaction = db.beginTransaction();
-        try {
-            QCPlayer qcPlayer = getQCPlayer(p.getUniqueId());
+        int soulCount = getSoulCount(p);
 
-            QCWorld w = qcp.wm.findBestWorldForDeadPlayer(p);
+        QCPlayer qcPlayer = getQCPlayer(p.getUniqueId());
 
-            if (qcPlayer == null) {
-                qcp.getLogger().warning("Player "+p.getUniqueId()+" died, but doesn't exist, adding....");
-                qcPlayer = new QCPlayer(p.getUniqueId().toString(), w.getId());
-                db.insert(qcPlayer);
-            } else {
-                qcPlayer.setWorldId(w.getId());
-                db.update(qcPlayer);
-            }
+        qcPlayer.setSoulsKeptDuringDeath(soulCount);
 
-            addToPlayerLog(p, QCPlayerLog.Action.PERMA_DEATH);
-            transaction.commit();
-        }
-        finally
+        db.update(qcPlayer);
+    }
+
+    private int getSoulCount(Player p) {
+        int souls = 0;
+
+        for(ItemStack itemStack : p.getInventory())
         {
-            transaction.end();
+            if(itemStack == null)
+                continue;
+            if(itemStack.getType() == SOUL_MATERIAL_TYPE) {
+                ItemMeta im = itemStack.getItemMeta();
+                if(isSoulMeta(im))
+                    souls += itemStack.getAmount();
+            }
         }
+
+        return souls;
+    }
+
+    private boolean isSoulMeta(ItemMeta im) {
+        if(im.getDisplayName().equals(SOUL_DISPLAY_NAME))
+            return true;
+        return false;
     }
 
     public QCPlayer getQCPlayer(Player player) {
@@ -85,11 +110,13 @@ public class PlayerManager {
     public void onPlayerJoin(Player player) {
         QCPlayer qcPlayer = getQCPlayer(player);
 
-        Transaction transaction = db.beginTransaction();
+        db.beginTransaction();
         try {
             //new player
             if(qcPlayer == null)
             {
+                giveSoulsToPlayer(player, SOULS_PER_REBIRTH);
+
                 QCWorld w = qcp.wm.findFirstJoinWorld();
                 createQCPlayer(player,w);
 
@@ -97,15 +124,12 @@ public class PlayerManager {
                 player.teleport(Bukkit.createWorld(new WorldCreator(w.getName())).getSpawnLocation());
 
                 addToPlayerLog(player, QCPlayerLog.Action.JOIN);
-                transaction.commit();
+                db.commitTransaction();
                 return;
             }
 
-            //we assume the player is in the right place.
-            //TODO 2 verify this
-
-            addToPlayerLog(player, QCPlayerLog.Action.JOIN);
-            transaction.commit();
+           addToPlayerLog(player, QCPlayerLog.Action.JOIN);
+            db.commitTransaction();
 
             player.sendMessage("You are in world '"+
                     qcp.pm.getPlayersWorld(player.getPlayer()).getName()+"'");
@@ -113,11 +137,99 @@ public class PlayerManager {
 
         }
         finally {
-            transaction.end();
+            db.endTransaction();
+        }
+    }
+
+    private void giveSoulsToPlayer(Player player, int soulCount) {
+        Inventory i = player.getInventory();
+        i.clear();
+
+        //TODO 3 choose a better material type for souls
+        while(soulCount != 0) {
+            //in case the user has a lot of souls, we create a max stack of 64
+            int sc = soulCount%64;
+            ItemStack is = new ItemStack(SOUL_MATERIAL_TYPE, sc);
+            ItemMeta im = is.getItemMeta();
+
+            im.setDisplayName(SOUL_DISPLAY_NAME);
+
+
+            im.setLore(SOUL_LORE);
+            is.setItemMeta(im);
+            i.addItem(is);
+            soulCount -= sc;
         }
     }
 
     public void onPlayerQuit(Player player) {
         addToPlayerLog(player, QCPlayerLog.Action.QUIT);
+    }
+
+    /**
+     * This is called after onDeath() when the player has clicked the respawn button
+     * and is ready to teleport to his new home.
+     *
+     * @return location to teleport to.
+     */
+    public Location onRespawn(Player p) {
+        QCPlayer player = qcp.pm.getQCPlayer(p);
+        QCWorld w;
+        int soulCount = player.getSoulsKeptDuringDeath();
+
+        db.beginTransaction();
+        try{
+            if(soulCount > 0) {
+                soulCount--;
+                //just incase something funny happens, we subtract a soul from their death count
+                player.setSoulsKeptDuringDeath(soulCount);
+                db.update(player);
+
+                w = getPlayersWorld(p);
+
+                if(soulCount == 0)
+                    p.sendMessage("You have no souls left, you are not long for this world.");
+                else if(soulCount == 1)
+                    p.sendMessage("You feel a lot less than whole. You have one soul left.");
+                else if(soulCount < SOULS_PER_REBIRTH)
+                    p.sendMessage("You feel a little less than whole. You have "+(soulCount)+" souls left.");
+                else if(soulCount == SOULS_PER_REBIRTH)
+                    p.sendMessage("You feel spiritually content. You have "+(soulCount)+" souls left.");
+                else if(soulCount < SOULS_PER_REBIRTH *2)
+                    p.sendMessage("You feel spiritually bloated, as if you are greater than mortal. You have "+(soulCount)+" souls left.");
+                else if(soulCount < SOULS_PER_REBIRTH *3)
+                    p.sendMessage("You feel like a ethereal king, fear your wrath! You have "+(soulCount)+" souls left.");
+                else if(soulCount < SOULS_PER_REBIRTH *4)
+                    p.sendMessage("You feel like a soul sucking demon, who has fallen so you may grow so large? You have "+(soulCount)+" souls left.");
+                else if(soulCount < SOULS_PER_REBIRTH *5)
+                    p.sendMessage("You've become almost immortal, flee, mortals, flee! You have "+(soulCount)+" souls left.");
+                else if(soulCount < SOULS_PER_REBIRTH *6)
+                    p.sendMessage("Are you a god? You have "+(soulCount)+" souls left.");
+                else if(soulCount < SOULS_PER_REBIRTH *7)
+                    p.sendMessage("Yes, you are a god. You have "+(soulCount)+" souls left.");
+                else
+                    p.sendMessage("You can stop now... You have "+(soulCount)+" souls left.");
+            }
+            else {
+                w = qcp.wm.findBestWorldForDeadPlayer(p);
+
+                player.setWorldId(w.getId());
+                db.update(player);
+
+                addToPlayerLog(p, QCPlayerLog.Action.PERMA_DEATH);
+
+                if(w == qcp.wm.netherWorld)
+                    soulCount = 0;
+                else soulCount = SOULS_PER_REBIRTH;
+                p.sendMessage("You have been reborn into "+w.getName());
+            }
+            db.commitTransaction();
+        } finally {
+            db.endTransaction();
+        }
+
+        giveSoulsToPlayer(p,soulCount);
+
+        return Bukkit.getWorld(w.getName()).getSpawnLocation();
     }
 }

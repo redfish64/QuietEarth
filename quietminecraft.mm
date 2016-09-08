@@ -183,8 +183,7 @@
       Each player starts with a visit_id of 0
     </p>
   </body>
-</html>
-</richcontent>
+</html></richcontent>
 <font NAME="SansSerif" SIZE="10"/>
 </node>
 <node CREATED="1473147863533" ID="ID_54278056" MODIFIED="1473147892603" TEXT="Player logs record which visit_ids the player has seen"/>
@@ -200,6 +199,159 @@
 <node CREATED="1473148108350" ID="ID_1594113529" MODIFIED="1473148115635" TEXT="newcomers get trial period"/>
 </node>
 </node>
+</node>
+<node CREATED="1473329224300" ID="ID_999690107" MODIFIED="1473329225537" TEXT="portals">
+<node CREATED="1473329227093" ID="ID_702637419" MODIFIED="1473329240841" TEXT="create a portal code snippet (from multiverse netherportals">
+<node CREATED="1473329241837" ID="ID_1382927870" MODIFIED="1473329248491">
+<richcontent TYPE="NODE"><html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;} else if (toWorld.getEnvironment() == World.Environment.THE_END &amp;&amp; type == PortalType.END) {
+    </p>
+    <p>
+      &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;Location loc = new Location(event.getTo().getWorld(), 100, 50, 0); // This is the vanilla location for obsidian platform.
+    </p>
+    <p>
+      &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;event.setTo(loc);
+    </p>
+    <p>
+      &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;Block block = loc.getBlock();
+    </p>
+    <p>
+      &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;for (int x = block.getX() - 2; x &lt;= block.getX() + 2; x++) {
+    </p>
+    <p>
+      &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;for (int z = block.getZ() - 2; z &lt;= block.getZ() + 2; z++) {
+    </p>
+    <p>
+      &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;Block platformBlock = loc.getWorld().getBlockAt(x, block.getY() - 1, z);
+    </p>
+    <p>
+      &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;if (platformBlock.getType() != Material.OBSIDIAN) {
+    </p>
+    <p>
+      &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;platformBlock.setType(Material.OBSIDIAN);
+    </p>
+    <p>
+      &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;}
+    </p>
+    <p>
+      &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;for (int yMod = 1; yMod &lt;= 3; yMod++) {
+    </p>
+    <p>
+      &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;Block b = platformBlock.getRelative(BlockFace.UP, yMod);
+    </p>
+    <p>
+      &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;if (b.getType() != Material.AIR) {
+    </p>
+    <p>
+      &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;b.setType(Material.AIR);
+    </p>
+    <p>
+      &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;}
+    </p>
+    <p>
+      &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;}
+    </p>
+    <p>
+      &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;}
+    </p>
+    <p>
+      &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;}
+    </p>
+    <p>
+      &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;}
+    </p>
+    <p>
+      &#160;
+    </p>
+  </body>
+</html>
+</richcontent>
+</node>
+</node>
+<node CREATED="1473329257437" ID="ID_38201515" MODIFIED="1473329272600" TEXT="portals won&apos;t work automatically, because each world needs its own nether world"/>
+<node CREATED="1473332784744" ID="ID_1272767155" MODIFIED="1473332789858" TEXT="thoughts">
+<node CREATED="1473332791007" ID="ID_927903694" MODIFIED="1473332799738" TEXT="there should only be one active portal per world">
+<node CREATED="1473332800726" ID="ID_956590528" MODIFIED="1473332810354" TEXT="if user creates another, the previous portal is deactivated"/>
+</node>
+<node CREATED="1473332822574" ID="ID_1436607596" MODIFIED="1473332839346" TEXT="portals from a world always appear in the same place in the nether?">
+<node CREATED="1473332840238" ID="ID_437514496" MODIFIED="1473332853682" TEXT="what if the nether location is flooded with lava, etc?"/>
+<node CREATED="1473332885911" ID="ID_762527727" MODIFIED="1473332914202" TEXT="someone may booby trap nether portal for a world, or for all worlds they can">
+<node CREATED="1473332917086" ID="ID_1906824224" MODIFIED="1473332921234" TEXT="is this acceptable?">
+<node CREATED="1473332952774" ID="ID_1709771872" MODIFIED="1473332978716" TEXT="I think yes but when worlds are revisted, their &quot;nether spawn&quot; point is randomized"/>
+<node CREATED="1473333006966" ID="ID_32447400" MODIFIED="1473333018706" TEXT="This provides a lot of interesting permanant world changes">
+<node CREATED="1473333019526" ID="ID_708095488" MODIFIED="1473333034074" TEXT="Someone could become &quot;king of hell&quot; by controlling all the world ports"/>
+</node>
+</node>
+</node>
+</node>
+<node CREATED="1473333072158" ID="ID_914297837" MODIFIED="1473333078970" TEXT="the balance of power is somewhat scary.">
+<node CREATED="1473333079934" ID="ID_1171876590" MODIFIED="1473333119348" TEXT="A player who acts nice, could enter a world, create a nether portal in a hidden location, allowing all his evil friends to come in away from the spawn point">
+<node CREATED="1473333150838" ID="ID_1141185602" MODIFIED="1473333163651" TEXT="This is too much potential for destruction"/>
+</node>
+</node>
+<node CREATED="1473333201447" ID="ID_867114380" MODIFIED="1473333219354" TEXT="Maybe first user gets a special item that only he can use to create portals">
+<node CREATED="1473333221150" ID="ID_830564560" MODIFIED="1473333234986" TEXT="A special flint and steel, that only works for that world and lights a portal">
+<node CREATED="1473333670151" ID="ID_1603563414" MODIFIED="1473333678979" TEXT="We will need special fire?"/>
+<node CREATED="1473333680887" ID="ID_807915352" MODIFIED="1473333685428" TEXT="This may be difficult to implement"/>
+</node>
+<node CREATED="1473333286271" ID="ID_1554586392" MODIFIED="1473333322482" TEXT="This way there could still be a &quot;king of hell&quot;, but it&apos;d be a lot harder to get worlds to open up portals until they are ready"/>
+<node CREATED="1473333519167" ID="ID_985951557" MODIFIED="1473333532683" TEXT="But then, what if the user logs off and never logs in again?">
+<node CREATED="1473333540943" ID="ID_1295995595" MODIFIED="1473333547882" TEXT="Or buries it"/>
+<node CREATED="1473333570815" ID="ID_1118879777" MODIFIED="1473333668059" TEXT="We can make the special item drop when they log off, I think"/>
+</node>
+</node>
+<node CREATED="1473333780623" ID="ID_1373267425" MODIFIED="1473333792891" TEXT="Maybe everyone gets a special portal block">
+<node CREATED="1473333794015" ID="ID_1269758791" MODIFIED="1473333812451" TEXT="It takes a certain number of special portal blocks to open a portal"/>
+</node>
+<node CREATED="1473333829559" ID="ID_1534974046" MODIFIED="1473333866275" TEXT="Maybe only the oldest alive member on the server can enter a portal">
+<node CREATED="1473333871375" ID="ID_1436227938" MODIFIED="1473333884067" TEXT="This &quot;activates&quot; the portal, and then the rest of the members can"/>
+<node CREATED="1473333884759" ID="ID_578651351" MODIFIED="1473333935282" TEXT="However, that would still be bad, if most people are logged off, a rogue player could then still create and enter a portal of their own making"/>
+</node>
+<node CREATED="1473333988919" ID="ID_811637881" MODIFIED="1473334006835" TEXT="I think a portal key, or a special flint of steel would be best">
+<node CREATED="1473334008927" ID="ID_110367794" MODIFIED="1473334036338" TEXT="If we can&apos;t make a special flint of steel work, we just make the first player that enters a portal activate it (and they must have the portal key)"/>
+<node CREATED="1473334041319" ID="ID_115578355" MODIFIED="1473334050555" TEXT="It someone buries it, thats the way it goes."/>
+</node>
+<node CREATED="1473335252704" ID="ID_99279135" MODIFIED="1473335268451" TEXT="a portal key in hell can be used to create a portal to a specific world">
+<node CREATED="1473335270023" ID="ID_1895819666" MODIFIED="1473335290715" TEXT="I think it should be a one way portal, and teleports them randomly within the world">
+<node CREATED="1473335292127" ID="ID_668939824" MODIFIED="1473335313683" TEXT="This way, &quot;the devil&quot;, or whoever wants to be a king of hell can visit worlds if they get a portal key"/>
+<node CREATED="1473335315519" ID="ID_773715383" MODIFIED="1473335384460" TEXT="Since the portal is still open on hell&apos;s side, it will allow others to come, too. They just can&apos;t get back (unless of course they die, which means they automatically go back), or if the owner of the portal key makes another portal on the world side"/>
+</node>
+</node>
+<node CREATED="1473335418744" ID="ID_129545511" MODIFIED="1473335425219" TEXT="Maybe portals should all be one way.">
+<node CREATED="1473335426336" ID="ID_1184933579" MODIFIED="1473335447548" TEXT="If the portal key holder wants to go back, they need to carry the items necessary to create a portal back to their world"/>
+<node CREATED="1473335450047" ID="ID_508157317" MODIFIED="1473335477683" TEXT="This would complicate getting a friend back to a world they died in">
+<node CREATED="1473335478976" ID="ID_1958660370" MODIFIED="1473335506733" TEXT="The PKH would have to open a portal, go find them in hell, and they both come back together"/>
+<node CREATED="1473335516104" ID="ID_1226921339" MODIFIED="1473335541260" TEXT="If they died in hell, they&apos;d both be dead and there would be no way to get back, unless someone could recover the key"/>
+<node CREATED="1473335561104" ID="ID_740422333" MODIFIED="1473335568348" TEXT="Maybe this would be better than having a static spawn point">
+<node CREATED="1473335569656" ID="ID_1910508114" MODIFIED="1473335579980" TEXT="If the devil gets your key, your screwed, in other words">
+<node CREATED="1473335609640" ID="ID_249537275" MODIFIED="1473335620188" TEXT="Your whole world would have a random spawn point to it from the nether."/>
+</node>
+</node>
+</node>
+<node CREATED="1473335687280" ID="ID_1612136858" MODIFIED="1473335721596" TEXT="What if we remove the &quot;only one portal active&quot; rule and have random but consistent spawn points">
+<node CREATED="1473335723136" ID="ID_12520458" MODIFIED="1473335748076" TEXT="Then someone could even set up a portals between overworlds">
+<node CREATED="1473335749384" ID="ID_504118464" MODIFIED="1473335761252" TEXT="Create portal to nether with k1"/>
+<node CREATED="1473335761656" ID="ID_1306271311" MODIFIED="1473335767100" TEXT="Enter nether"/>
+<node CREATED="1473335768552" ID="ID_889749172" MODIFIED="1473335781636" TEXT="Go through portal to world 2"/>
+<node CREATED="1473335782088" ID="ID_182330312" MODIFIED="1473335792436" TEXT="Create portal using world one portal key"/>
+</node>
+</node>
+</node>
+<node CREATED="1473335834696" ID="ID_1153869783" MODIFIED="1473335862483" TEXT="Portals could still be two way. It just prevents mining obsidian, which I don&apos;t care too much about (since it&apos;s possible in vanilla anyway)">
+<node CREATED="1473335863816" ID="ID_553608000" MODIFIED="1473335873476" TEXT="With two way portals and a portal key...">
+<node CREATED="1473335918848" ID="ID_401645410" MODIFIED="1473335931812" TEXT="The portal holder wouldn&apos;t have to go into hell (and not first)">
+<node CREATED="1473335935344" ID="ID_673447100" MODIFIED="1473335949900" TEXT="This may be better because the portal to hell may be unfair for some reason and cause instant death"/>
+</node>
+<node CREATED="1473335962592" ID="ID_116922802" MODIFIED="1473335970235" TEXT="Or they could go in, but have to jump right out"/>
+</node>
+</node>
+</node>
+<node CREATED="1473332811671" ID="ID_1833829504" MODIFIED="1473332816266" TEXT="can we deactivate a portal?"/>
 </node>
 </node>
 </node>

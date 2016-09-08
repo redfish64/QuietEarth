@@ -17,3 +17,10 @@ commands:
            /kill
            Example: /kill
               ... and you die
+  gm:
+    aliases: []
+    description: Gives stuff
+    usage: |
+           /gm
+           Example: /gm
+              ... and you get stuff

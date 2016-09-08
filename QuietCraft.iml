@@ -20,5 +20,6 @@
       </library>
     </orderEntry>
     <orderEntry type="library" name="spigot-1.10.2" level="project" />
+    <orderEntry type="library" name="materialapi2.1" level="project" />
   </component>
 </module>
