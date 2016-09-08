@@ -4,6 +4,8 @@ import com.avaje.ebean.EbeanServer;
 import com.avaje.ebean.Transaction;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -14,8 +16,11 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.world.PortalCreateEvent;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 import java.util.logging.Level;
 
 /**
@@ -46,9 +51,7 @@ public class QCListener implements Listener {
         if(e.getEntityType() != EntityType.PLAYER)
             return;
 
-        e.getDrops().clear(); //HACK, filter for souls
-
-        qcp.pm.onPlayerDeath(e.getEntity());
+        qcp.pm.onPlayerDeath(e.getEntity(), e);
     }
 
     @EventHandler(priority= EventPriority.NORMAL)
@@ -61,8 +64,6 @@ public class QCListener implements Listener {
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void onPortalCreate(PortalCreateEvent event) {
-        String world = event.getWorld().getName();
-        //qcp.getLogger().info("denied portal creation");
-        //event.setCancelled(true);
+        qcp.wm.onPortalCreate(event);
     }
 }

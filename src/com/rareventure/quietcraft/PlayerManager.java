@@ -1,12 +1,12 @@
 package com.rareventure.quietcraft;
 
 import com.avaje.ebean.EbeanServer;
-import com.avaje.ebean.Transaction;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.WorldCreator;
 import org.bukkit.entity.Player;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -20,15 +20,33 @@ public class PlayerManager {
     private static final int SOULS_PER_REBIRTH = 4;
     private static final Material SOUL_MATERIAL_TYPE = Material.DIAMOND;
     private static final String SOUL_DISPLAY_NAME = "Soul";
+
+    //TODO 2.5 make saying 'hello sailor' cause the person to be immediately transported to the nether
+    //with no souls
     private static final List<String> SOUL_LORE = Arrays.asList(
-            ("Oh ye who go about saying unto each:  \"Hello sailor\":\n" +
-            "Dost thou know the magnitude of thy sin before the gods?\n" +
-            "Yea, verily, thou shalt be ground between two stones.\n" +
-            "Shall the angry gods cast thy body into the whirlpool?\n" +
-            "Surely, thy eye shall be put out with a sharp stick!\n" +
-            "Even unto the ends of the earth shalt thou wander and\n" +
-            "unto the land of the dead shalt thou be sent at last.\n" +
-            "Surely thou shalt repent of thy cunning.").split("\n"));
+            ("Oh ye who go about saying " +
+                    "unto each:  \"Hello sailor\":\n" +
+            "Dost thou know the magnitude " +
+                    "of thy sin before the gods?\n" +
+            "Yea, verily, thou shalt be " +
+                    "ground between two stones.\n" +
+            "Shall the angry gods cast thy " +
+                    "body into the whirlpool?\n" +
+            "Surely, thy eye shall be put " +
+                    "out with a sharp stick!\n" +
+            "Even unto the ends of the " +
+                    "earth shalt thou wander and\n" +
+            "unto the land of the dead " +
+                    "shalt thou be sent at last.\n" +
+            "Surely thou shalt repent of" +
+                    " thy cunning.").split("\n"));
+
+    private static final Material PORTAL_KEY_MATERIAL = Material.FLINT_AND_STEEL;
+
+    private static final List<String> PORTAL_KEY_LORE = Arrays.asList(
+            ("This flint of steel seems magical somehow...").split("\n"));
+    private static final String PORTAL_KEY_DISPLAY_NAME_ENDING = " portal key";
+
     private final QuietCraftPlugin qcp;
     private final EbeanServer db;
 
@@ -60,7 +78,10 @@ public class PlayerManager {
         return null;
     }
 
-    public void onPlayerDeath(Player p) {
+    public void onPlayerDeath(Player p, PlayerDeathEvent e) {
+        //TODO 2 in the nether, souls aren't removed from inventory (are collectable), and the player is reborn
+        //in the next world
+
         EbeanServer db = qcp.getDatabase();
 
         int soulCount = getSoulCount(p);
@@ -70,6 +91,16 @@ public class PlayerManager {
         qcPlayer.setSoulsKeptDuringDeath(soulCount);
 
         db.update(qcPlayer);
+
+        //remove the souls from inventory, so they don't spray out everywhere allowing someone else
+        //to collect them
+        for(Iterator<ItemStack> isi = e.getDrops().listIterator(); isi.hasNext();)
+        {
+            ItemStack is = isi.next();
+            if(is.getType().equals(SOUL_MATERIAL_TYPE)
+                    && is.getItemMeta().getDisplayName().equals(SOUL_DISPLAY_NAME))
+                isi.remove();
+        }
     }
 
     private int getSoulCount(Player p) {
@@ -115,7 +146,7 @@ public class PlayerManager {
             //new player
             if(qcPlayer == null)
             {
-                giveSoulsToPlayer(player, SOULS_PER_REBIRTH);
+                giveInitialPackageToPlayer(player, SOULS_PER_REBIRTH, true);
 
                 QCWorld w = qcp.wm.findFirstJoinWorld();
                 createQCPlayer(player,w);
@@ -141,9 +172,26 @@ public class PlayerManager {
         }
     }
 
-    private void giveSoulsToPlayer(Player player, int soulCount) {
+    /**
+     * Gives the player their initial items when they die or join a world
+     * @param player
+     * @param soulCount souls remaining
+     */
+    private void giveInitialPackageToPlayer(Player player, int soulCount, boolean isFirstAppearance) {
         Inventory i = player.getInventory();
         i.clear();
+
+        if(isFirstAppearance)
+        {
+            ItemStack is = new ItemStack(PORTAL_KEY_MATERIAL, 20);
+            ItemMeta im = is.getItemMeta();
+
+            im.setDisplayName(player.getWorld().getName()+PORTAL_KEY_DISPLAY_NAME_ENDING);
+            im.setLore(PORTAL_KEY_LORE);
+
+            is.setItemMeta(im);
+            i.addItem(is);
+        }
 
         //TODO 3 choose a better material type for souls
         while(soulCount != 0) {
@@ -153,8 +201,6 @@ public class PlayerManager {
             ItemMeta im = is.getItemMeta();
 
             im.setDisplayName(SOUL_DISPLAY_NAME);
-
-
             im.setLore(SOUL_LORE);
             is.setItemMeta(im);
             i.addItem(is);
@@ -209,6 +255,8 @@ public class PlayerManager {
                     p.sendMessage("Yes, you are a god. You have "+(soulCount)+" souls left.");
                 else
                     p.sendMessage("You can stop now... You have "+(soulCount)+" souls left.");
+
+                giveInitialPackageToPlayer(p,soulCount, false);
             }
             else {
                 w = qcp.wm.findBestWorldForDeadPlayer(p);
@@ -222,14 +270,43 @@ public class PlayerManager {
                     soulCount = 0;
                 else soulCount = SOULS_PER_REBIRTH;
                 p.sendMessage("You have been reborn into "+w.getName());
+                giveInitialPackageToPlayer(p,soulCount, true);
             }
             db.commitTransaction();
         } finally {
             db.endTransaction();
         }
 
-        giveSoulsToPlayer(p,soulCount);
 
         return Bukkit.getWorld(w.getName()).getSpawnLocation();
+    }
+
+    /**
+     * Returns players nearby a location
+     * @param l location
+     * @param maxDistance max distance from location
+     * @return players within max distance of the location
+     */
+    public static List<Player> getNearbyPlayers(Location l, int maxDistance) {
+        List<Player> players = new ArrayList<Player>();
+        for(Player p : Bukkit.getOnlinePlayers())
+        {
+            if(p.getLocation().distance(l) < maxDistance)
+                players.add(p);
+        }
+
+        return players;
+    }
+
+    public static boolean containsPortalKey(Player p) {
+        for(ItemStack i : p.getInventory())
+        {
+            if(i != null && i.getType() == PORTAL_KEY_MATERIAL && i.getItemMeta() != null
+                    && i.getItemMeta().getDisplayName() != null
+                    && i.getItemMeta().getDisplayName().endsWith(PORTAL_KEY_DISPLAY_NAME_ENDING))
+                return true;
+        }
+
+        return false;
     }
 }

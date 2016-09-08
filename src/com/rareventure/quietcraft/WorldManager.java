@@ -3,12 +3,10 @@ package com.rareventure.quietcraft;
 import com.avaje.ebean.EbeanServer;
 import com.avaje.ebean.SqlQuery;
 import com.avaje.ebean.SqlRow;
-import com.avaje.ebean.Transaction;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.World;
-import org.bukkit.WorldCreator;
+import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.event.world.PortalCreateEvent;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -41,6 +39,7 @@ public class WorldManager {
      */
     private static final long ABANDONED_WORLD_CUTOFF_MS = 1000l * 60l * 60l * 24l * 30l
             ;
+    private static final int MAX_KEY_PORTAL_DISTANCE = 5;
     private final QuietCraftPlugin qcp;
 
     public List<QCWorld> worlds;
@@ -230,6 +229,47 @@ public class WorldManager {
 
     public QCWorld createNewWorld() {
         return createNewWorld(null);
+    }
+
+    public void onPortalCreate(PortalCreateEvent event) {
+        if(!isPortalValid(event.getBlocks())) {
+            qcp.getLogger().info("denied portal creation");
+            event.setCancelled(true);
+            return; //TODO 3 maybe turn all blocks to sand or create an explosion or something
+        }
+//            List<Block> blocks = event.getBlocks();
+//            for(Block b : blocks)
+//            {
+//                b.setType(Material.SAND);
+//            }
+//
+//        event.getWorld().createExplosion (blocks.get(0).getLocation(), 3);
+
+        String world = event.getWorld().getName();
+        //qcp.getLogger().info("denied portal creation");
+        //event.setCancelled(true);
+
+    }
+
+    private boolean isPortalValid(ArrayList<Block> blocks) {
+        BlockArea ba = new BlockArea();
+        Location l;
+
+        //first get the rectangle of the portal
+        for(Block b : blocks)
+        {
+            ba.expandArea(b.getLocation());
+        }
+
+        //we can't actually tell who let the fire, so we just look for nearby players and
+        //if they have the portal key, the portal is considered valid.
+        for(Player p : PlayerManager.getNearbyPlayers(ba.getCenter(),MAX_KEY_PORTAL_DISTANCE))
+        {
+            if(PlayerManager.containsPortalKey(p))
+                return true;
+        }
+
+        return false;
     }
 
 }

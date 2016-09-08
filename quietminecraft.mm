@@ -269,12 +269,17 @@
       &#160;
     </p>
   </body>
-</html>
-</richcontent>
+</html></richcontent>
 </node>
 </node>
 <node CREATED="1473329257437" ID="ID_38201515" MODIFIED="1473329272600" TEXT="portals won&apos;t work automatically, because each world needs its own nether world"/>
-<node CREATED="1473332784744" ID="ID_1272767155" MODIFIED="1473332789858" TEXT="thoughts">
+<node CREATED="1473332811671" ID="ID_1833829504" MODIFIED="1473344960012" TEXT="can we deactivate a portal?"/>
+<node CREATED="1473344962057" ID="ID_224671769" MODIFIED="1473345013644" TEXT="each user gets a special obsedian block when joining. If the leaders of the world wish, they can ask the user gives up this portal block. ">
+<node CREATED="1473345015728" ID="ID_532487696" MODIFIED="1473345016796" TEXT="Without it, portals can&apos;t be made."/>
+<node CREATED="1473345017233" ID="ID_596003341" MODIFIED="1473345050380" TEXT="Portals made in the nether with this block will only go to the world of the portal block"/>
+<node CREATED="1473345054064" ID="ID_1989557766" MODIFIED="1473345054064" TEXT=""/>
+</node>
+<node CREATED="1473332784744" ID="ID_1272767155" MODIFIED="1473349981877" TEXT="thoughts">
 <node CREATED="1473332791007" ID="ID_927903694" MODIFIED="1473332799738" TEXT="there should only be one active portal per world">
 <node CREATED="1473332800726" ID="ID_956590528" MODIFIED="1473332810354" TEXT="if user creates another, the previous portal is deactivated"/>
 </node>
@@ -350,8 +355,20 @@
 <node CREATED="1473335962592" ID="ID_116922802" MODIFIED="1473335970235" TEXT="Or they could go in, but have to jump right out"/>
 </node>
 </node>
+<node CREATED="1473349983851" ID="ID_98650745" MODIFIED="1473350442952" TEXT="what if a portal key just made a portal appear on the other side as well?">
+<node CREATED="1473350001995" ID="ID_22803797" MODIFIED="1473350047879" TEXT="That way we still can have both sides open."/>
+<node CREATED="1473350051571" ID="ID_1332274588" MODIFIED="1473350068566" TEXT="We can check if the player has the key in inventory. If not, its a one way portal, bye player!"/>
+<node CREATED="1473350069179" ID="ID_1329483500" MODIFIED="1473350079038" TEXT="If they do, then the portal is created on the other side"/>
+<node CREATED="1473350084395" ID="ID_1850191999" MODIFIED="1473350102367" TEXT="Other players, entities, can then enter the portal after it has been created"/>
+<node CREATED="1473350298467" ID="ID_3828311" MODIFIED="1473350316103" TEXT="It would be confusing though, and if a player made a mistake, they&apos;d be trapped out of their world forever. Kind of sad"/>
 </node>
-<node CREATED="1473332811671" ID="ID_1833829504" MODIFIED="1473332816266" TEXT="can we deactivate a portal?"/>
+<node CREATED="1473350444043" ID="ID_1977839165" MODIFIED="1473350463543" TEXT="What if we don&apos;t have portal keys. Instead, only one portal can work?">
+<node CREATED="1473350464411" ID="ID_1311843530" MODIFIED="1473350495343" TEXT="Then hell entities always have access to world as long as a portal exists"/>
+</node>
+<node CREATED="1473350514283" ID="ID_546038631" MODIFIED="1473350556599" TEXT="If we have a special flint and steel, and we just find the player around the portal. If they have a special flint and steel, we assume the portal is proper and create it, otherwise don&apos;t/ explode/ whatever">
+<node CREATED="1473350576291" ID="ID_756455142" MODIFIED="1473350591319" TEXT="It&apos;s clear, then. The special flint and steel creates portals. Normal ones don&apos;t"/>
+</node>
+</node>
 </node>
 </node>
 </node>
