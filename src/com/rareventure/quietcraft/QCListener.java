@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityCreatePortalEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -61,6 +62,9 @@ public class QCListener implements Listener {
 
         e.setRespawnLocation(l);
     }
+
+    //note that EntityCreatePortalEvent for portals triggered
+    //by fire, so we use just PortalCreateEvent instead
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void onPortalCreate(PortalCreateEvent event) {

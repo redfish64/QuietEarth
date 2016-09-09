@@ -3,6 +3,7 @@ package com.rareventure.quietcraft;
 import com.avaje.ebean.EbeanServer;
 import com.avaje.ebean.SqlQuery;
 import com.avaje.ebean.SqlRow;
+import com.google.common.collect.Sets;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -39,19 +40,36 @@ public class WorldManager {
      */
     private static final long ABANDONED_WORLD_CUTOFF_MS = 1000l * 60l * 60l * 24l * 30l
             ;
+
+    //TODO 2.5 saying "hello sailor" should kill player and send them to the nether (they'll respawn in the next
+    // world when they die in the nether)
+    // should check for 17173 speak (1's as l's, etc.) as well, maybe
+
+    /**
+     * The max distance from a portal for a player to have a portal key in order to
+     * have the portal created when lit.
+     */
     private static final int MAX_KEY_PORTAL_DISTANCE = 5;
+
+    /**
+     * Maximum distance from 0,0,0 for random spawn locations
+     */
+    private static final double MAX_SPAWN_RADIUS = 10000.;
     private final QuietCraftPlugin qcp;
 
-    public List<QCWorld> worlds;
-    public QCWorld netherWorld;
+    /**
+     * All visited worlds of server. There is always one active visitedworld per world
+     */
+    public List<QCVisitedWorld> visitedWorlds;
+    public QCVisitedWorld netherVisitedWorld;
 
     public WorldManager(QuietCraftPlugin qcp) {
         this.qcp = qcp;
 
-        worlds = new ArrayList<QCWorld>();
-        worlds.addAll(qcp.getDatabase().find(QCWorld.class).findList());
+        visitedWorlds = new ArrayList<QCVisitedWorld>();
+        visitedWorlds.addAll(qcp.getDatabase().find(QCVisitedWorld.class).findList());
 
-        for (QCWorld w : worlds) {
+        for (QCVisitedWorld vw : visitedWorlds) {
             //we must call createworld for each world in setup, otherwise we won't be able
             //to respawn to it during gameplay
             //Calling createWorld() whether it exists or not, freezes the entire server for 10-20 seconds
@@ -61,33 +79,33 @@ public class WorldManager {
             //way. There isn't much I can do. Maybe allow multiple servers, but I think if we can get abandoned
             //worlds to work, we'll be ok
             //TODO 4 Can we fix this somehow
-            WorldCreator c = new WorldCreator(w.getName());
+            WorldCreator c = new WorldCreator(vw.getName());
             c.createWorld();
 
             //find and populate the netherWorld
             //note that if this is a fresh install, then worlds will be size 0, and netherWorld won't
             //be populated until setupForNewInstall() is called.
-            if (w.getId() == 1)
-                netherWorld = w;
+            if (vw.getId() == 1)
+                netherVisitedWorld = vw;
         }
     }
 
     /**
      * Finds the best world for a newbie to join.
      */
-    public QCWorld findFirstJoinWorld() {
-        QCWorld bestW = null;
+    public QCVisitedWorld findFirstJoinVisitedWorld() {
+        QCVisitedWorld bestW = null;
 
-        for (QCWorld w : worlds) {
-            if (w == netherWorld)
+        for (QCVisitedWorld w : visitedWorlds) {
+            if (w == netherVisitedWorld)
                 continue;
 
             if (bestW == null)
                 bestW = w;
-            else if (bestW.currentPlayerCount < w.currentPlayerCount)
-                bestW = w;
-            else if (bestW.getWorldVisitedCount(qcp) < w.getWorldVisitedCount(qcp))
-                bestW = w;
+//            else if (bestW.currentPlayerCount < w.currentPlayerCount)
+//                bestW = w;
+//            else if (bestW.getWorldVisitedCount(qcp) < w.getWorldVisitedCount(qcp))
+//                bestW = w;
         }
 
         return bestW;
@@ -98,30 +116,36 @@ public class WorldManager {
      * most likely due to all active players already visiting it and changes its world id and spawn
      * point to recycle it.
      */
-    public void updateWorldVisitIds()
+    public void createNewVisitedWorlds()
     {
         EbeanServer db = qcp.getDatabase();
 
         db.beginTransaction();
         try {
-            //find the max visited_world id, so we know what to upgrade to
-            SqlQuery q = db.createSqlQuery("select max(visit_id) as max_visit_id from world");
-            long nextVisitId = q.findUnique().getLong("max_visit_id") + 1;
-
             //find the worlds that haven't had activity since ABANDONED_WORLD_CUTOFF_MS
-            q = db.
-                    createSqlQuery("select world_id, world_visit_id, max(timestamp) from qc_player_log " +
+            SqlQuery q = db.
+                    createSqlQuery("select world_visit_id, max(timestamp) from qc_player_log " +
                             "group by world_visit_id having max(timestamp) < :timestamp_cutoff " +
                             "order by max(timestamp)");
             q.setParameter("timestamp_cutoff", System.currentTimeMillis() - ABANDONED_WORLD_CUTOFF_MS);
 
-            //finds out the worlds the player already visited
+            //create new active worlds for the ones that have been abandoned
             List<SqlRow> visitedWorldIdSqlRows = q.findList();
             for (SqlRow sr : visitedWorldIdSqlRows) {
-                long worldId = sr.getLong("world_id");
-                QCWorld w = getQCWorld(worldId);
-                w.setVisitId(nextVisitId++);
-                db.update(w);
+                int visitedWorldId = sr.getInteger("visited_world_id");
+
+                for(int i = 0 ; i < visitedWorlds.size(); i++)
+                {
+                    QCVisitedWorld vw = getQCVisitedWorld(visitedWorldId);
+
+                    vw.setActive(false);
+                    db.update(vw);
+                    QCVisitedWorld copy = vw.createCopy(
+                            createRandomSpawnLocation(getWorld(vw)),
+                            createRandomNetherSpawnLocation());
+                    copy.setActive(true);
+                    db.insert(copy);
+                }
             }
             db.commitTransaction();
         }
@@ -134,7 +158,7 @@ public class WorldManager {
     /**
      * Finds the best world to join for a player that just died to join.
      */
-    public QCWorld findBestWorldForDeadPlayer(Player player) {
+    public QCVisitedWorld findBestWorldForDeadPlayer(Player player) {
         SqlQuery q = qcp.getDatabase().createSqlQuery("select distinct world_visit_id from qc_player_log where player_uuid = :uuid");
         q.setParameter("uuid", player.getUniqueId().toString());
 
@@ -145,30 +169,31 @@ public class WorldManager {
             visitedWorldIds.add(sr.getLong("world_visit_id"));
         }
 
-        QCWorld bestW = null;
+        QCVisitedWorld bestW = null;
 
-        for (QCWorld w : worlds) {
+        for (QCVisitedWorld w : visitedWorlds) {
             //the player doesn't go to the nether until he's not allowed anywhere else
-            if (w == netherWorld)
+            if (w == netherVisitedWorld)
                 continue;
 
             //don't choose a world that has been spawned in already
-            if (visitedWorldIds.contains(w.getVisitId()))
+            if (visitedWorldIds.contains(w.getId()))
                 continue;
 
             if (bestW == null)
                 bestW = w;
-            else if (bestW.currentPlayerCount < w.currentPlayerCount)
-                bestW = w;
-            else
-                //choose the most visited world.. since it is the most interesting
-                if (bestW.getWorldVisitedCount(qcp) < w.getWorldVisitedCount(qcp))
-                    bestW = w;
+            //TODO 2 make choosing next world use better statistics to find more active worlds
+//            else if (bestW.currentPlayerCount < w.currentPlayerCount)
+//                bestW = w;
+//            else
+//                //choose the most visited world.. since it is the most interesting
+//                if (bestW.getWorldVisitedCount(qcp) < w.getWorldVisitedCount(qcp))
+//                    bestW = w;
         }
 
         //if there is no good world for the player anymore, we just send them to the nether
         if (bestW == null) {
-            return netherWorld;
+            return netherVisitedWorld;
         }
 
         return bestW;
@@ -180,33 +205,8 @@ public class WorldManager {
         p.teleport(loc);
     }
 
-    //TODO 3 add a worldcreatorparams object for setting up different parameters for new world generation
-    //(especially for hell and purgatory)
-    public synchronized QCWorld createNewWorld(String name) {
-        int id = worlds.size() + 1;
-
-        if (name == null) {
-            name = "world_qc" + (id-1); //TODO 3 maybe come up with a random name generator
-        }
-
-        QCWorld qcw = new QCWorld(id,id,name);
-
-        qcp.getDatabase().insert(qcw);
-
-        worlds.add(qcw);
-
-        qcp.getLogger().info("Starting world creation for " + name + "...");
-        WorldCreator c = new WorldCreator(name);
-
-        //TODO 3 randomize world, maybe use generators from other plugins, etc.
-        c.createWorld();
-        qcp.getLogger().info("Finished world creation for " + name);
-
-        return qcw;
-    }
-
-    public QCWorld getQCWorld(long id) {
-        for (QCWorld w : worlds) {
+    public QCVisitedWorld getQCVisitedWorld(long id) {
+        for (QCVisitedWorld w : visitedWorlds) {
             if (w.getId() == id)
                 return w;
         }
@@ -215,9 +215,11 @@ public class WorldManager {
     }
 
     public void setupForNewInstall() {
-        netherWorld = new QCWorld(1,1,"world_nether");
-        qcp.getDatabase().insert(netherWorld);
-        worlds.add(netherWorld);
+        QCWorld w;
+        netherVisitedWorld = new QCVisitedWorld(1,w = new QCWorld(1,"world_nether"),null,null,true);
+        qcp.getDatabase().insert(w);
+        qcp.getDatabase().insert(netherVisitedWorld);
+        visitedWorlds.add(netherVisitedWorld);
 
         //create a bunch of empty worlds
         //we can't create worlds adhoc, or it freezes the server while the creation is in process
@@ -231,12 +233,85 @@ public class WorldManager {
         return createNewWorld(null);
     }
 
+    /**
+     * Creates a new world and a new active visited world to go with it.
+     *
+     * @param name may be null
+     * @return the visited world
+     */
+    //TODO 3 add a worldcreatorparams object for setting up different parameters for new world generation
+    //(especially for hell and purgatory)
+    public synchronized QCWorld createNewWorld(String name) {
+        int id = visitedWorlds.size() + 1;
+
+        if (name == null) {
+            name = "world_qc" + (id-1); //TODO 3 maybe come up with a random name generator
+        }
+
+        qcp.getLogger().info("Starting world creation for " + name + "...");
+        WorldCreator c = new WorldCreator(name);
+        //TODO 3 randomize world, maybe use generators from other plugins, etc.
+        World w = c.createWorld();
+        qcp.getLogger().info("Finished world creation for " + name);
+
+        QCWorld qcw = new QCWorld(id,name);
+
+        qcp.getDatabase().insert(qcw);
+
+        QCVisitedWorld vw = new QCVisitedWorld(id, qcw,
+                createRandomSpawnLocation(w),
+                createRandomNetherSpawnLocation(), true);
+
+        visitedWorlds.add(vw);
+
+        return qcw;
+    }
+
+    private QCLocation createRandomNetherSpawnLocation() {
+        World w = getWorld(netherVisitedWorld);
+
+        return createRandomSpawnLocation(w);
+    }
+
+    /**
+     * Places we make sure the spawn location is not at. Note that we are a little rougher here and allow
+     * water as a place to spawn above *splash*, as well as cacti.
+     */
+    private static final HashSet<Material> SPAWN_LOCATION_BLACKLIST = Sets.newHashSet(Material.LAVA,Material.STATIONARY_LAVA);
+
+    private World getWorld(QCVisitedWorld vw) {
+        return Bukkit.getWorld(vw.getName());
+    }
+
+    /**
+     * Finds a semi safe place to put a spawn location
+     * @return
+     */
+    private QCLocation createRandomSpawnLocation(World w) {
+        Location loc;
+        int y;
+        do {
+            loc =
+                    //TODO 3 maybe make this allow for rare occurrences of spawning at far away places
+                    // (x+k)^2 or something
+
+                    new Location(w,
+                            MAX_SPAWN_RADIUS * (Math.random() * 2 - 1),
+                            0,
+                            MAX_SPAWN_RADIUS * (Math.random() * 2 - 1)
+                    );
+
+            y = Util.getValidHighestY(loc, SPAWN_LOCATION_BLACKLIST);
+        }
+        while(y == -1);
+
+        return new QCLocation(loc);
+    }
+
     public void onPortalCreate(PortalCreateEvent event) {
         if(!isPortalValid(event.getBlocks())) {
             qcp.getLogger().info("denied portal creation");
             event.setCancelled(true);
-            return; //TODO 3 maybe turn all blocks to sand or create an explosion or something
-        }
 //            List<Block> blocks = event.getBlocks();
 //            for(Block b : blocks)
 //            {
@@ -244,11 +319,21 @@ public class WorldManager {
 //            }
 //
 //        event.getWorld().createExplosion (blocks.get(0).getLocation(), 3);
+            return; //TODO 3 maybe turn all blocks to sand or create an explosion or something
+        }
 
-        String world = event.getWorld().getName();
-        //qcp.getLogger().info("denied portal creation");
-        //event.setCancelled(true);
+        String worldName = event.getWorld().getName();
 
+        if(worldName.equals(netherVisitedWorld.getName()))
+        {
+            //TODO 2 we have to go back to the world according to the flint and steel
+            return;
+        }
+
+        //create a link from the current location to the nether world.
+        //TODO 1 I think we should have a QCVisitedWorld table for all the crap we want to
+        //add to it, rather than resetting stuff within world. We need to add a
+        // nether location for each visited world.
     }
 
     private boolean isPortalValid(ArrayList<Block> blocks) {

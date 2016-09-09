@@ -4,10 +4,14 @@ package com.rareventure.quietcraft;
 import com.avaje.ebean.annotation.EnumValue;
 import com.avaje.ebean.validation.NotNull;
 
+import javax.annotation.Nullable;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+
+//TODO 2 when leaving the server, the portal key should drop from the players inventory... and always be there forever
+//.. is this possible? I heard items automatically disappear after 5 minutes.
 
 @Entity()
 @Table(name = "qc_player")
@@ -18,7 +22,7 @@ public class QCPlayer {
 
     @NotNull
     @ManyToOne
-    private long worldId;
+    private QCVisitedWorld visitedWorld;
 
     /**
      * The number of souls kept while dead. When a player dies
@@ -28,12 +32,24 @@ public class QCPlayer {
     @NotNull
     private int soulsKeptDuringDeath;
 
+    @ManyToOne
+    private QCLocation bedLocation;
+
     public QCPlayer() {
     }
 
-    public QCPlayer(String uuid, long worldId) {
+    public QCPlayer(String uuid, QCVisitedWorld visitedWorld, int soulsKeptDuringDeath) {
         this.uuid = uuid;
-        this.worldId = worldId;
+        this.visitedWorld = visitedWorld;
+        this.soulsKeptDuringDeath = soulsKeptDuringDeath;
+    }
+
+    public QCLocation getBedLocation() {
+        return bedLocation;
+    }
+
+    public void setBedLocation(QCLocation bedLocation) {
+        this.bedLocation = bedLocation;
     }
 
     public String getUuid() {
@@ -44,12 +60,12 @@ public class QCPlayer {
         this.uuid = uuid;
     }
 
-    public long getWorldId() {
-        return worldId;
+    public QCVisitedWorld getVisitedWorld() {
+        return visitedWorld;
     }
 
-    public void setWorldId(long worldId) {
-        this.worldId = worldId;
+    public void setVisitedWorld(QCVisitedWorld visitedWorld) {
+        this.visitedWorld = visitedWorld;
     }
 
     public int getSoulsKeptDuringDeath() {
@@ -59,5 +75,4 @@ public class QCPlayer {
     public void setSoulsKeptDuringDeath(int soulsKeptDuringDeath) {
         this.soulsKeptDuringDeath = soulsKeptDuringDeath;
     }
-
 }

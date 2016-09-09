@@ -58,24 +58,15 @@ public class PlayerManager {
 
     private void addToPlayerLog(Player player, QCPlayerLog.Action action)
     {
-        QCWorld w = getPlayersWorld(player);
-        db.insert(new QCPlayerLog(player.getUniqueId().toString(),new Date(),
-                w.getId(), w.getVisitId(),
+        QCPlayer qcPlayer = getQCPlayer(player);
+        db.insert(new QCPlayerLog(qcPlayer,new Date(),
+                qcPlayer.getVisitedWorld(),
                 action));
     }
 
     public QCPlayer getQCPlayer(UUID uniqueId) {
         return db.find(QCPlayer.class).where().
                 eq("uuid", uniqueId.toString()).findUnique();
-    }
-
-    public QCWorld getPlayersWorld(Player player) {
-        QCPlayer qcPlayer = getQCPlayer(player.getUniqueId());
-
-        if(qcPlayer != null)
-            return qcp.wm.getQCWorld(qcPlayer.getWorldId());
-
-        return null;
     }
 
     public void onPlayerDeath(Player p, PlayerDeathEvent e) {
@@ -130,8 +121,8 @@ public class PlayerManager {
         return getQCPlayer(player.getUniqueId());
     }
 
-    public QCPlayer createQCPlayer(Player player, QCWorld w) {
-        QCPlayer qcPlayer = new QCPlayer(player.getUniqueId().toString(), w.getId());
+    public QCPlayer createQCPlayer(Player player, QCVisitedWorld vw) {
+        QCPlayer qcPlayer = new QCPlayer(player.getUniqueId().toString(), vw, SOULS_PER_REBIRTH);
         db.insert(qcPlayer);
 
         return qcPlayer;
@@ -148,7 +139,7 @@ public class PlayerManager {
             {
                 giveInitialPackageToPlayer(player, SOULS_PER_REBIRTH, true);
 
-                QCWorld w = qcp.wm.findFirstJoinWorld();
+                QCVisitedWorld w = qcp.wm.findFirstJoinVisitedWorld();
                 createQCPlayer(player,w);
 
                 player.sendMessage("You have been born in world '"+w.getName()+"'");
@@ -159,11 +150,11 @@ public class PlayerManager {
                 return;
             }
 
-           addToPlayerLog(player, QCPlayerLog.Action.JOIN);
+            addToPlayerLog(player, QCPlayerLog.Action.JOIN);
             db.commitTransaction();
 
             player.sendMessage("You are in world '"+
-                    qcp.pm.getPlayersWorld(player.getPlayer()).getName()+"'");
+                    player.getWorld().getName()+"'");
             return;
 
         }
@@ -183,7 +174,7 @@ public class PlayerManager {
 
         if(isFirstAppearance)
         {
-            ItemStack is = new ItemStack(PORTAL_KEY_MATERIAL, 20);
+            ItemStack is = new ItemStack(PORTAL_KEY_MATERIAL);
             ItemMeta im = is.getItemMeta();
 
             im.setDisplayName(player.getWorld().getName()+PORTAL_KEY_DISPLAY_NAME_ENDING);
@@ -220,7 +211,7 @@ public class PlayerManager {
      */
     public Location onRespawn(Player p) {
         QCPlayer player = qcp.pm.getQCPlayer(p);
-        QCWorld w;
+        QCVisitedWorld vw;
         int soulCount = player.getSoulsKeptDuringDeath();
 
         db.beginTransaction();
@@ -231,7 +222,7 @@ public class PlayerManager {
                 player.setSoulsKeptDuringDeath(soulCount);
                 db.update(player);
 
-                w = getPlayersWorld(p);
+                vw = player.getVisitedWorld();
 
                 if(soulCount == 0)
                     p.sendMessage("You have no souls left, you are not long for this world.");
@@ -259,17 +250,17 @@ public class PlayerManager {
                 giveInitialPackageToPlayer(p,soulCount, false);
             }
             else {
-                w = qcp.wm.findBestWorldForDeadPlayer(p);
+                vw = qcp.wm.findBestWorldForDeadPlayer(p);
 
-                player.setWorldId(w.getId());
+                player.setVisitedWorld(vw);
                 db.update(player);
 
                 addToPlayerLog(p, QCPlayerLog.Action.PERMA_DEATH);
 
-                if(w == qcp.wm.netherWorld)
+                if(vw == qcp.wm.netherVisitedWorld)
                     soulCount = 0;
                 else soulCount = SOULS_PER_REBIRTH;
-                p.sendMessage("You have been reborn into "+w.getName());
+                p.sendMessage("You have been reborn into "+vw.getName());
                 giveInitialPackageToPlayer(p,soulCount, true);
             }
             db.commitTransaction();
@@ -278,7 +269,7 @@ public class PlayerManager {
         }
 
 
-        return Bukkit.getWorld(w.getName()).getSpawnLocation();
+        return Bukkit.getWorld(vw.getName()).getSpawnLocation();
     }
 
     /**
@@ -298,6 +289,11 @@ public class PlayerManager {
         return players;
     }
 
+    /**
+     *
+     * @param p player
+     * @return true if player has a portal key in their inventory
+     */
     public static boolean containsPortalKey(Player p) {
         for(ItemStack i : p.getInventory())
         {

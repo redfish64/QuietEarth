@@ -3,9 +3,11 @@ package com.rareventure.quietcraft;
 
 import com.avaje.ebean.annotation.EnumValue;
 import com.avaje.ebean.validation.NotNull;
+import org.apache.logging.log4j.core.net.JMSQueueManager;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import java.util.Date;
 
@@ -41,43 +43,33 @@ public class QCPlayerLog {
 
     }
 
-    @NotNull
-    private String playerUuid;
+    @ManyToOne
+    private QCPlayer player;
 
     @NotNull
     private Date timestamp;
 
-    /**
-     * The visitId of the world
-     */
-    @NotNull
-    private long worldVisitId;
-
-    /**
-     * The id of the world
-     */
-    @NotNull
-    private long worldId;
+    @ManyToOne
+    private QCVisitedWorld visitedWorld;
 
     @NotNull
     private Action action;
 
     public QCPlayerLog() {}
 
-    public QCPlayerLog(String playerUuid, Date timestamp, long worldId, long worldVisitId, Action action) {
-        this.playerUuid = playerUuid;
+    public QCPlayerLog(QCPlayer player, Date timestamp, QCVisitedWorld visitedWorld, Action action) {
+        this.player = player;
         this.timestamp = timestamp;
-        this.worldId = worldId;
-        this.worldVisitId = worldVisitId;
+        this.visitedWorld = visitedWorld;
         this.action = action;
     }
 
-    public String getPlayerUuid() {
-        return playerUuid;
+    public QCPlayer getPlayer() {
+        return player;
     }
 
-    public void setPlayerUuid(String playerUuid) {
-        this.playerUuid = playerUuid;
+    public void setPlayer(QCPlayer player) {
+        this.player = player;
     }
 
     public Date getTimestamp() {
@@ -88,20 +80,12 @@ public class QCPlayerLog {
         this.timestamp = timestamp;
     }
 
-    public long getWorldId() {
-        return worldId;
+    public QCVisitedWorld getVisitedWorld() {
+        return visitedWorld;
     }
 
-    public void setWorldId(long worldId) {
-        this.worldId = worldId;
-    }
-
-    public long getWorldVisitId() {
-        return worldVisitId;
-    }
-
-    public void setWorldVisitId(long worldVisitId) {
-        this.worldVisitId = worldVisitId;
+    public void setVisitedWorld(QCVisitedWorld visitedWorld) {
+        this.visitedWorld = visitedWorld;
     }
 
     public Action getAction() {

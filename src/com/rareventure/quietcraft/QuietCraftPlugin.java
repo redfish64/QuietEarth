@@ -61,6 +61,8 @@ public class QuietCraftPlugin extends JavaPlugin {
         list.add(QCPlayer.class);
         list.add(QCPlayerLog.class);
         list.add(QCWorld.class);
+        list.add(QCVisitedWorld.class);
+        list.add(QCLocation.class);
         return list;
     }
 
