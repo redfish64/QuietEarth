@@ -4,6 +4,7 @@ import com.avaje.ebean.EbeanServer;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerPortalEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -52,10 +53,19 @@ public class PlayerManager {
     }
 
     public void onPlayerDeath(Player p, PlayerDeathEvent e) {
-        //TODO 2 in the nether, souls aren't removed from inventory (are collectable), and the player is reborn
-        //in the next world
+        EbeanServer db = qcp.db;
 
-        EbeanServer db = qcp.getDatabase();
+        if(WorldManager.isNetherWorld(p.getWorld().getName())) {
+            //in the nether, souls aren't removed from inventory (are collectable), and the player
+            //loses all their souls
+            QCPlayer qcPlayer = getQCPlayer(p.getUniqueId());
+
+            qcPlayer.setSoulsKeptDuringDeath(0);
+
+            db.update(qcPlayer);
+            return;
+        }
+
 
         int soulCount = getSoulCount(p);
 
@@ -161,7 +171,7 @@ public class PlayerManager {
         Inventory i = player.getInventory();
         i.clear();
 
-        if(isFirstAppearance && !player.getWorld().equals(WorldManager.NETHER_WORLD_NAME))
+        if(isFirstAppearance)
         {
             ItemStack is = new ItemStack(PORTAL_KEY_MATERIAL);
             ItemMeta im = is.getItemMeta();
@@ -252,7 +262,7 @@ public class PlayerManager {
             return spawnLocation;
         }
 
-        //db.beginTransaction();
+        db.beginTransaction();
         try{
             addToPlayerLog(player, QCPlayerLog.Action.PERMA_DEATH);
 
@@ -266,20 +276,41 @@ public class PlayerManager {
 
             addToPlayerLog(player, QCPlayerLog.Action.MOVED_TO_WORLD);
 
-            if(vw == qcp.wm.netherVisitedWorld)
-                soulCount = 0;
-            else soulCount = SOULS_PER_REBIRTH;
-            p.sendMessage("You have been reborn into "+vw.getName());
-            giveInitialPackageToPlayer(p,soulCount, true);
-
-           // db.commitTransaction();
+           db.commitTransaction();
         } finally {
-           // db.endTransaction();
+           db.endTransaction();
         }
 
         debugPrintPlayerInfo("onRespawn without souls left",p);
 
-        Location spawnLocation = Bukkit.getWorld(vw.getName()).getSpawnLocation();
+        Location spawnLocation;
+
+        if(vw == qcp.wm.netherVisitedWorld) {
+            //we only want this message to appear the first time the player entered the nether
+            if(!qcp.wm.isNetherWorld(p.getWorld().getName()))
+                p.sendMessage("The world slowly comes into place. You blink twice... wait a minute, where *ARE* you?");
+            //TODO 3 maybe put up a message indicating how much time before an abandoned world can be
+            //revisited
+            //TODO 2.5 maybe allow someone to revisit a world if they were the only one who revisited it
+            //since the abandonment time (in another random spawn location of course... create a
+            // new visit id). Or should the visited worlds be based on the people in them? In other
+            // words, dying in a world with only one player doesn't prevent that world from being
+            // visited again.
+
+
+            //in the nether the spawn location is always random, to prevent someone from creating a booby
+            //trap at a spawn location
+            spawnLocation = qcp.wm.getRandomSpawnLocation(Bukkit.getWorld(WorldManager.NETHER_WORLD_NAME));
+
+        }
+        else
+        {
+            giveInitialPackageToPlayer(p,SOULS_PER_REBIRTH, true);
+            p.sendMessage("You have been reborn into " + vw.getName());
+
+            spawnLocation = Bukkit.getWorld(vw.getName()).getSpawnLocation();
+        }
+
 
         return spawnLocation;
 
@@ -318,5 +349,13 @@ public class PlayerManager {
         }
 
         return null;
+    }
+
+    /**
+     * Called when a player is about to be teleported by a portal
+     */
+    public void onPlayerPortalEvent(PlayerPortalEvent event) {
+        Util.getPortalCenter(event.getFrom());
+        event.getPortalTravelAgent().createPortal()
     }
 }

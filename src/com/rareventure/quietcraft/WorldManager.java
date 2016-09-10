@@ -4,11 +4,10 @@ import com.avaje.ebean.EbeanServer;
 import com.avaje.ebean.SqlQuery;
 import com.avaje.ebean.SqlRow;
 import com.google.common.collect.Sets;
-import org.apache.commons.lang3.tuple.Pair;
+import com.rareventure.quietcraft.utils.BlockArea;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.world.PortalCreateEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -145,8 +144,8 @@ public class WorldManager {
                     vw.setActive(false);
                     db.update(vw);
                     QCVisitedWorld copy = vw.createCopy(
-                            createRandomSpawnLocation(getWorld(vw)),
-                            createRandomNetherSpawnLocation());
+                            createRandomSpawnQCLocation(getWorld(vw)),
+                            createRandomNetherSpawnQCLocation());
                     copy.setActive(true);
                     db.insert(copy);
                 }
@@ -262,11 +261,11 @@ public class WorldManager {
 
         qcp.getDatabase().insert(qcw);
 
-        QCLocation spawnLocation = createRandomSpawnLocation(w);
+        QCLocation spawnLocation = createRandomSpawnQCLocation(w);
 
         QCVisitedWorld vw = new QCVisitedWorld(id, qcw,
                 spawnLocation,
-                createRandomNetherSpawnLocation(), true);
+                createRandomNetherSpawnQCLocation(), true);
         qcp.getDatabase().insert(vw);
 
         visitedWorlds.add(vw);
@@ -286,10 +285,16 @@ public class WorldManager {
      *
      * @return created location
      */
-    private QCLocation createRandomNetherSpawnLocation() {
+    private QCLocation createRandomNetherSpawnQCLocation() {
         World w = getWorld(netherVisitedWorld);
 
-        return createRandomSpawnLocation(w);
+        return createRandomSpawnQCLocation(w);
+    }
+
+    public Location createRandomNetherSpawnLocation() {
+        World w = getWorld(netherVisitedWorld);
+
+        return getRandomSpawnLocation(w);
     }
 
     /**
@@ -310,10 +315,10 @@ public class WorldManager {
     }
 
     /**
-     * Finds a semi safe place to put a spawn location. Saves location to database.
+     * Finds a semi safe place to put a spawn location.
      * @return
      */
-    private QCLocation createRandomSpawnLocation(World w) {
+    public static Location getRandomSpawnLocation(World w) {
         Location loc;
         int y;
         do {
@@ -331,13 +336,23 @@ public class WorldManager {
         }
         while(y == -1);
 
+        return loc;
+    }
 
-        QCLocation qcl = new QCLocation(loc);
+    /**
+     * Finds a semi safe place to put a spawn location. Saves location to database.
+     * @return
+     */
+    private QCLocation createRandomSpawnQCLocation(World w) {
+        QCLocation qcl = new QCLocation(getRandomSpawnLocation(w));
         qcp.db.insert(qcl);
 
         return qcl;
     }
 
+    /**
+     * Called when a portal is created.
+     */
     public void onPortalCreate(PortalCreateEvent event) {
         Map.Entry<Player,ItemStack> playerAndPortalKey = getPortalKeyNearPortal(event.getBlocks());
 
@@ -361,6 +376,8 @@ public class WorldManager {
         BlockArea ba = new BlockArea(event.getBlocks());
         Location portalLocation = ba.getCenter();
 
+        //TODO 2 we need to create the portal on the other side somehow
+
         //if we are creating a portal in the nether, we choose the world to go to
         //based on the portal key used.
         if(isNetherWorld(NETHER_WORLD_NAME))
@@ -372,7 +389,7 @@ public class WorldManager {
                 // netherworld portals go to a random place in the overworld
                 // (the idea is that getting a portal key from another player is valuable and can
                 //  be used to sneak into the overworld)
-                QCLocation qcOverworldPortalLocation = createRandomSpawnLocation(overWorld);
+                QCLocation qcOverworldPortalLocation = createRandomSpawnQCLocation(overWorld);
 
                 QCLocation qcPortalLocation = createQCLocation(portalLocation);
 
@@ -390,7 +407,7 @@ public class WorldManager {
             }
 
             return;
-        }
+        }//if creating portal from nether world
 
         QCVisitedWorld visitedWorld = qcp.pm.getQCPlayer(playerAndPortalKey.getKey()).getVisitedWorld();
 
@@ -420,7 +437,7 @@ public class WorldManager {
         return qcL;
     }
 
-    private static boolean isNetherWorld(String worldName) {
+    public static boolean isNetherWorld(String worldName) {
         return worldName.equals(NETHER_WORLD_NAME);
     }
 

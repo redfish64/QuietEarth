@@ -14,6 +14,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityCreatePortalEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerPortalEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.world.PortalCreateEvent;
@@ -64,11 +65,21 @@ public class MainListener implements Listener {
             e.setRespawnLocation(l);
     }
 
-    //note that EntityCreatePortalEvent for portals triggered
+    //note that EntityCreatePortalEvent doesn't go off
+    //for portals created
     //by fire, so we use just PortalCreateEvent instead
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void onPortalCreate(PortalCreateEvent event) {
         qcp.wm.onPortalCreate(event);
+    }
+
+    //TODO 3 this class is a little silly, maybe just have WorldManager and PlayerManager
+    //listen directly
+
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void onPlayerPortalEvent(PlayerPortalEvent event)
+    {
+        qcp.pm.onPlayerPortalEvent(event);
     }
 }

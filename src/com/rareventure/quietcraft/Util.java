@@ -51,4 +51,7 @@ public class Util {
         return b.getY();
     }
 
+    public static void getPortalCenter(Location from) {
+
+    }
 }

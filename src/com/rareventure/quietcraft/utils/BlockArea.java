@@ -1,4 +1,4 @@
-package com.rareventure.quietcraft;
+package com.rareventure.quietcraft.utils;
 
 import org.bukkit.Location;
 import org.bukkit.World;
