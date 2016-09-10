@@ -2,6 +2,10 @@ package com.rareventure.quietcraft;
 
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
+
+import java.util.Collection;
 
 /**
  * A 3D rectangular area in block units
@@ -13,6 +17,17 @@ public class BlockArea
     public int minZ = Integer.MAX_VALUE, maxZ = Integer.MIN_VALUE;
 
     public World w;
+
+    public BlockArea()
+    {}
+
+    public BlockArea(Collection<Block> bC)
+    {
+        for(Block b : bC)
+        {
+            expandArea(b.getLocation());
+        }
+    }
 
     public void expandArea(Location location) {
         w = location.getWorld();

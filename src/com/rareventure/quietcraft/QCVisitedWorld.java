@@ -1,7 +1,9 @@
 
 package com.rareventure.quietcraft;
 
+import com.avaje.ebean.event.BulkTableEvent;
 import com.avaje.ebean.validation.NotNull;
+import org.bukkit.Bukkit;
 
 import javax.persistence.*;
 
@@ -22,14 +24,13 @@ public class QCVisitedWorld {
     @Id @GeneratedValue
     private int id;
 
-    @ManyToOne
-    private QCWorld world;
+    @NotNull
+    private int worldId;
 
     /**
      * Where new users spawn. Nullable for the "nether" visited world
      */
-    @ManyToOne
-    private QCLocation spawnLocation;
+    private int spawnLocationId;
 
     /**
      * Where portals go to in the nether. We have a static location for this, so that nether
@@ -38,8 +39,7 @@ public class QCVisitedWorld {
      * Nullable for the "nether" visited world.
      * </p>
      */
-    @ManyToOne
-    private QCLocation netherLocation;
+    private int netherLocationId;
 
     /**
      * If true, the visited world is considered active. There may be only one active visited
@@ -53,11 +53,21 @@ public class QCVisitedWorld {
     public QCVisitedWorld() {
     }
 
+    public QCVisitedWorld(int id, int worldId, int spawnLocationId, int netherLocationId, boolean active) {
+        this.id = id;
+        this.worldId = worldId;
+        this.spawnLocationId = spawnLocationId;
+        this.netherLocationId = netherLocationId;
+        this.active = active;
+    }
+
     public QCVisitedWorld(int id, QCWorld world, QCLocation spawnLocation, QCLocation netherLocation, boolean active) {
         this.id = id;
-        this.world = world;
-        this.spawnLocation = spawnLocation;
-        this.netherLocation = netherLocation;
+        this.worldId = world.getId();
+        if(spawnLocation != null)
+            this.spawnLocationId = spawnLocation.getId();
+        if(netherLocation != null)
+            this.netherLocationId = netherLocation.getId();
         this.active = active;
     }
 
@@ -70,11 +80,13 @@ public class QCVisitedWorld {
     }
 
     public QCWorld getWorld() {
-        return world;
+        return QuietCraftPlugin.db.find(QCWorld.class).where().
+                eq("id", String.valueOf(worldId)).findUnique();
     }
 
     public void setWorld(QCWorld world) {
-        this.world = world;
+
+        setWorldId(world.getId());
     }
 
     public int getId() {
@@ -86,28 +98,65 @@ public class QCVisitedWorld {
     }
 
     public QCLocation getSpawnLocation() {
-        return spawnLocation;
+        return QuietCraftPlugin.db.find(QCLocation.class).where().
+                eq("id", String.valueOf(spawnLocationId)).findUnique();
     }
 
     public void setSpawnLocation(QCLocation spawnLocation) {
-        this.spawnLocation = spawnLocation;
+        setSpawnLocationId(spawnLocation.getId());
     }
 
     public QCLocation getNetherLocation() {
-        return netherLocation;
+        return QuietCraftPlugin.db.find(QCLocation.class).where().
+                eq("id", String.valueOf(netherLocationId)).findUnique();
     }
 
     public void setNetherLocation(QCLocation netherLocation) {
-        this.netherLocation = netherLocation;
+        setNetherLocationId(netherLocation.getId());
     }
 
     public String getName() {
-        return world.getName();
+        return getWorld().getName();
     }
 
     public QCVisitedWorld createCopy(QCLocation spawnLocation, QCLocation netherSpawnLocation) {
-        return new QCVisitedWorld(0,this.world,spawnLocation,netherSpawnLocation, active
+        return new QCVisitedWorld(0,this.worldId,spawnLocation.getId(),netherSpawnLocation.getId(), active
         );
+    }
+
+    public int getWorldId() {
+        return worldId;
+    }
+
+    public void setWorldId(int worldId) {
+        this.worldId = worldId;
+    }
+
+    public int getSpawnLocationId() {
+        return spawnLocationId;
+    }
+
+    public void setSpawnLocationId(int spawnLocationId) {
+        this.spawnLocationId = spawnLocationId;
+    }
+
+    public int getNetherLocationId() {
+        return netherLocationId;
+    }
+
+    public void setNetherLocationId(int netherLocationId) {
+        this.netherLocationId = netherLocationId;
+    }
+
+    @Override
+    public String toString() {
+        return "QCVisitedWorld{" +
+                "id=" + id +
+                ", worldId=" + worldId +
+                ", spawnLocationId=" + spawnLocationId +
+                ", netherLocationId=" + netherLocationId +
+                ", active=" + active +
+                '}';
     }
 }
 

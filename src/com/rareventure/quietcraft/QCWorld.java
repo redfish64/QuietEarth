@@ -9,7 +9,7 @@ import javax.persistence.*;
 @Table(name="qc_world")
 public class QCWorld {
     @Id
-    private long id;
+    private int id;
 
     @NotNull
     private String name;
@@ -17,16 +17,16 @@ public class QCWorld {
     public QCWorld()
     {}
 
-    public QCWorld(long id, String name) {
+    public QCWorld(int id, String name) {
         this.id = id;
         this.name = name;
     }
 
-    public long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(int id) {
         this.id = id;
     }
 

@@ -27,10 +27,10 @@ import java.util.logging.Level;
 /**
  * Listens for world events and ferries the data off to the right manager
  */
-public class QCListener implements Listener {
+public class MainListener implements Listener {
     private final QuietCraftPlugin qcp;
 
-    public QCListener(QuietCraftPlugin qcp)
+    public MainListener(QuietCraftPlugin qcp)
     {
         this.qcp = qcp;
     }
@@ -60,7 +60,8 @@ public class QCListener implements Listener {
 
         Location l = qcp.pm.onRespawn(e.getPlayer());
 
-        e.setRespawnLocation(l);
+        if(l != null)
+            e.setRespawnLocation(l);
     }
 
     //note that EntityCreatePortalEvent for portals triggered

@@ -18,6 +18,7 @@ public class HackGiveStuffCommandExecutor implements CommandExecutor {
 
             Inventory i = player.getInventory();
             i.addItem(new ItemStack(Material.OBSIDIAN, 64));
+            i.addItem(new ItemStack(Material.BED, 3));
             i.addItem(new ItemStack(Material.FLINT_AND_STEEL, 64));
             i.addItem(new ItemStack(Material.DIAMOND_PICKAXE, 1));
             i.addItem(new ItemStack(Material.DIAMOND_SWORD, 1));

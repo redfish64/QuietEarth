@@ -1,10 +1,8 @@
 package com.rareventure.quietcraft;
 
-import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
+import com.avaje.ebean.EbeanServer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -17,10 +15,15 @@ import java.util.*;
 
 
 public class QuietCraftPlugin extends JavaPlugin {
+    public static EbeanServer db;
     public WorldManager wm;
     public PlayerManager pm;
 
     public void onEnable() {
+        //store db as a static variable because there will only be one instance of this
+        //plugin, for sure.
+        db = getDatabase();
+
         PluginDescriptionFile desc = getDescription();
 
         System.out.println(desc.getFullName() + " has been enabled");
@@ -34,10 +37,11 @@ public class QuietCraftPlugin extends JavaPlugin {
             wm.setupForNewInstall();
         }
 
-        getServer().getPluginManager().registerEvents(new QCListener(this), this);
+        getServer().getPluginManager().registerEvents(new MainListener(this), this);
 
         this.getCommand("kill").setExecutor(new KillCommandExecutor());
         this.getCommand("gm").setExecutor(new HackGiveStuffCommandExecutor());
+        this.getCommand("world").setExecutor(new WorldCommandExecutor());
     }
 
     /**
@@ -60,6 +64,7 @@ public class QuietCraftPlugin extends JavaPlugin {
         List<Class<?>> list = new ArrayList<>();
         list.add(QCPlayer.class);
         list.add(QCPlayerLog.class);
+        list.add(QCPortalLink.class);
         list.add(QCWorld.class);
         list.add(QCVisitedWorld.class);
         list.add(QCLocation.class);

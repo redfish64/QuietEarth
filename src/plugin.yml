@@ -24,3 +24,10 @@ commands:
            /gm
            Example: /gm
               ... and you get stuff
+  world:
+    aliases: []
+    description: Says which world you are in
+    usage: |
+           /world
+           Example: /world
+              Your world is wonky world

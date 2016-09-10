@@ -1,10 +1,7 @@
 package com.rareventure.quietcraft;
 
 import com.avaje.ebean.EbeanServer;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.WorldCreator;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.Inventory;
@@ -17,38 +14,24 @@ import java.util.*;
  * Contains standard procedures for handling interaction with the system state and database
  */
 public class PlayerManager {
-    private static final int SOULS_PER_REBIRTH = 4;
+    private static final int SOULS_PER_REBIRTH = 1;
     private static final Material SOUL_MATERIAL_TYPE = Material.DIAMOND;
     private static final String SOUL_DISPLAY_NAME = "Soul";
 
     //TODO 2.5 make saying 'hello sailor' cause the person to be immediately transported to the nether
     //with no souls
     private static final List<String> SOUL_LORE = Arrays.asList(
-            ("Oh ye who go about saying " +
-                    "unto each:  \"Hello sailor\":\n" +
-            "Dost thou know the magnitude " +
-                    "of thy sin before the gods?\n" +
-            "Yea, verily, thou shalt be " +
-                    "ground between two stones.\n" +
-            "Shall the angry gods cast thy " +
-                    "body into the whirlpool?\n" +
-            "Surely, thy eye shall be put " +
-                    "out with a sharp stick!\n" +
-            "Even unto the ends of the " +
-                    "earth shalt thou wander and\n" +
-            "unto the land of the dead " +
-                    "shalt thou be sent at last.\n" +
-            "Surely thou shalt repent of" +
-                    " thy cunning.").split("\n"));
+            ("This is a soul. It's very valuable if you like living in this world.").split("\n"));
 
     private static final Material PORTAL_KEY_MATERIAL = Material.FLINT_AND_STEEL;
 
     private static final List<String> PORTAL_KEY_LORE = Arrays.asList(
             ("This flint of steel seems magical somehow...").split("\n"));
-    private static final String PORTAL_KEY_DISPLAY_NAME_ENDING = " portal key";
+    public static final String PORTAL_KEY_DISPLAY_NAME_ENDING = " portal key";
 
     private final QuietCraftPlugin qcp;
-    private final EbeanServer db;
+
+    private EbeanServer db;
 
     public PlayerManager(QuietCraftPlugin qcp)
     {
@@ -56,11 +39,10 @@ public class PlayerManager {
         this.qcp = qcp;
     }
 
-    private void addToPlayerLog(Player player, QCPlayerLog.Action action)
+    private void addToPlayerLog(QCPlayer qcPlayer, QCPlayerLog.Action action)
     {
-        QCPlayer qcPlayer = getQCPlayer(player);
-        db.insert(new QCPlayerLog(qcPlayer,new Date(),
-                qcPlayer.getVisitedWorld(),
+        db.insert(new QCPlayerLog(qcPlayer.getUuid(),new Date(),
+                qcPlayer.getVisitedWorld().getId(),
                 action));
     }
 
@@ -92,6 +74,8 @@ public class PlayerManager {
                     && is.getItemMeta().getDisplayName().equals(SOUL_DISPLAY_NAME))
                 isi.remove();
         }
+
+        debugPrintPlayerInfo("onPlayerDeath",p);
     }
 
     private int getSoulCount(Player p) {
@@ -137,30 +121,35 @@ public class PlayerManager {
             //new player
             if(qcPlayer == null)
             {
-                giveInitialPackageToPlayer(player, SOULS_PER_REBIRTH, true);
-
                 QCVisitedWorld w = qcp.wm.findFirstJoinVisitedWorld();
-                createQCPlayer(player,w);
+                qcPlayer = createQCPlayer(player,w);
 
                 player.sendMessage("You have been born in world '"+w.getName()+"'");
-                player.teleport(Bukkit.createWorld(new WorldCreator(w.getName())).getSpawnLocation());
 
-                addToPlayerLog(player, QCPlayerLog.Action.JOIN);
-                db.commitTransaction();
-                return;
+                Location spawnLocation = Bukkit.getWorld(w.getName()).getSpawnLocation();
+                player.teleport(spawnLocation);
+                giveInitialPackageToPlayer(player, SOULS_PER_REBIRTH, true);
+
+                addToPlayerLog(qcPlayer, QCPlayerLog.Action.JOIN);
             }
+            else {
+                addToPlayerLog(qcPlayer, QCPlayerLog.Action.JOIN);
 
-            addToPlayerLog(player, QCPlayerLog.Action.JOIN);
+                player.sendMessage("You are in world '" +
+                        player.getWorld().getName() + "'");
+            }
             db.commitTransaction();
-
-            player.sendMessage("You are in world '"+
-                    player.getWorld().getName()+"'");
-            return;
-
         }
         finally {
             db.endTransaction();
         }
+
+        debugPrintPlayerInfo("onPlayerJoin",player);
+    }
+
+    private void debugPrintPlayerInfo(String message, Player player) {
+        QCPlayer p = getQCPlayer(player);
+        Bukkit.getLogger().info(message+", "+p);
     }
 
     /**
@@ -172,7 +161,7 @@ public class PlayerManager {
         Inventory i = player.getInventory();
         i.clear();
 
-        if(isFirstAppearance)
+        if(isFirstAppearance && !player.getWorld().equals(WorldManager.NETHER_WORLD_NAME))
         {
             ItemStack is = new ItemStack(PORTAL_KEY_MATERIAL);
             ItemMeta im = is.getItemMeta();
@@ -200,23 +189,24 @@ public class PlayerManager {
     }
 
     public void onPlayerQuit(Player player) {
-        addToPlayerLog(player, QCPlayerLog.Action.QUIT);
+        addToPlayerLog(getQCPlayer(player), QCPlayerLog.Action.QUIT);
+        debugPrintPlayerInfo("onPlayerQuit",player);
     }
 
     /**
      * This is called after onDeath() when the player has clicked the respawn button
      * and is ready to teleport to his new home.
      *
-     * @return location to teleport to.
+     * @return location to teleport to, or null if player should respawn as normal
      */
     public Location onRespawn(Player p) {
         QCPlayer player = qcp.pm.getQCPlayer(p);
         QCVisitedWorld vw;
         int soulCount = player.getSoulsKeptDuringDeath();
 
-        db.beginTransaction();
-        try{
-            if(soulCount > 0) {
+        if(soulCount > 0) {
+            db.beginTransaction();
+            try{
                 soulCount--;
                 //just incase something funny happens, we subtract a soul from their death count
                 player.setSoulsKeptDuringDeath(soulCount);
@@ -248,28 +238,51 @@ public class PlayerManager {
                     p.sendMessage("You can stop now... You have "+(soulCount)+" souls left.");
 
                 giveInitialPackageToPlayer(p,soulCount, false);
+                db.commitTransaction();
+            } finally {
+                db.endTransaction();
             }
-            else {
-                vw = qcp.wm.findBestWorldForDeadPlayer(p);
 
-                player.setVisitedWorld(vw);
-                db.update(player);
+            debugPrintPlayerInfo("onRespawn with souls left",p);
+            Location bedSpawnLocation = p.getBedSpawnLocation();
+            if(bedSpawnLocation != null && bedSpawnLocation.getWorld() == p.getWorld())
+                return bedSpawnLocation;
 
-                addToPlayerLog(p, QCPlayerLog.Action.PERMA_DEATH);
-
-                if(vw == qcp.wm.netherVisitedWorld)
-                    soulCount = 0;
-                else soulCount = SOULS_PER_REBIRTH;
-                p.sendMessage("You have been reborn into "+vw.getName());
-                giveInitialPackageToPlayer(p,soulCount, true);
-            }
-            db.commitTransaction();
-        } finally {
-            db.endTransaction();
+            Location spawnLocation = Bukkit.getWorld(vw.getName()).getSpawnLocation();
+            return spawnLocation;
         }
 
+        //db.beginTransaction();
+        try{
+            addToPlayerLog(player, QCPlayerLog.Action.PERMA_DEATH);
 
-        return Bukkit.getWorld(vw.getName()).getSpawnLocation();
+            vw = qcp.wm.findBestWorldForDeadPlayer(p);
+
+            player.setVisitedWorld(vw);
+            db.update(player);
+            Bukkit.getLogger().info("onRespawn set visited world "+vw+","+player);
+
+            debugPrintPlayerInfo("onRespawn without souls left",p);
+
+            addToPlayerLog(player, QCPlayerLog.Action.MOVED_TO_WORLD);
+
+            if(vw == qcp.wm.netherVisitedWorld)
+                soulCount = 0;
+            else soulCount = SOULS_PER_REBIRTH;
+            p.sendMessage("You have been reborn into "+vw.getName());
+            giveInitialPackageToPlayer(p,soulCount, true);
+
+           // db.commitTransaction();
+        } finally {
+           // db.endTransaction();
+        }
+
+        debugPrintPlayerInfo("onRespawn without souls left",p);
+
+        Location spawnLocation = Bukkit.getWorld(vw.getName()).getSpawnLocation();
+
+        return spawnLocation;
+
     }
 
     /**
@@ -290,19 +303,20 @@ public class PlayerManager {
     }
 
     /**
+     * Searches a players inventory for a portal key
      *
      * @param p player
-     * @return true if player has a portal key in their inventory
+     * @return portal key in players inventory, or null if it doesn't exist
      */
-    public static boolean containsPortalKey(Player p) {
+    public static ItemStack getPortalKey(Player p) {
         for(ItemStack i : p.getInventory())
         {
             if(i != null && i.getType() == PORTAL_KEY_MATERIAL && i.getItemMeta() != null
                     && i.getItemMeta().getDisplayName() != null
                     && i.getItemMeta().getDisplayName().endsWith(PORTAL_KEY_DISPLAY_NAME_ENDING))
-                return true;
+                return i;
         }
 
-        return false;
+        return null;
     }
 }

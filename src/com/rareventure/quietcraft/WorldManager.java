@@ -4,15 +4,15 @@ import com.avaje.ebean.EbeanServer;
 import com.avaje.ebean.SqlQuery;
 import com.avaje.ebean.SqlRow;
 import com.google.common.collect.Sets;
+import org.apache.commons.lang3.tuple.Pair;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.world.PortalCreateEvent;
+import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 //TODO 2 revisit spawn points. Also beds. When a player dies who is a leader in the community, we don't want them
 // to have to respawn at the spawn point, so that the spawn point can be booby trapped without affecting long standing
@@ -29,8 +29,11 @@ import java.util.Set;
 //TODO 2 Update visit ids periodically (once a day or so)
 //TODO 3 delete all player logs where visit ids no longer exist to save space??
 
+//TODO 2 test destroying beds and making sure that user can't teleport to a bed after destroyed (when kiled)
+//TODO 2 get rid of diamond lore
+
 /**
- * Created by tim on 7/10/16.
+ * Manages worlds and visited worlds.
  */
 public class WorldManager {
     private static final int MAX_WORLDS = 3;
@@ -55,6 +58,7 @@ public class WorldManager {
      * Maximum distance from 0,0,0 for random spawn locations
      */
     private static final double MAX_SPAWN_RADIUS = 10000.;
+    public static final String NETHER_WORLD_NAME = "world_nether";
     private final QuietCraftPlugin qcp;
 
     /**
@@ -159,14 +163,14 @@ public class WorldManager {
      * Finds the best world to join for a player that just died to join.
      */
     public QCVisitedWorld findBestWorldForDeadPlayer(Player player) {
-        SqlQuery q = qcp.getDatabase().createSqlQuery("select distinct world_visit_id from qc_player_log where player_uuid = :uuid");
+        SqlQuery q = qcp.getDatabase().createSqlQuery("select distinct visited_world_id from qc_player_log where player_id = :uuid");
         q.setParameter("uuid", player.getUniqueId().toString());
 
         //finds out the worlds the player already visited
-        Set<SqlRow> visitedWorldIdSqlRows = q.findSet();
-        Set<Long> visitedWorldIds = new HashSet<Long>(visitedWorldIdSqlRows.size());
-        for (SqlRow sr : visitedWorldIdSqlRows) {
-            visitedWorldIds.add(sr.getLong("world_visit_id"));
+        Set<SqlRow> playerVisitedWorldIdSqlRows = q.findSet();
+        Set<Integer> playerVisitedWorldIds = new HashSet<Integer>(playerVisitedWorldIdSqlRows.size());
+        for (SqlRow sr : playerVisitedWorldIdSqlRows) {
+            playerVisitedWorldIds.add(sr.getInteger("visited_world_id"));
         }
 
         QCVisitedWorld bestW = null;
@@ -177,7 +181,7 @@ public class WorldManager {
                 continue;
 
             //don't choose a world that has been spawned in already
-            if (visitedWorldIds.contains(w.getId()))
+            if (playerVisitedWorldIds.contains(w.getId()))
                 continue;
 
             if (bestW == null)
@@ -216,7 +220,7 @@ public class WorldManager {
 
     public void setupForNewInstall() {
         QCWorld w;
-        netherVisitedWorld = new QCVisitedWorld(1,w = new QCWorld(1,"world_nether"),null,null,true);
+        netherVisitedWorld = new QCVisitedWorld(1,w = new QCWorld(1,WorldManager.NETHER_WORLD_NAME),null,null,true);
         qcp.getDatabase().insert(w);
         qcp.getDatabase().insert(netherVisitedWorld);
         visitedWorlds.add(netherVisitedWorld);
@@ -258,15 +262,30 @@ public class WorldManager {
 
         qcp.getDatabase().insert(qcw);
 
+        QCLocation spawnLocation = createRandomSpawnLocation(w);
+
         QCVisitedWorld vw = new QCVisitedWorld(id, qcw,
-                createRandomSpawnLocation(w),
+                spawnLocation,
                 createRandomNetherSpawnLocation(), true);
+        qcp.getDatabase().insert(vw);
 
         visitedWorlds.add(vw);
+
+        w.setSpawnLocation(
+                (int)Math.floor(spawnLocation.getX()),
+                (int)Math.floor(spawnLocation.getY()),
+                (int)Math.floor(spawnLocation.getZ())
+        );
 
         return qcw;
     }
 
+    /**
+     * Creates a random spawn loacation in the nether world.
+     * Saves the location to the db
+     *
+     * @return created location
+     */
     private QCLocation createRandomNetherSpawnLocation() {
         World w = getWorld(netherVisitedWorld);
 
@@ -274,17 +293,24 @@ public class WorldManager {
     }
 
     /**
-     * Places we make sure the spawn location is not at. Note that we are a little rougher here and allow
-     * water as a place to spawn above *splash*, as well as cacti.
+     * Places we make sure the spawn location is not at.
      */
-    private static final HashSet<Material> SPAWN_LOCATION_BLACKLIST = Sets.newHashSet(Material.LAVA,Material.STATIONARY_LAVA);
+    private static final HashSet<Material> SPAWN_LOCATION_BLACKLIST =
+            Sets.newHashSet(
+                    Material.LAVA,
+                    Material.STATIONARY_LAVA,
+                    Material.WATER,
+                    Material.STATIONARY_WATER,
+                    Material.CACTUS,
+                    Material.FIRE
+            );
 
     private World getWorld(QCVisitedWorld vw) {
         return Bukkit.getWorld(vw.getName());
     }
 
     /**
-     * Finds a semi safe place to put a spawn location
+     * Finds a semi safe place to put a spawn location. Saves location to database.
      * @return
      */
     private QCLocation createRandomSpawnLocation(World w) {
@@ -305,11 +331,21 @@ public class WorldManager {
         }
         while(y == -1);
 
-        return new QCLocation(loc);
+
+        QCLocation qcl = new QCLocation(loc);
+        qcp.db.insert(qcl);
+
+        return qcl;
     }
 
     public void onPortalCreate(PortalCreateEvent event) {
-        if(!isPortalValid(event.getBlocks())) {
+        Map.Entry<Player,ItemStack> playerAndPortalKey = getPortalKeyNearPortal(event.getBlocks());
+
+        //portal was created without a portal key
+        if(playerAndPortalKey == null) {
+            //TODO 2 we have to destroy the portal somehow. Otherwise people could
+            //create long standing non working portals, and when someone with a portal
+            //key walks by unknowningly, they portal would be created
             qcp.getLogger().info("denied portal creation");
             event.setCancelled(true);
 //            List<Block> blocks = event.getBlocks();
@@ -319,26 +355,89 @@ public class WorldManager {
 //            }
 //
 //        event.getWorld().createExplosion (blocks.get(0).getLocation(), 3);
-            return; //TODO 3 maybe turn all blocks to sand or create an explosion or something
-        }
-
-        String worldName = event.getWorld().getName();
-
-        if(worldName.equals(netherVisitedWorld.getName()))
-        {
-            //TODO 2 we have to go back to the world according to the flint and steel
             return;
         }
 
-        //create a link from the current location to the nether world.
-        //TODO 1 I think we should have a QCVisitedWorld table for all the crap we want to
-        //add to it, rather than resetting stuff within world. We need to add a
-        // nether location for each visited world.
+        BlockArea ba = new BlockArea(event.getBlocks());
+        Location portalLocation = ba.getCenter();
+
+        //if we are creating a portal in the nether, we choose the world to go to
+        //based on the portal key used.
+        if(isNetherWorld(NETHER_WORLD_NAME))
+        {
+            World overWorld = Bukkit.getWorld(getWorldNameForPortalKey(playerAndPortalKey.getValue()));
+
+            qcp.db.beginTransaction();
+            try {
+                // netherworld portals go to a random place in the overworld
+                // (the idea is that getting a portal key from another player is valuable and can
+                //  be used to sneak into the overworld)
+                QCLocation qcOverworldPortalLocation = createRandomSpawnLocation(overWorld);
+
+                QCLocation qcPortalLocation = createQCLocation(portalLocation);
+
+                //create a link from the current location to the nether world.
+                QCPortalLink pl =
+                        new QCPortalLink(netherVisitedWorld.getId(), qcPortalLocation.getId(),
+                                qcp.pm.getQCPlayer(playerAndPortalKey.getKey()).getVisitedWorldId(),
+                                qcOverworldPortalLocation.getId());
+                qcp.db.save(pl);
+
+                qcp.db.commitTransaction();
+            }
+            finally {
+                qcp.db.endTransaction();
+            }
+
+            return;
+        }
+
+        QCVisitedWorld visitedWorld = qcp.pm.getQCPlayer(playerAndPortalKey.getKey()).getVisitedWorld();
+
+        qcp.db.beginTransaction();
+        try {
+            QCLocation qcPortalLocation = createQCLocation(portalLocation);
+
+            //create a link from the current location to the nether world.
+            QCPortalLink pl = new QCPortalLink(
+                    qcp.pm.getQCPlayer(playerAndPortalKey.getKey()).getVisitedWorldId(),
+                    qcPortalLocation.getId(),
+                    netherVisitedWorld.getId(),
+                    visitedWorld.getNetherLocation().getId());
+            qcp.db.save(pl);
+
+            qcp.db.commitTransaction();
+        }
+        finally {
+            qcp.db.endTransaction();
+        }
     }
 
-    private boolean isPortalValid(ArrayList<Block> blocks) {
+    private QCLocation createQCLocation(Location portalLocation) {
+        QCLocation qcL = new QCLocation(portalLocation);
+        qcp.db.save(qcL);
+
+        return qcL;
+    }
+
+    private static boolean isNetherWorld(String worldName) {
+        return worldName.equals(NETHER_WORLD_NAME);
+    }
+
+    private static String getWorldNameForPortalKey(ItemStack portalKey) {
+        String s = portalKey.getItemMeta().getDisplayName();
+
+        return s.substring(0, s.length() - PlayerManager.PORTAL_KEY_DISPLAY_NAME_ENDING.length());
+    }
+
+    /**
+     * Looks for a player holding a portal key near the portal creation.
+     *
+     * @param blocks blocks of portal
+     * @return name of world of portal key
+     */
+    private Map.Entry<Player,ItemStack> getPortalKeyNearPortal(ArrayList<Block> blocks) {
         BlockArea ba = new BlockArea();
-        Location l;
 
         //first get the rectangle of the portal
         for(Block b : blocks)
@@ -346,15 +445,17 @@ public class WorldManager {
             ba.expandArea(b.getLocation());
         }
 
-        //we can't actually tell who let the fire, so we just look for nearby players and
-        //if they have the portal key, the portal is considered valid.
+        //we can't actually tell who let the fire, so we just look for nearby players
+        //for the portal key
         for(Player p : PlayerManager.getNearbyPlayers(ba.getCenter(),MAX_KEY_PORTAL_DISTANCE))
         {
-            if(PlayerManager.containsPortalKey(p))
-                return true;
+            ItemStack portalKey = PlayerManager.getPortalKey(p);
+
+            if(portalKey != null)
+                return new AbstractMap.SimpleEntry<Player, ItemStack>(p, portalKey);
         }
 
-        return false;
+        return null;
     }
 
 }

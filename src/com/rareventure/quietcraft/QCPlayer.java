@@ -21,8 +21,7 @@ public class QCPlayer {
     private String uuid;
 
     @NotNull
-    @ManyToOne
-    private QCVisitedWorld visitedWorld;
+    private int visitedWorldId;
 
     /**
      * The number of souls kept while dead. When a player dies
@@ -32,24 +31,13 @@ public class QCPlayer {
     @NotNull
     private int soulsKeptDuringDeath;
 
-    @ManyToOne
-    private QCLocation bedLocation;
-
     public QCPlayer() {
     }
 
     public QCPlayer(String uuid, QCVisitedWorld visitedWorld, int soulsKeptDuringDeath) {
         this.uuid = uuid;
-        this.visitedWorld = visitedWorld;
+        this.visitedWorldId = visitedWorld.getId();
         this.soulsKeptDuringDeath = soulsKeptDuringDeath;
-    }
-
-    public QCLocation getBedLocation() {
-        return bedLocation;
-    }
-
-    public void setBedLocation(QCLocation bedLocation) {
-        this.bedLocation = bedLocation;
     }
 
     public String getUuid() {
@@ -61,11 +49,12 @@ public class QCPlayer {
     }
 
     public QCVisitedWorld getVisitedWorld() {
-        return visitedWorld;
+        return QuietCraftPlugin.db.find(QCVisitedWorld.class).where().
+                eq("id", String.valueOf(visitedWorldId)).findUnique();
     }
 
     public void setVisitedWorld(QCVisitedWorld visitedWorld) {
-        this.visitedWorld = visitedWorld;
+        setVisitedWorldId(visitedWorld.getId());
     }
 
     public int getSoulsKeptDuringDeath() {
@@ -74,5 +63,22 @@ public class QCPlayer {
 
     public void setSoulsKeptDuringDeath(int soulsKeptDuringDeath) {
         this.soulsKeptDuringDeath = soulsKeptDuringDeath;
+    }
+
+    public int getVisitedWorldId() {
+        return visitedWorldId;
+    }
+
+    public void setVisitedWorldId(int visitedWorldId) {
+        this.visitedWorldId = visitedWorldId;
+    }
+
+    @Override
+    public String toString() {
+        return "QCPlayer{" +
+                "uuid='" + uuid + '\'' +
+                ", visitedWorldId=" + visitedWorldId +
+                ", soulsKeptDuringDeath=" + soulsKeptDuringDeath +
+                '}';
     }
 }
