@@ -18,6 +18,7 @@ public class QuietCraftPlugin extends JavaPlugin {
     public static EbeanServer db;
     public WorldManager wm;
     public PlayerManager pm;
+    public PortalManager portalManager;
 
     public void onEnable() {
         //store db as a static variable because there will only be one instance of this
@@ -30,6 +31,7 @@ public class QuietCraftPlugin extends JavaPlugin {
 
         boolean freshInstallation = setupDatabase();
 
+        portalManager = new PortalManager(this);
         wm = new WorldManager(this);
         pm = new PlayerManager(this);
 
@@ -41,7 +43,8 @@ public class QuietCraftPlugin extends JavaPlugin {
 
         this.getCommand("kill").setExecutor(new KillCommandExecutor());
         this.getCommand("gm").setExecutor(new HackGiveStuffCommandExecutor());
-        this.getCommand("world").setExecutor(new WorldCommandExecutor());
+        this.getCommand("w").setExecutor(new WorldCommandExecutor());
+        this.getCommand("cp").setExecutor(new HackCreatePortal());
     }
 
     /**

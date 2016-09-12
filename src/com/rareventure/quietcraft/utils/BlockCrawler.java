@@ -1,5 +1,6 @@
 package com.rareventure.quietcraft.utils;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -43,7 +44,10 @@ public class BlockCrawler {
 					if (mProcessedBlocks.size() < mMaxPortalSize)
 						processAdjacent(nextLoc.getBlock(), block.getType());
 					else
-						throw new MaxRecursionException("Max Block");
+					{
+						Bukkit.getLogger().warning("Reached max block count");
+					}
+						return;
 				}
 			}
 		}

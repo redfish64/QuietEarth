@@ -1,17 +1,26 @@
 package com.rareventure.quietcraft;
 
 import com.avaje.ebean.validation.NotNull;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.block.Block;
 
-import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.List;
 
 /**
  * Represents a link between two portals in two different worlds.
+ * <p>Note that we don't get notified when a portal is destroyed, so multiple portal links from and
+ * to the same place may be created</p>
  */
 @Entity()
 @Table(name = "qc_portal_link")
 public class QCPortalLink {
+
+    @Id
+    @GeneratedValue
+    private int id;
 
     @NotNull
     private int visitedWorldId1;
@@ -43,7 +52,7 @@ public class QCPortalLink {
         this.loc2Id = loc2.getId();
     }
 
-    public QCLocation getLoc1() {
+    public QCLocation getQCLoc1() {
         return QuietCraftPlugin.db.find(QCLocation.class).where().
                 eq("id", String.valueOf(loc1Id)).findUnique();
     }
@@ -52,7 +61,7 @@ public class QCPortalLink {
         setLoc1Id(loc1.getId());
     }
 
-    public QCLocation getLoc2() {
+    public QCLocation getQCLoc2() {
         return QuietCraftPlugin.db.find(QCLocation.class).where().
                 eq("id", String.valueOf(loc2Id)).findUnique();
     }
@@ -91,5 +100,35 @@ public class QCPortalLink {
 
     public void setVisitedWorldId2(int visitedWorldId2) {
         this.visitedWorldId2 = visitedWorldId2;
+    }
+
+    public Location getOtherLoc(WorldManager wm, Location l) {
+        QCLocation l1 = getQCLoc1();
+
+        if(l1.isAt(l) && wm.getQCVisitedWorld(l.getWorld().getName()).getId() == getVisitedWorldId1())
+            return getQCLoc2().toLocation(
+                    Bukkit.getWorld(wm.getQCVisitedWorld(visitedWorldId2).getName()));
+
+        return l;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public Location getLoc1() {
+        QCLocation qcl = getQCLoc1();
+        World w = DbUtil.getWorldFromQCVisitedWorldId(getVisitedWorldId1());
+        return qcl.toLocation(w);
+    }
+
+    public Location getLoc2() {
+        QCLocation qcl = getQCLoc2();
+        World w = DbUtil.getWorldFromQCVisitedWorldId(getVisitedWorldId1());
+        return qcl.toLocation(w);
     }
 }

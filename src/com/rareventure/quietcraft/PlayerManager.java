@@ -1,6 +1,7 @@
 package com.rareventure.quietcraft;
 
 import com.avaje.ebean.EbeanServer;
+import com.rareventure.quietcraft.utils.BlockArea;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.PlayerDeathEvent;
@@ -47,18 +48,13 @@ public class PlayerManager {
                 action));
     }
 
-    public QCPlayer getQCPlayer(UUID uniqueId) {
-        return db.find(QCPlayer.class).where().
-                eq("uuid", uniqueId.toString()).findUnique();
-    }
-
     public void onPlayerDeath(Player p, PlayerDeathEvent e) {
         EbeanServer db = qcp.db;
 
         if(WorldManager.isNetherWorld(p.getWorld().getName())) {
             //in the nether, souls aren't removed from inventory (are collectable), and the player
             //loses all their souls
-            QCPlayer qcPlayer = getQCPlayer(p.getUniqueId());
+            QCPlayer qcPlayer = DbUtil.getQCPlayer(p.getUniqueId());
 
             qcPlayer.setSoulsKeptDuringDeath(0);
 
@@ -69,7 +65,7 @@ public class PlayerManager {
 
         int soulCount = getSoulCount(p);
 
-        QCPlayer qcPlayer = getQCPlayer(p.getUniqueId());
+        QCPlayer qcPlayer = DbUtil.getQCPlayer(p.getUniqueId());
 
         qcPlayer.setSoulsKeptDuringDeath(soulCount);
 
@@ -112,7 +108,7 @@ public class PlayerManager {
     }
 
     public QCPlayer getQCPlayer(Player player) {
-        return getQCPlayer(player.getUniqueId());
+        return DbUtil.getQCPlayer(player.getUniqueId());
     }
 
     public QCPlayer createQCPlayer(Player player, QCVisitedWorld vw) {
@@ -300,7 +296,7 @@ public class PlayerManager {
 
             //in the nether the spawn location is always random, to prevent someone from creating a booby
             //trap at a spawn location
-            spawnLocation = qcp.wm.getRandomSpawnLocation(Bukkit.getWorld(WorldManager.NETHER_WORLD_NAME));
+            spawnLocation = WorldUtil.getRandomSpawnLocation(Bukkit.getWorld(WorldUtil.NETHER_WORLD_NAME));
 
         }
         else
@@ -355,7 +351,27 @@ public class PlayerManager {
      * Called when a player is about to be teleported by a portal
      */
     public void onPlayerPortalEvent(PlayerPortalEvent event) {
-        Util.getPortalCenter(event.getFrom());
-        event.getPortalTravelAgent().createPortal()
+        BlockArea b = WorldUtil.findActivePortal(event.getFrom());
+
+        if (b == null) {
+            Bukkit.getLogger().warning("Couldn't find portal for location: " + event.getFrom());
+            return;
+        }
+
+        Location l = WorldUtil.getRepresentativePortalLocation(b);
+
+        QCPortalLink pl = qcp.portalManager.getPortalLinkForLocation(l);
+
+        if(pl == null) {
+            Bukkit.getLogger().warning("Couldn't find portal link for portal at "+l);
+            //TODO 2 destroy it
+            //WorldUtil.destroyPortal(l.getWorld(),b);
+            return;
+        }
+
+        Location otherLocation = pl.getOtherLoc(qcp.wm,l);
+        event.getPortalTravelAgent().findOrCreate(otherLocation);
+
+        event.getPlayer().teleport(otherLocation);
     }
 }
