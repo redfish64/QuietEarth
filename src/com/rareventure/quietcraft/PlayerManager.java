@@ -354,7 +354,6 @@ public class PlayerManager {
         BlockArea b = WorldUtil.findActivePortal(event.getFrom());
 
         if (b == null) {
-            Bukkit.getLogger().warning("Couldn't find portal for location: " + event.getFrom());
             return;
         }
 
@@ -363,15 +362,13 @@ public class PlayerManager {
         QCPortalLink pl = qcp.portalManager.getPortalLinkForLocation(l);
 
         if(pl == null) {
-            Bukkit.getLogger().warning("Couldn't find portal link for portal at "+l);
             //TODO 2 destroy it
             //WorldUtil.destroyPortal(l.getWorld(),b);
             return;
         }
 
         Location otherLocation = pl.getOtherLoc(qcp.wm,l);
-        event.getPortalTravelAgent().findOrCreate(otherLocation);
-
         event.getPlayer().teleport(otherLocation);
+        event.setCancelled(true);
     }
 }

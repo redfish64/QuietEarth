@@ -43,9 +43,18 @@ public class WorldUtil {
                     Material.FIRE
             );
 
+    /**
+     * Max height to search for an open area in the nether
+     */
+    private static final int NETHER_WORLD_MAX_HEIGHT = 125;
+
     public static Block getHighestFreeBlockAt(final int posX, final int posZ, final World world)
     {
-        final int maxHeight = world.getMaxHeight();
+        final int maxHeight = 
+                isNetherWorld(world) ? NETHER_WORLD_MAX_HEIGHT :
+                world.getMaxHeight();
+
+//        Bukkit.getLogger().info("maxHeight is "+maxHeight);
 
         int searchedHeight = maxHeight - 1;
 
@@ -54,6 +63,7 @@ public class WorldUtil {
         while (searchedHeight > 0)
         {
             final Block block = world.getBlockAt(posX, searchedHeight, posZ);
+//            Bukkit.getLogger().info("height is "+searchedHeight+" material is "+block.getType());
 
             if (lastBlock != null && lastBlock.getType() == Material.AIR &&
                     block.getType() != Material.AIR)
@@ -66,6 +76,10 @@ public class WorldUtil {
         return world.getBlockAt(posX,++searchedHeight,posZ);
     }
 
+    public static boolean isNetherWorld(World world) {
+        return world.getName().equals(NETHER_WORLD_NAME);
+    }
+
     public static int getValidHighestY(Location l, Set<Material> blackList) {
 
         l.getWorld().getChunkAt(l).load();
@@ -75,8 +89,9 @@ public class WorldUtil {
         if(blackList.contains(ground.getType()))
             return -1;
 
-        Bukkit.getLogger().info("spawn point ground material "+ground.getType());
-        Bukkit.getLogger().info("spawn point block material "+b.getType());
+//        Bukkit.getLogger().info("spawn point ground material "+ground.getType());
+//        Bukkit.getLogger().info("spawn point block material "+b.getType());
+//        Bukkit.getLogger().info("spawn point highest y "+b.getY());
         return b.getY();
     }
 
@@ -104,8 +119,6 @@ public class WorldUtil {
         //for a Z aligned portal
         if(!isXDim)
             ba.swapXZDim();
-
-        boolean [] foundEdge = new boolean[4];
 
         //keep expanding ba until we found an obsidian edge in all directions
         //top = 0, left = 1, bottom = 2, right = 3
@@ -309,6 +322,16 @@ public class WorldUtil {
                     b.setType(Material.OBSIDIAN);
                 else
                     b.setType(activate ? Material.PORTAL : Material.AIR);
+
+                //create air around the portal
+                if(xAligned) {
+                    b.getRelative(0, 0, -1).setType(Material.AIR);
+                    b.getRelative(0, 0, 1).setType(Material.AIR);
+                }
+                else {
+                    b.getRelative(-1, 0, 0).setType(Material.AIR);
+                    b.getRelative(1, 0, 0).setType(Material.AIR);
+                }
             }
         }
 
@@ -317,12 +340,13 @@ public class WorldUtil {
             for (int z = -FLOOR_LENGTH; z <= FLOOR_LENGTH; z++) {
                 Block b;
                 if(xAligned)
-                    b=b1.getRelative(x -w/2,-1,z);
+                    b=b1.getRelative(x - w/2,-1,z);
                 else
-                    b=b1.getRelative(z,-1,x -w/2);
+                    b=b1.getRelative(z,-1,x - w/2);
                 b.setType(Material.SANDSTONE);
             }
         }
+
 
         return WorldUtil.findPortalLocation(l,xAligned);
     }
@@ -344,7 +368,9 @@ public class WorldUtil {
      * Finds the portals representative location given a location nearby in in portal.
      */
     private static Location findPortalLocation(Location l, boolean xAligned) {
-        return getRepresentativePortalLocation(findPortal(l,xAligned));
+        //we add 1 to location because the location is at the base of the portal,
+        //and findPortal only works if inside the portal
+        return getRepresentativePortalLocation(findPortal(l.clone().add(0,1,0),xAligned));
     }
 
     public static World getNetherWorld() {
@@ -388,6 +414,9 @@ public class WorldUtil {
         }
         while(y == -1);
 
+        loc.setY(y);
         return loc;
     }
 }
+//TODO 2 find why we are spawning underground sometimes
+//TODO 2 find why we sometimes spawn in the wrong world on connect???

@@ -53,7 +53,7 @@ public class WorldManager {
     private static final int MAX_KEY_PORTAL_DISTANCE = 5;
 
     private static final MathUtil.RandomNormalParams NETHER_PORTAL_WIDTH_PARAMS =
-            new MathUtil.RandomNormalParams(4,7,4,10);
+            new MathUtil.RandomNormalParams(4,7,4,3);
 
     /**
      * The ratio between height and width. It's important to make sure that
@@ -436,16 +436,9 @@ public class WorldManager {
         WorldUtil.destroyPortal(pl.getLoc1(),true);
         WorldUtil.destroyPortal(pl.getLoc2(),true);
 
-        qcp.db.beginTransaction();
-        try {
-            qcp.db.delete(pl.getQCLoc1());
-            qcp.db.delete(pl.getQCLoc2());
-            qcp.db.delete(pl);
-            qcp.db.commitTransaction();
-        }
-        finally {
-            qcp.db.endTransaction();
-        }
+        qcp.db.delete(pl.getQCLoc1());
+        qcp.db.delete(pl.getQCLoc2());
+        qcp.db.delete(pl);
     }
 
     /**

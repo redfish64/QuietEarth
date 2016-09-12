@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.entity.EntityCreatePortalEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -81,5 +82,16 @@ public class MainListener implements Listener {
     public void onPlayerPortalEvent(PlayerPortalEvent event)
     {
         qcp.pm.onPlayerPortalEvent(event);
+    }
+
+    @EventHandler
+    public void onBlockPhysicsEvent(BlockPhysicsEvent e)
+    {
+        if(e.getChangedType() == Material.PORTAL || e.getBlock().getType() == Material.PORTAL)
+        {
+            e.setCancelled(true);
+            Bukkit.getLogger().info("HACK CANCELING ALL PORTAL PHYSIC EVENTS "+e.getBlock());
+        }
+
     }
 }

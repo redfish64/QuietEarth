@@ -17,11 +17,12 @@ public class HackGiveStuffCommandExecutor implements CommandExecutor {
             Player player = (Player) sender;
 
             Inventory i = player.getInventory();
-            i.addItem(new ItemStack(Material.OBSIDIAN, 64));
-            i.addItem(new ItemStack(Material.BED, 3));
             i.addItem(new ItemStack(Material.FLINT_AND_STEEL, 1));
+            i.addItem(new ItemStack(Material.TORCH, 64));
             i.addItem(new ItemStack(Material.DIAMOND_PICKAXE, 1));
             i.addItem(new ItemStack(Material.DIAMOND_SWORD, 1));
+            i.addItem(new ItemStack(Material.OBSIDIAN, 64));
+            i.addItem(new ItemStack(Material.BED, 3));
             i.addItem(new ItemStack(Material.DIAMOND_LEGGINGS, 1));
             i.addItem(new ItemStack(Material.DIAMOND_HELMET, 1));
             i.addItem(new ItemStack(Material.DIAMOND_BOOTS, 1));
