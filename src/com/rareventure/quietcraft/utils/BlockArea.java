@@ -157,4 +157,10 @@ public class BlockArea
     public void expandArea(Block block) {
         expandArea(block.getState());
     }
+
+    public boolean containsBlock(Block block) {
+        return block.getX() >= minX && block.getX() < maxX
+                && block.getY() >= minY && block.getY() < maxY
+                && block.getZ() >= minZ && block.getZ() < maxZ;
+    }
 }

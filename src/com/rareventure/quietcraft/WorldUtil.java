@@ -321,7 +321,15 @@ public class WorldUtil {
                 if(x == 0 || x == w-1 || y == 0 || y == h-1)
                     b.setType(Material.OBSIDIAN);
                 else
-                    b.setType(activate ? Material.PORTAL : Material.AIR);
+                {
+                    if(activate) {
+                        b.setType(Material.PORTAL);
+                        b.getState().getData();
+                    }
+                    else
+                        b.setType(Material.AIR);
+                }
+
 
                 //create air around the portal
                 if(xAligned) {

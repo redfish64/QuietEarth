@@ -7,19 +7,13 @@ import com.rareventure.quietcraft.utils.BlockArea;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.world.PortalCreateEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
 
-//TODO 2 revisit spawn points. Also beds. When a player dies who is a leader in the community, we don't want them
-// to have to respawn at the spawn point, so that the spawn point can be booby trapped without affecting long standing
-// members
-
 //TODO 2 update visit id and change spawn point of worlds when visit id changes
-//TODO 2 spawn players randomly in the nether. We can't have a booby trapped spawn point in the nether or it'd
-//be no fun
-//TODO 2 when opening a portal to the nether, randomize the location of the portal in the nether.
 //TODO 2.5 possibly notify everybody in the nether where the portal opened, and give them a way to see their
 // own location, so they can attack it.
 
@@ -27,8 +21,27 @@ import java.util.*;
 //TODO 2 Update visit ids periodically (once a day or so)
 //TODO 3 delete all player logs where visit ids no longer exist to save space??
 
-//TODO 2 test destroying beds and making sure that user can't teleport to a bed after destroyed (when kiled)
 //TODO 2 get rid of diamond lore
+
+//TODO 2 decide when and how worlds can be revisited. What about multiple spawns per world?
+
+//TODO 2 decide on distance for:
+//  nether spawn
+//  portals to nether
+//  portals from nether (wild portals)
+//  reused world spawn
+//TODO 2 what about timedout items? Do we worry about items not owned by anybody being destroyed?
+
+//TODO 2 flying admin user
+
+//TODO 2 if we allow world reuse, handle cases where a user doesn't log in for a long time
+// and the world they were in no longer exists
+
+//TODO 2 make sure a user doesn't spawn sufficated in dirt or whatever
+
+//TODO 2 new rule: when in nether with at least one soul, all souls drop in nether,
+// player is teleported back to world (so dying in nether isn't so harsh and allows player to
+// try and recover souls)
 
 /**
  * Manages worlds and visited worlds.
@@ -53,8 +66,9 @@ public class WorldManager {
     private static final int MAX_KEY_PORTAL_DISTANCE = 5;
 
     private static final MathUtil.RandomNormalParams NETHER_PORTAL_WIDTH_PARAMS =
-            new MathUtil.RandomNormalParams(4,7,4,3);
-
+            new MathUtil.RandomNormalParams(4,3,4,15);
+    //TODO 2 make sure to clear out any blocks where a player might teleport to(nearby the nether)
+    //TODO 2 fix portal physics hack
     /**
      * The ratio between height and width. It's important to make sure that
      * given the minimum width in NETHER_PORTAL_WIDTH_PARAMS, that this
@@ -62,7 +76,7 @@ public class WorldManager {
      */
     private static final double PORTAL_HEIGHT_TO_WIDTH = 6f/4f;
     private static final MathUtil.RandomNormalParams OVERWORLD_PORTAL_WIDTH_PARAMS =
-            new MathUtil.RandomNormalParams(4,7,4,1);
+            new MathUtil.RandomNormalParams(4,1,4,7);
 
     private final QuietCraftPlugin qcp;
 
@@ -427,7 +441,7 @@ public class WorldManager {
             qcp.db.endTransaction();
         }
     }
-
+//TODO 2 make sure that players spawn in populated worlds first!
     /**
      * Destroys portals on both sides of a portal link, and then deletes the portal link,
      * and qclocations from the database
@@ -450,7 +464,8 @@ public class WorldManager {
 
         Location l = WorldUtil.constructPortal(netherWorldLocation, width,
                 (int)Math.round(width* PORTAL_HEIGHT_TO_WIDTH),
-                Math.random() < .5,
+                true, //TODO 3.5 if we let this be false, portal blocks face sideways
+                //Math.random() < .5,
                 active);
         return l;
     }
@@ -464,7 +479,8 @@ public class WorldManager {
 
         Location l = WorldUtil.constructPortal(overWorldLocation, width,
                 (int)Math.round(width* PORTAL_HEIGHT_TO_WIDTH),
-                Math.random() < .5,
+                true, //TODO 3.5 if we let this be false, portal blocks face sideways
+                //Math.random() < .5,
                 active);
         return l;
     }
@@ -514,4 +530,49 @@ public class WorldManager {
         return null;
     }
 
+    /**
+     * List of portal areas that were recently constructed (or being constructed)
+     * automatically. We keep track of this so that the block physics code doesn't
+     * remove nether material blocks as we add them
+     */
+    private List<BlockArea> recentConstructedPortalAreas = new ArrayList<>();
+
+    /**
+     * The last time a portal began automatic construction
+     */
+    private long lastPortalConstructionMS;
+
+    public void onBlockPhysicsEvent(BlockPhysicsEvent e) {
+        clearStaleConstructedPortals();
+
+        if(e.getBlock().getType() == Material.PORTAL) {
+            synchronized (recentConstructedPortalAreas) {
+                recentConstructedPortalAreas.stream().
+                        forEach(ba -> {
+                            if (ba.containsBlock(e.getBlock()))
+                                e.setCancelled(true);
+                        });
+            }
+        }
+        //TODO 2 when a portal is destroyed, its corresponding link should be destroyed too
+        //TODO 2 for multiple world portals linked to the same nether portal,
+        //each player gets a last portal link entered db field, so they go back the same
+        //place they left. Maybe 1 out of every 20 times, they go to a random portal linked
+        //to the same
+        //TODO 2 when creating a new world portal, we need to check if there is already a
+        //portal established at the same place, and use it if there
+    }
+
+    /**
+     * This checks if enough time has passed that the constructed portals
+     * should have gone through all the block physics events, and we can
+     * stop blocking the event
+     */
+    private void clearStaleConstructedPortals() {
+        synchronized(recentConstructedPortalAreas) {
+            //we give them one second
+            if (lastPortalConstructionMS + 1000 < System.currentTimeMillis())
+                recentConstructedPortalAreas.clear();
+        }
+    }
 }

@@ -14,7 +14,7 @@ public class MathUtil {
         int iv = (int)(Math.round(val));
         if(iv < params.min)
             iv = (int)Math.ceil(params.min);
-        else if(iv < params.max)
+        else if(iv > params.max)
             iv = (int)Math.floor(params.max);
         return iv;
     }
@@ -41,6 +41,28 @@ public class MathUtil {
             this.std = std;
             this.min = min;
             this.max = max;
+        }
+    }
+
+    public static void main(String []argv)
+    {
+        RandomNormalParams r = new RandomNormalParams(10,3,7,15);
+        for(int i = 0; i < 20; i++)
+        {
+            for(int j = 0; j < 5; j++)
+            {
+                System.out.print(String.format("%8.3f ",normalRandom(r)));
+            }
+            System.out.println();
+        }
+        System.out.println();
+        for(int i = 0; i < 20; i++)
+        {
+            for(int j = 0; j < 5; j++)
+            {
+                System.out.print(String.format("%8d ",normalRandomInt(r)));
+            }
+            System.out.println();
         }
     }
 }

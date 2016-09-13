@@ -84,10 +84,32 @@
 <node CREATED="1467445008976" ID="ID_1726378833" MODIFIED="1467445130668" TEXT="Player">
 <node CREATED="1467445037534" ID="ID_1587864216" MODIFIED="1468003618458" TEXT="uuid"/>
 <node CREATED="1467445059822" ID="ID_950797792" MODIFIED="1468054942621" TEXT="world_id"/>
+<node CREATED="1473782345442" ID="ID_513964811" MODIFIED="1473782350182" TEXT="last_portal_id">
+<node CREATED="1473782351218" ID="ID_1538997106" MODIFIED="1473782410828" TEXT="The last portal the user logged in"/>
+</node>
 </node>
 <node CREATED="1468054943401" ID="ID_1386911060" MODIFIED="1468054945035" TEXT="World">
 <node CREATED="1468054946105" ID="ID_1671473401" MODIFIED="1468054952069" TEXT="id"/>
 <node CREATED="1468054952433" ID="ID_1289061435" MODIFIED="1468054954029" TEXT="name"/>
+</node>
+<node CREATED="1473782106042" ID="ID_561265688" MODIFIED="1473782108071" TEXT="VisitedWorld">
+<node CREATED="1473782109498" ID="ID_1318187908" MODIFIED="1473782110270" TEXT="id"/>
+<node CREATED="1473782221074" ID="ID_1926893251" MODIFIED="1473782224862" TEXT="nickname">
+<node CREATED="1473782226450" ID="ID_1929490821" MODIFIED="1473782252238" TEXT="Used to give the world a random name"/>
+</node>
+<node CREATED="1473782110794" ID="ID_1040217542" MODIFIED="1473782127574" TEXT="nether_portal_loc[x,y,z]"/>
+<node CREATED="1473782128058" ID="ID_89568102" MODIFIED="1473782136270" TEXT="span_loc[x,y,z]"/>
+</node>
+<node CREATED="1473782137626" ID="ID_1718827732" MODIFIED="1473782140334" TEXT="PortalLink">
+<node CREATED="1473782141490" ID="ID_105936424" MODIFIED="1473782143478" TEXT="id"/>
+<node CREATED="1473782145002" ID="ID_1545534943" MODIFIED="1473782170414" TEXT="loc1_vw"/>
+<node CREATED="1473782150882" ID="ID_1088672852" MODIFIED="1473782156118" TEXT="loc1[x,y,z]">
+<node CREATED="1473782189322" ID="ID_550703063" MODIFIED="1473782201214" TEXT="block (int) location of bottom center portal element"/>
+</node>
+<node CREATED="1473782145002" ID="ID_194372849" MODIFIED="1473782181702" TEXT="loc2_vw"/>
+<node CREATED="1473782150882" ID="ID_539080733" MODIFIED="1473782188118" TEXT="loc2[x,y,z]">
+<node CREATED="1473782189322" ID="ID_812788050" MODIFIED="1473782201214" TEXT="block (int) location of bottom center portal element"/>
+</node>
 </node>
 <node CREATED="1467445118489" ID="ID_1944689299" MODIFIED="1467445126463" TEXT="PlayerLog">
 <node CREATED="1467445138537" ID="ID_1787179342" MODIFIED="1468003630410" TEXT="player_uuid"/>
@@ -140,7 +162,7 @@
 </node>
 </node>
 <node CREATED="1473080306960" ID="ID_1727806319" MODIFIED="1473099187029" TEXT="spawning">
-<node CREATED="1473080310848" ID="ID_722706054" MODIFIED="1473080328740" TEXT="when a player dies, they go to the next world they haven&apos;t visited yet">
+<node CREATED="1473080310848" ID="ID_722706054" MODIFIED="1473764860073" TEXT="when a player dies, with no souls  they go to the next world they haven&apos;t visited yet">
 <node CREATED="1473080329800" ID="ID_11412421" MODIFIED="1473080334965" TEXT="If the player has visited all the worlds then">
 <node CREATED="1473080335880" ID="ID_1533665923" MODIFIED="1473080348765" TEXT="If there are any worlds that haven&apos;t been visited in a month, the player can join those"/>
 <node CREATED="1473080349120" ID="ID_133161436" MODIFIED="1473080365052" TEXT="Otherwise the player goes to nether"/>
@@ -158,7 +180,7 @@
 <node CREATED="1473099286913" ID="ID_1878431273" MODIFIED="1473099290772" TEXT="about 100 players"/>
 </node>
 </node>
-<node CREATED="1473099421192" ID="ID_842966636" MODIFIED="1473147407697" TEXT="thoughts">
+<node CREATED="1473099421192" ID="ID_842966636" MODIFIED="1473764973238" TEXT="thoughts">
 <node CREATED="1473099425896" ID="ID_1629893461" MODIFIED="1473099480125" TEXT="If we have a maximum of 50 worlds, it seems more like we are just a perma death server with extra lives">
 <node CREATED="1473099481585" ID="ID_1603276191" MODIFIED="1473099510045" TEXT="All we need to do is prevent the high death users from joining servers populated by more friendly people."/>
 <node CREATED="1473099517672" ID="ID_1960633103" MODIFIED="1473099540868" TEXT="Which means we can reuse as many worlds as we want. "/>
@@ -199,87 +221,7 @@
 <node CREATED="1473148108350" ID="ID_1594113529" MODIFIED="1473148115635" TEXT="newcomers get trial period"/>
 </node>
 </node>
-</node>
-<node CREATED="1473329224300" ID="ID_999690107" MODIFIED="1473329225537" TEXT="portals">
-<node CREATED="1473329227093" ID="ID_702637419" MODIFIED="1473329240841" TEXT="create a portal code snippet (from multiverse netherportals">
-<node CREATED="1473329241837" ID="ID_1382927870" MODIFIED="1473329248491">
-<richcontent TYPE="NODE"><html>
-  <head>
-    
-  </head>
-  <body>
-    <p>
-      &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;} else if (toWorld.getEnvironment() == World.Environment.THE_END &amp;&amp; type == PortalType.END) {
-    </p>
-    <p>
-      &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;Location loc = new Location(event.getTo().getWorld(), 100, 50, 0); // This is the vanilla location for obsidian platform.
-    </p>
-    <p>
-      &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;event.setTo(loc);
-    </p>
-    <p>
-      &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;Block block = loc.getBlock();
-    </p>
-    <p>
-      &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;for (int x = block.getX() - 2; x &lt;= block.getX() + 2; x++) {
-    </p>
-    <p>
-      &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;for (int z = block.getZ() - 2; z &lt;= block.getZ() + 2; z++) {
-    </p>
-    <p>
-      &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;Block platformBlock = loc.getWorld().getBlockAt(x, block.getY() - 1, z);
-    </p>
-    <p>
-      &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;if (platformBlock.getType() != Material.OBSIDIAN) {
-    </p>
-    <p>
-      &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;platformBlock.setType(Material.OBSIDIAN);
-    </p>
-    <p>
-      &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;}
-    </p>
-    <p>
-      &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;for (int yMod = 1; yMod &lt;= 3; yMod++) {
-    </p>
-    <p>
-      &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;Block b = platformBlock.getRelative(BlockFace.UP, yMod);
-    </p>
-    <p>
-      &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;if (b.getType() != Material.AIR) {
-    </p>
-    <p>
-      &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;b.setType(Material.AIR);
-    </p>
-    <p>
-      &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;}
-    </p>
-    <p>
-      &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;}
-    </p>
-    <p>
-      &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;}
-    </p>
-    <p>
-      &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;}
-    </p>
-    <p>
-      &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;}
-    </p>
-    <p>
-      &#160;
-    </p>
-  </body>
-</html></richcontent>
-</node>
-</node>
-<node CREATED="1473329257437" ID="ID_38201515" MODIFIED="1473329272600" TEXT="portals won&apos;t work automatically, because each world needs its own nether world"/>
-<node CREATED="1473332811671" ID="ID_1833829504" MODIFIED="1473344960012" TEXT="can we deactivate a portal?"/>
-<node CREATED="1473344962057" ID="ID_224671769" MODIFIED="1473345013644" TEXT="each user gets a special obsedian block when joining. If the leaders of the world wish, they can ask the user gives up this portal block. ">
-<node CREATED="1473345015728" ID="ID_532487696" MODIFIED="1473345016796" TEXT="Without it, portals can&apos;t be made."/>
-<node CREATED="1473345017233" ID="ID_596003341" MODIFIED="1473345050380" TEXT="Portals made in the nether with this block will only go to the world of the portal block"/>
-<node CREATED="1473345054064" ID="ID_1989557766" MODIFIED="1473345054064" TEXT=""/>
-</node>
-<node CREATED="1473332784744" ID="ID_1272767155" MODIFIED="1473349981877" TEXT="thoughts">
+<node CREATED="1473332784744" FOLDED="true" ID="ID_1272767155" MODIFIED="1473779646629" TEXT="portals">
 <node CREATED="1473332791007" ID="ID_927903694" MODIFIED="1473332799738" TEXT="there should only be one active portal per world">
 <node CREATED="1473332800726" ID="ID_956590528" MODIFIED="1473332810354" TEXT="if user creates another, the previous portal is deactivated"/>
 </node>
@@ -368,7 +310,177 @@
 <node CREATED="1473350514283" ID="ID_546038631" MODIFIED="1473350556599" TEXT="If we have a special flint and steel, and we just find the player around the portal. If they have a special flint and steel, we assume the portal is proper and create it, otherwise don&apos;t/ explode/ whatever">
 <node CREATED="1473350576291" ID="ID_756455142" MODIFIED="1473350591319" TEXT="It&apos;s clear, then. The special flint and steel creates portals. Normal ones don&apos;t"/>
 </node>
+<node CREATED="1473759370420" ID="ID_1135922241" MODIFIED="1473759385367" TEXT="portal destruction">
+<node CREATED="1473759387035" ID="ID_1390198332" MODIFIED="1473759396599" TEXT="If one side of a portal is destroyed, should we destroy the other side?">
+<node CREATED="1473760137835" ID="ID_1094931192" MODIFIED="1473760161567" TEXT="I like this idea, because it adds a lot of surprise to the game if suddenly a portal is destroyed"/>
 </node>
+</node>
+<node CREATED="1473759397571" ID="ID_12698110" MODIFIED="1473759403815" TEXT="multiple portals to nether">
+<node CREATED="1473759414835" ID="ID_735747390" MODIFIED="1473760029215" TEXT="If we create multiple portals from a world to the nether, what should happen?">
+<node CREATED="1473760029206" ID="ID_1317689360" MODIFIED="1473760037495" TEXT="Keep multiple portals open?">
+<node CREATED="1473759960147" ID="ID_561947213" MODIFIED="1473760016479" TEXT="I like multiple portals, because it allows a person to create a portal secretly, go to the nether, do some business there, come back, and destroy the other portal"/>
+<node CREATED="1473760039819" ID="ID_1809405283" MODIFIED="1473760044175" TEXT="Teleport back randomly?">
+<node CREATED="1473760056435" ID="ID_150878578" MODIFIED="1473760081367" TEXT="Maybe give each player a &quot;last&quot; portallink field, so they come back the way they came">
+<node CREATED="1473760083515" ID="ID_183570851" MODIFIED="1473760094255" TEXT="Maybe add some randomness to it, so you might go to the other portal"/>
+</node>
+</node>
+</node>
+</node>
+</node>
+<node CREATED="1473759406883" ID="ID_1755442873" MODIFIED="1473759413047" TEXT="portals from nether">
+<node CREATED="1473759467427" ID="ID_153451036" MODIFIED="1473759477791" TEXT="Should portals from nether be wild?">
+<node CREATED="1473759848187" ID="ID_461202264" MODIFIED="1473759857015" TEXT="Yes, because it means that losing your portal key is bad"/>
+</node>
+</node>
+</node>
+<node CREATED="1473762235117" ID="ID_1936397530" MODIFIED="1473762239552" TEXT="world reborning">
+<node CREATED="1473762241012" ID="ID_766962356" MODIFIED="1473762262857" TEXT="If a player was the only one to visit a world, can we allow the user to revisit it?"/>
+<node CREATED="1473762272676" ID="ID_1600885092" MODIFIED="1473762494719" TEXT="Under what circumstances does a world become revisitable?"/>
+</node>
+</node>
+<node CREATED="1473779670385" ID="ID_1806096186" MODIFIED="1473780476520" TEXT="thoughts2">
+<node CREATED="1473779673521" ID="ID_679005881" MODIFIED="1473779679093" TEXT="world reuse">
+<node CREATED="1473779680105" ID="ID_1178543141" MODIFIED="1473779729933" TEXT="not eligible if">
+<node CREATED="1473779684209" ID="ID_714270803" MODIFIED="1473779691333" TEXT="players existing in world">
+<node CREATED="1473779692401" ID="ID_98781438" MODIFIED="1473779697757" TEXT="logged in"/>
+<node CREATED="1473779698361" ID="ID_745508255" MODIFIED="1473779706669" TEXT="logged out but within X days">
+<node CREATED="1473780600449" ID="ID_1125172592" MODIFIED="1473780623373" TEXT="Probably 7 days"/>
+</node>
+</node>
+<node CREATED="1473779708281" ID="ID_1228561549" MODIFIED="1473779726421" TEXT="portals exist"/>
+<node CREATED="1473779894833" ID="ID_570379573" MODIFIED="1473781964342" TEXT="player left from a portal within X days">
+<node CREATED="1473779904921" ID="ID_930017209" MODIFIED="1473779912125" TEXT="probably 1 day or less"/>
+<node CREATED="1473780545441" ID="ID_808436687" MODIFIED="1473780582389" TEXT="This prevents the case where everyone in the world take a trip to the nether together, and destroy the portal, since they know they can come back since they have a portal key"/>
+</node>
+</node>
+<node CREATED="1473779873601" ID="ID_1205514430" MODIFIED="1473779880661" TEXT="worlds will be reused oldest first"/>
+<node CREATED="1473780627921" ID="ID_1527181915" MODIFIED="1473780639453" TEXT="players that log in from an old visiting world">
+<node CREATED="1473780645834" ID="ID_1490906036" MODIFIED="1473780647869" TEXT="What do we do?">
+<node CREATED="1473780649665" ID="ID_315100314" MODIFIED="1473780660685" TEXT="Give them a new portal key?">
+<node CREATED="1473780662737" ID="ID_1270185479" MODIFIED="1473780666853" TEXT="What if they didn&apos;t have one?"/>
+<node CREATED="1473780668025" ID="ID_1397679606" MODIFIED="1473780674165" TEXT="Check their inventory and replace it?"/>
+<node CREATED="1473780675273" ID="ID_1292870095" MODIFIED="1473780698621" TEXT="What if they stored it in a box somewhere?"/>
+</node>
+</node>
+</node>
+</node>
+<node CREATED="1473779739601" ID="ID_1129327386" MODIFIED="1473779867733" TEXT="from other world (including from nether) portals">
+<node CREATED="1473779760681" ID="ID_453209071" MODIFIED="1473779786477" TEXT="do not work if world has been reclaimed"/>
+</node>
+<node CREATED="1473780294697" ID="ID_1548407758" MODIFIED="1473780298717" TEXT="remove QCLocation">
+<node CREATED="1473780299873" ID="ID_1150194141" MODIFIED="1473780304725" TEXT="It&apos;s too messy">
+<node CREATED="1473780305873" ID="ID_1071834436" MODIFIED="1473780310037" TEXT="locations pointing to the same place"/>
+<node CREATED="1473780317137" ID="ID_1459154536" MODIFIED="1473780330334" TEXT="having to clean up locations everytime we delete a visited world or portal link"/>
+<node CREATED="1473780330609" ID="ID_1775631448" MODIFIED="1473780338997" TEXT="extra joins to find portal links referencing the same place"/>
+</node>
+</node>
+<node CREATED="1473780476513" ID="ID_198195587" MODIFIED="1473780493485" TEXT="Portals need to be created at chosen block, not &quot;nearby&quot;">
+<node CREATED="1473780341057" ID="ID_841562490" MODIFIED="1473780358702" TEXT="portal representatitive location now min corner">
+<node CREATED="1473780360537" ID="ID_1264874952" MODIFIED="1473780373677" TEXT="Otherwise different portals of different sizes will have different locations"/>
+</node>
+<node CREATED="1473780409457" ID="ID_498453880" MODIFIED="1473780513101" TEXT="What about all portals have odd width?">
+<node CREATED="1473780500074" ID="ID_1079092045" MODIFIED="1473780518189" TEXT="Then we can still create the portal based on the chosen block"/>
+<node CREATED="1473780520457" ID="ID_860420728" MODIFIED="1473780529397" TEXT="And teleportation won&apos;t be so painful"/>
+</node>
+</node>
+<node CREATED="1473780724769" ID="ID_1071776257" MODIFIED="1473781131094" TEXT="people spawning in nether">
+<node CREATED="1473780730554" ID="ID_1277777876" MODIFIED="1473780740605" TEXT="hard to survive in the nether">
+<node CREATED="1473780742689" ID="ID_1491446246" MODIFIED="1473781145357" TEXT="give them a welcoming back of iron tools, weapons, etc">
+<node CREATED="1473781149449" ID="ID_1004443840" MODIFIED="1473781833236" TEXT="not too good, but not so bad they have to give up"/>
+<node CREATED="1473781736850" ID="ID_1286864581" MODIFIED="1473781748014" TEXT="gives them a reason to keep killing themselves"/>
+<node CREATED="1473781748322" ID="ID_1791198353" MODIFIED="1473781768174" TEXT="If they spawn somewhere else... but still, yes a problem"/>
+</node>
+<node CREATED="1473781834474" ID="ID_1878465487" MODIFIED="1473781894694" TEXT="give them a magic device that gives them information of where portals, other people, etc. are when &quot;used&quot;?"/>
+</node>
+<node CREATED="1473781157473" ID="ID_292790336" MODIFIED="1473781165094" TEXT="can&apos;t find living people easily">
+<node CREATED="1473781167169" ID="ID_1216739459" MODIFIED="1473781214717" TEXT="Automatic messaging system indicating direction of new portals">
+<node CREATED="1473781215666" ID="ID_1031207668" MODIFIED="1473781220085" TEXT="Have to wait for a portal"/>
+<node CREATED="1473781220777" ID="ID_435292919" MODIFIED="1473781240599" TEXT="compass doesn&apos;t work"/>
+</node>
+<node CREATED="1473781670010" ID="ID_1794852017" MODIFIED="1473781679494" TEXT="spawn near portals?">
+<node CREATED="1473781681834" ID="ID_804915481" MODIFIED="1473781682814" TEXT="evil"/>
+<node CREATED="1473782032674" ID="ID_828092991" MODIFIED="1473782036718" TEXT="too easy I think"/>
+<node CREATED="1473782043674" ID="ID_1949293140" MODIFIED="1473782049974" TEXT="maybe a certain distance, though, would be ok"/>
+</node>
+</node>
+<node CREATED="1473782071266" ID="ID_1579837478" MODIFIED="1473782089350" TEXT="people spawning in nether shouldn&apos;t happen too often, so we&apos;ll make this future"/>
+</node>
+<node CREATED="1473780870545" ID="ID_1939626376" MODIFIED="1473780885981" TEXT="nether portals should have a ceiling to prevent falling lava"/>
+</node>
+<node CREATED="1473329224300" ID="ID_999690107" MODIFIED="1473329225537" TEXT="portals">
+<node CREATED="1473344962057" ID="ID_224671769" MODIFIED="1473759613455" TEXT="each user gets a special portal key. when a portal is made, this key must be nearby">
+<node CREATED="1473345017233" ID="ID_596003341" MODIFIED="1473345050380" TEXT="Portals made in the nether with this block will only go to the world of the portal block"/>
+<node CREATED="1473759759963" ID="ID_365677963" MODIFIED="1473759788711" TEXT="This prevents a random user from opening up a portal to hell and letting other random users inside the world">
+<node CREATED="1473759789924" ID="ID_1835980555" MODIFIED="1473759799591" TEXT="The user would have to be coaxed to give up their portal key"/>
+</node>
+<node CREATED="1473764869141" ID="ID_1817584664" MODIFIED="1473764879817" TEXT="Portal keys are associated with visited world, not actual world">
+<node CREATED="1473764881525" ID="ID_1436586991" MODIFIED="1473764897281" TEXT="When world is reused, portal key from old world no longer works"/>
+</node>
+</node>
+<node CREATED="1473759623867" ID="ID_1924238193" MODIFIED="1473759665815" TEXT="portals from each world go only to one &quot;nether spawn point&quot; for that world">
+<node CREATED="1473759666907" ID="ID_471626626" MODIFIED="1473777788804" TEXT="This way, someone in the nether can control the world nether portals and become &quot;king of the nether&quot;">
+<node CREATED="1473759700867" ID="ID_45020791" MODIFIED="1473759743199" TEXT="By strangling the portal to the nether, the world will slowly die, since newbies will run out, and souls that are lost cannot be regained"/>
+</node>
+</node>
+<node CREATED="1473759862315" ID="ID_581196899" MODIFIED="1473759877175" TEXT="portals from nether can be created, too, as long as a player has a portal key">
+<node CREATED="1473759878451" ID="ID_242091547" MODIFIED="1473759904903" TEXT="This means that losing a portal key can be dangerous"/>
+</node>
+</node>
+<node CREATED="1473763933293" ID="ID_1457528766" MODIFIED="1473763933993" TEXT="nether">
+<node CREATED="1473763752189" ID="ID_1557638101" MODIFIED="1473763773017" TEXT="when dying in nether, with souls left, souls should drop and player transported back to world">
+<node CREATED="1473763775173" ID="ID_1708841129" MODIFIED="1473763830201" TEXT="All souls in inventory should drop">
+<node CREATED="1473763831285" ID="ID_1233429313" MODIFIED="1473763902668">
+<richcontent TYPE="NODE"><html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      People may decide to visit nether with only one soul in inventory.&#160;So if that player drops no souls, killing them has no value (and we want killing people in the nether to be valuable)
+    </p>
+  </body>
+</html></richcontent>
+</node>
+</node>
+</node>
+</node>
+<node CREATED="1473764906573" ID="ID_1331054879" MODIFIED="1473764908289" TEXT="world reuse">
+<node CREATED="1473764909365" ID="ID_75196820" MODIFIED="1473764923689" TEXT="abandonment">
+<node CREATED="1473764925061" ID="ID_829875226" MODIFIED="1473764933625" TEXT="Occurs when all of the following">
+<node CREATED="1473764934670" ID="ID_974322471" MODIFIED="1473764944138" TEXT="no portals exist to other worlds"/>
+</node>
+</node>
+</node>
+<node CREATED="1473763557829" ID="ID_760795941" MODIFIED="1473763559425" TEXT="manual">
+<node CREATED="1473763560637" ID="ID_508662675" MODIFIED="1473763571017" TEXT="Subjects">
+<node CREATED="1473764026101" ID="ID_1519681681" MODIFIED="1473764027658" TEXT="pvp">
+<node CREATED="1473764028773" ID="ID_1506918180" MODIFIED="1473764031473" TEXT="on, always"/>
+<node CREATED="1473764031845" ID="ID_1837632303" MODIFIED="1473764043985" TEXT="find a world with nice people, or create your own and only allow nice people"/>
+</node>
+<node CREATED="1473763572165" ID="ID_1498478071" MODIFIED="1473763582745" TEXT="semi-perma death">
+<node CREATED="1473763631141" ID="ID_1111254238" MODIFIED="1473763632625" TEXT="souls"/>
+</node>
+<node CREATED="1473763636541" ID="ID_713038597" MODIFIED="1473763638161" TEXT="nether">
+<node CREATED="1473763640949" ID="ID_412189619" MODIFIED="1473763650769" TEXT="souls drop when player dies"/>
+</node>
+<node CREATED="1473763583013" ID="ID_1767177315" MODIFIED="1473763584465" TEXT="griefers">
+<node CREATED="1473763964005" ID="ID_748733712" MODIFIED="1473763977139" TEXT="kill the griefer and he can probably never come back"/>
+<node CREATED="1473763977733" ID="ID_100214371" MODIFIED="1473764012137" TEXT="die and the griefer can chase you, so either kill him, hide or hope he stays in the same living world and doesn&apos;t follow you"/>
+</node>
+<node CREATED="1473763584901" ID="ID_214638953" MODIFIED="1473763611956" TEXT="portals">
+<node CREATED="1473763624846" ID="ID_555212777" MODIFIED="1473763628889" TEXT="portal keys"/>
+<node CREATED="1473763620989" ID="ID_229375727" MODIFIED="1473763622857" TEXT="to nether"/>
+<node CREATED="1473763591949" ID="ID_362344784" MODIFIED="1473763593721" TEXT="from nether"/>
+<node CREATED="1473763594197" ID="ID_435025403" MODIFIED="1473763599633" TEXT="multiple portals to nether"/>
+<node CREATED="1473763600572" ID="ID_1630882486" MODIFIED="1473763604569" TEXT="destroying portals"/>
+</node>
+<node CREATED="1473764057069" ID="ID_714860943" MODIFIED="1473764060257" TEXT="ancient worlds">
+<node CREATED="1473764061309" ID="ID_1241853049" MODIFIED="1473764074993" TEXT="will be revisitable after abandoned"/>
+</node>
+</node>
+</node>
+<node CREATED="1473763489445" ID="ID_673670273" MODIFIED="1473763490433" TEXT="testing">
+<node CREATED="1473763491637" ID="ID_92793187" MODIFIED="1473763526865" TEXT="most populated world gets spawned in first"/>
 </node>
 </node>
 </node>

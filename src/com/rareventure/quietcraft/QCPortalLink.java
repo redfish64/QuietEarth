@@ -102,14 +102,27 @@ public class QCPortalLink {
         this.visitedWorldId2 = visitedWorldId2;
     }
 
+    /**
+     * Returns the other location of a portal link.
+     * @param wm
+     * @param l must be the representative location of the portal
+     * @return
+     */
     public Location getOtherLoc(WorldManager wm, Location l) {
         QCLocation l1 = getQCLoc1();
 
         if(l1.isAt(l) && wm.getQCVisitedWorld(l.getWorld().getName()).getId() == getVisitedWorldId1())
-            return getQCLoc2().toLocation(
-                    Bukkit.getWorld(wm.getQCVisitedWorld(visitedWorldId2).getName()));
+            return getQCLoc2().toLocation(getWorld2(wm));
 
-        return l;
+        return l1.toLocation(getWorld1(wm));
+    }
+
+    private World getWorld1(WorldManager wm) {
+        return Bukkit.getWorld(wm.getQCVisitedWorld(visitedWorldId1).getName());
+    }
+
+    private World getWorld2(WorldManager wm) {
+        return Bukkit.getWorld(wm.getQCVisitedWorld(visitedWorldId2).getName());
     }
 
     public int getId() {

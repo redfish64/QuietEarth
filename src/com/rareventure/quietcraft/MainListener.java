@@ -87,11 +87,6 @@ public class MainListener implements Listener {
     @EventHandler
     public void onBlockPhysicsEvent(BlockPhysicsEvent e)
     {
-        if(e.getChangedType() == Material.PORTAL || e.getBlock().getType() == Material.PORTAL)
-        {
-            e.setCancelled(true);
-            Bukkit.getLogger().info("HACK CANCELING ALL PORTAL PHYSIC EVENTS "+e.getBlock());
-        }
-
+        qcp.wm.onBlockPhysicsEvent(e);
     }
 }

@@ -134,7 +134,7 @@ public class PlayerManager {
 
                 Location spawnLocation = Bukkit.getWorld(w.getName()).getSpawnLocation();
                 player.teleport(spawnLocation);
-                giveInitialPackageToPlayer(player, SOULS_PER_REBIRTH, true);
+                giveInitialPackageToPlayer(player, player.getWorld(), SOULS_PER_REBIRTH, true);
 
                 addToPlayerLog(qcPlayer, QCPlayerLog.Action.JOIN);
             }
@@ -161,9 +161,10 @@ public class PlayerManager {
     /**
      * Gives the player their initial items when they die or join a world
      * @param player
+     * @param world
      * @param soulCount souls remaining
      */
-    private void giveInitialPackageToPlayer(Player player, int soulCount, boolean isFirstAppearance) {
+    private void giveInitialPackageToPlayer(Player player, World world, int soulCount, boolean isFirstAppearance) {
         Inventory i = player.getInventory();
         i.clear();
 
@@ -172,7 +173,7 @@ public class PlayerManager {
             ItemStack is = new ItemStack(PORTAL_KEY_MATERIAL);
             ItemMeta im = is.getItemMeta();
 
-            im.setDisplayName(player.getWorld().getName()+PORTAL_KEY_DISPLAY_NAME_ENDING);
+            im.setDisplayName(world.getName()+PORTAL_KEY_DISPLAY_NAME_ENDING);
             im.setLore(PORTAL_KEY_LORE);
 
             is.setItemMeta(im);
@@ -243,7 +244,7 @@ public class PlayerManager {
                 else
                     p.sendMessage("You can stop now... You have "+(soulCount)+" souls left.");
 
-                giveInitialPackageToPlayer(p,soulCount, false);
+                giveInitialPackageToPlayer(p, p.getWorld() , soulCount, false);
                 db.commitTransaction();
             } finally {
                 db.endTransaction();
@@ -301,10 +302,12 @@ public class PlayerManager {
         }
         else
         {
-            giveInitialPackageToPlayer(p,SOULS_PER_REBIRTH, true);
+            World spawnedWorld = Bukkit.getWorld(vw.getName());
+
+            giveInitialPackageToPlayer(p,spawnedWorld, SOULS_PER_REBIRTH, true);
             p.sendMessage("You have been reborn into " + vw.getName());
 
-            spawnLocation = Bukkit.getWorld(vw.getName()).getSpawnLocation();
+            spawnLocation = vw.getSpawnLocation().toLocation(spawnedWorld);
         }
 
 
