@@ -49,9 +49,9 @@ public class PlayerManager {
     }
 
     public void onPlayerDeath(Player p, PlayerDeathEvent e) {
-        EbeanServer db = qcp.db;
+        EbeanServer db = QuietCraftPlugin.db;
 
-        if(WorldManager.isNetherWorld(p.getWorld().getName())) {
+        if(WorldUtil.isNetherWorld(p.getWorld().getName())) {
             //in the nether, souls aren't removed from inventory (are collectable), and the player
             //loses all their souls
             QCPlayer qcPlayer = DbUtil.getQCPlayer(p.getUniqueId());
@@ -102,9 +102,7 @@ public class PlayerManager {
     }
 
     private boolean isSoulMeta(ItemMeta im) {
-        if(im.getDisplayName().equals(SOUL_DISPLAY_NAME))
-            return true;
-        return false;
+        return im.getDisplayName().equals(SOUL_DISPLAY_NAME);
     }
 
     public QCPlayer getQCPlayer(Player player) {
@@ -159,10 +157,10 @@ public class PlayerManager {
     }
 
     /**
-     * Gives the player their initial items when they die or join a world
-     * @param player
-     * @param world
+     * Gives the player their initial items when they die or join a visited world
      * @param soulCount souls remaining
+     * @param isFirstAppearance true if this is the first time the player has appeared in
+     *                          this visited world
      */
     private void giveInitialPackageToPlayer(Player player, World world, int soulCount, boolean isFirstAppearance) {
         Inventory i = player.getInventory();
@@ -255,8 +253,7 @@ public class PlayerManager {
             if(bedSpawnLocation != null && bedSpawnLocation.getWorld() == p.getWorld())
                 return bedSpawnLocation;
 
-            Location spawnLocation = Bukkit.getWorld(vw.getName()).getSpawnLocation();
-            return spawnLocation;
+            return Bukkit.getWorld(vw.getName()).getSpawnLocation();
         }
 
         db.beginTransaction();
@@ -284,7 +281,7 @@ public class PlayerManager {
 
         if(vw == qcp.wm.netherVisitedWorld) {
             //we only want this message to appear the first time the player entered the nether
-            if(!qcp.wm.isNetherWorld(p.getWorld().getName()))
+            if(!WorldUtil.isNetherWorld(p.getWorld().getName()))
                 p.sendMessage("The world slowly comes into place. You blink twice... wait a minute, where *ARE* you?");
             //TODO 3 maybe put up a message indicating how much time before an abandoned world can be
             //revisited
@@ -307,7 +304,7 @@ public class PlayerManager {
             giveInitialPackageToPlayer(p,spawnedWorld, SOULS_PER_REBIRTH, true);
             p.sendMessage("You have been reborn into " + vw.getName());
 
-            spawnLocation = vw.getSpawnLocation().toLocation(spawnedWorld);
+            spawnLocation = vw.getSpawnLocation(spawnedWorld);
         }
 
 
@@ -322,7 +319,7 @@ public class PlayerManager {
      * @return players within max distance of the location
      */
     public static List<Player> getNearbyPlayers(Location l, int maxDistance) {
-        List<Player> players = new ArrayList<Player>();
+        List<Player> players = new ArrayList<>();
         for(Player p : Bukkit.getOnlinePlayers())
         {
             if(p.getLocation().distance(l) < maxDistance)
@@ -350,6 +347,8 @@ public class PlayerManager {
         return null;
     }
 
+    //TODO 2 create some reasonable logging messages so when we go alpha we'll have more to go on
+
     /**
      * Called when a player is about to be teleported by a portal
      */
@@ -361,17 +360,19 @@ public class PlayerManager {
         }
 
         Location l = WorldUtil.getRepresentativePortalLocation(b);
+        Bukkit.getLogger().info("Player portal location"+l);
 
         QCPortalLink pl = qcp.portalManager.getPortalLinkForLocation(l);
+        Bukkit.getLogger().info("Portal link for location " +pl);
 
         if(pl == null) {
-            //TODO 2 destroy it
-            //WorldUtil.destroyPortal(l.getWorld(),b);
+            Bukkit.getLogger().info("Could not find link for " +pl);
+            WorldUtil.destroyPortal(l, false);
             return;
         }
 
         Location otherLocation = pl.getOtherLoc(qcp.wm,l);
-        event.getPlayer().teleport(otherLocation);
+        event.getPlayer().teleport(WorldUtil.findPortalTeleportPlaceForUser(otherLocation));
         event.setCancelled(true);
     }
 }

@@ -70,20 +70,10 @@ public class QuietCraftPlugin extends JavaPlugin {
         list.add(QCPortalLink.class);
         list.add(QCWorld.class);
         list.add(QCVisitedWorld.class);
-        list.add(QCLocation.class);
         return list;
     }
 
-    public static boolean anonymousCheck(CommandSender sender) {
-        if (!(sender instanceof Player)) {
-            sender.sendMessage("Cannot execute that command, I don't know who you are!");
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-//    public static Player getPlayer(CommandSender sender, String[] args, int index) {
+    //    public static Player getPlayer(CommandSender sender, String[] args, int index) {
 //        if (args.length > index) {
 //            List<Player> players = sender.getServer().matchPlayer(args[index]);
 //

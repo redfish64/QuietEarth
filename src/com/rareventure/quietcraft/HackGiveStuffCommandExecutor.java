@@ -17,7 +17,6 @@ public class HackGiveStuffCommandExecutor implements CommandExecutor {
             Player player = (Player) sender;
 
             Inventory i = player.getInventory();
-            i.addItem(new ItemStack(Material.FLINT_AND_STEEL, 1));
             i.addItem(new ItemStack(Material.TORCH, 64));
             i.addItem(new ItemStack(Material.DIAMOND_PICKAXE, 1));
             i.addItem(new ItemStack(Material.COMPASS, 1));
@@ -35,6 +34,7 @@ public class HackGiveStuffCommandExecutor implements CommandExecutor {
             i.addItem(new ItemStack(Material.COMPASS, 1));
             i.addItem(new ItemStack(Material.COMPASS, 1));
             i.addItem(new ItemStack(Material.COMPASS, 1));
+            i.addItem(new ItemStack(Material.FLINT_AND_STEEL, 1));
 
             sender.sendMessage("Here you go...");
         } else {

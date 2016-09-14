@@ -15,7 +15,7 @@ public class HackCreatePortal implements CommandExecutor {
             Player player = (Player) sender;
 
             Location l = player.getLocation();
-            WorldUtil.constructPortal(l.clone().add(4,0,0),5,6, true, false);
+            WorldUtil.constructPortal(l.clone().add(4,0,0),5,6, true, false,false);
         } else {
             sender.sendMessage("You can only perform this command as a player");
         }

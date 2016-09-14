@@ -33,6 +33,10 @@ public class BlockArea
         }
     }
 
+    /**
+     * Expands the block area to encompass given location.
+     * Note the value is assumed to be within a 1x1x1 cube which is then added, it is *NOT* a point.
+     */
     public void expandArea(Location location) {
         w = location.getWorld();
         minX = Math.min(location.getBlockX(), minX);
@@ -55,8 +59,8 @@ public class BlockArea
     /**
      * @return an array of all the blocks within the blockarea
      */
-    public ArrayList<BlockState> getBlocks(World w) {
-        ArrayList<BlockState> bs = new ArrayList<>((maxX - minX+1)*(maxY-minY+1)*(maxZ-minZ+1));
+    public ArrayList<Block> getBlocks(World w) {
+        ArrayList<Block> bs = new ArrayList<>((maxX - minX+1)*(maxY-minY+1)*(maxZ-minZ+1));
 
         for(int x = minX; x < maxX; x++)
         {
@@ -64,7 +68,7 @@ public class BlockArea
             {
                 for(int z = minZ; z < maxZ; z++)
                 {
-                    bs.add(w.getBlockAt(x,y,z).getState());
+                    bs.add(w.getBlockAt(x,y,z));
                 }
             }
         }
@@ -162,5 +166,12 @@ public class BlockArea
         return block.getX() >= minX && block.getX() < maxX
                 && block.getY() >= minY && block.getY() < maxY
                 && block.getZ() >= minZ && block.getZ() < maxZ;
+    }
+
+    public Location getBlockCenter() {
+        return new Location(w,
+                Math.floor(((double)minX+maxX)*.5),
+                Math.floor(((double)minY+maxY)*.5),
+                Math.floor(((double)minZ+maxZ)*.5));
     }
 }

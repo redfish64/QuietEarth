@@ -52,7 +52,7 @@ public class WorldManager {
     /**
      * The amount of time before we start recycling old worlds as new
      */
-    private static final long ABANDONED_WORLD_CUTOFF_MS = 1000l * 60l * 60l * 24l * 30l
+    private static final long ABANDONED_WORLD_CUTOFF_MS = 1000L * 60L * 60L * 24L * 30L
             ;
 
     //TODO 2.5 saying "hello sailor" should kill player and send them to the nether (they'll respawn in the next
@@ -89,7 +89,7 @@ public class WorldManager {
     public WorldManager(QuietCraftPlugin qcp) {
         this.qcp = qcp;
 
-        visitedWorlds = new ArrayList<QCVisitedWorld>();
+        visitedWorlds = new ArrayList<>();
         visitedWorlds.addAll(qcp.getDatabase().find(QCVisitedWorld.class).findList());
 
         for (QCVisitedWorld vw : visitedWorlds) {
@@ -163,11 +163,12 @@ public class WorldManager {
 
                     vw.setActive(false);
                     db.update(vw);
-                    QCVisitedWorld copy = vw.createCopy(
-                            createRandomSpawnQCLocation(getWorld(vw)),
-                            createRandomNetherSpawnQCLocation());
-                    copy.setActive(true);
-                    db.insert(copy);
+                    //TODO 2 FIXME
+//                    QCVisitedWorld copy = vw.createCopy(
+//                            createRandomSpawnQCLocation(getWorld(vw)),
+//                            createRandomNetherSpawnQCLocation());
+//                    copy.setActive(true);
+//                    db.insert(copy);
                 }
             }
             db.commitTransaction();
@@ -187,7 +188,7 @@ public class WorldManager {
 
         //finds out the worlds the player already visited
         Set<SqlRow> playerVisitedWorldIdSqlRows = q.findSet();
-        Set<Integer> playerVisitedWorldIds = new HashSet<Integer>(playerVisitedWorldIdSqlRows.size());
+        Set<Integer> playerVisitedWorldIds = new HashSet<>(playerVisitedWorldIdSqlRows.size());
         for (SqlRow sr : playerVisitedWorldIdSqlRows) {
             playerVisitedWorldIds.add(sr.getInteger("visited_world_id"));
         }
@@ -251,8 +252,8 @@ public class WorldManager {
     }
 
     public void setupForNewInstall() {
-        QCWorld w;
-        netherVisitedWorld = new QCVisitedWorld(1,w = new QCWorld(1, WorldUtil.NETHER_WORLD_NAME),null,null,true);
+        QCWorld w = new QCWorld(1, WorldUtil.NETHER_WORLD_NAME);
+        netherVisitedWorld = new QCVisitedWorld(1,w.getId(),0,0,0,0,0,0,true);
         qcp.getDatabase().insert(w);
         qcp.getDatabase().insert(netherVisitedWorld);
         visitedWorlds.add(netherVisitedWorld);
@@ -294,11 +295,11 @@ public class WorldManager {
 
         qcp.getDatabase().insert(qcw);
 
-        QCLocation spawnLocation = createRandomSpawnQCLocation(w);
+        Location spawnLocation = WorldUtil.getRandomSpawnLocation(w);
 
         QCVisitedWorld vw = new QCVisitedWorld(id, qcw,
                 spawnLocation,
-                createRandomNetherSpawnQCLocation(), true);
+                createRandomNetherSpawnLocation(), true);
         qcp.getDatabase().insert(vw);
 
         visitedWorlds.add(vw);
@@ -313,17 +314,10 @@ public class WorldManager {
     }
 
     /**
-     * Creates a random spawn loacation in the nether world.
-     * Saves the location to the db
+     * Creates a random spawn location in the nether world.
      *
      * @return created location
      */
-    private QCLocation createRandomNetherSpawnQCLocation() {
-        World w = getWorld(netherVisitedWorld);
-
-        return createRandomSpawnQCLocation(w);
-    }
-
     public Location createRandomNetherSpawnLocation() {
         World w = getWorld(netherVisitedWorld);
 
@@ -334,16 +328,6 @@ public class WorldManager {
         return Bukkit.getWorld(vw.getName());
     }
 
-    /**
-     * Finds a semi safe place to put a spawn location. Saves location to database.
-     * @return
-     */
-    private QCLocation createRandomSpawnQCLocation(World w) {
-        QCLocation qcl = new QCLocation(WorldUtil.getRandomSpawnLocation(w));
-        qcp.db.insert(qcl);
-
-        return qcl;
-    }
 
     //TODO 3 allow souls to be split into soul fragments, and those split again
     //to make a soul economy
@@ -366,79 +350,72 @@ public class WorldManager {
             return;
         }
 
+        QCPlayer qcPlayer = qcp.pm.getQCPlayer(playerAndPortalKey.getKey());
+
         BlockArea ba = WorldUtil.getPortalArea(event.getBlocks());
         Location portalLocation = WorldUtil.getRepresentativePortalLocation(ba);
 
         //if we are creating a portal in the nether, we choose the world to go to
         //based on the portal key used.
-        if(isNetherWorld(event.getWorld().getName()))
+        if(WorldUtil.isNetherWorld(event.getWorld().getName()))
         {
             World overWorld = Bukkit.getWorld(getWorldNameForPortalKey(playerAndPortalKey.getValue()));
 
+            // netherworld portals go to a random place in the overworld
+            // (the idea is that getting a portal key from another player is valuable and can
+            //  be used to sneak into the overworld)
             Location overWorldPortalLocation = WorldUtil.getRandomSpawnLocation(overWorld);
 
-            overWorldPortalLocation = constructOverWorldPortal(overWorldPortalLocation, true);
+            constructOverWorldPortal(overWorldPortalLocation, true);
 
-            qcp.db.beginTransaction();
+            QuietCraftPlugin.db.beginTransaction();
             try {
                 //destroy any existing portals that exist in the same spot
                 qcp.portalManager.getPortalLinksForLocation(portalLocation).
-                        stream().forEach(pl -> destroyPortalsForPortalLink(pl));
+                        forEach(this::destroyPortalsForPortalLink);
                 qcp.portalManager.getPortalLinksForLocation(overWorldPortalLocation).
-                        stream().forEach(pl -> destroyPortalsForPortalLink(pl));
+                        forEach(this::destroyPortalsForPortalLink);
 
-                // netherworld portals go to a random place in the overworld
-                // (the idea is that getting a portal key from another player is valuable and can
-                //  be used to sneak into the overworld)
-                QCLocation qcOverworldPortalLocation = createQCLocation(overWorldPortalLocation);
-
-                QCLocation qcPortalLocation = createQCLocation(portalLocation);
 
                 //create a link from the current location to the nether world.
                 QCPortalLink pl =
-                        new QCPortalLink(netherVisitedWorld.getId(), qcPortalLocation.getId(),
-                                qcp.pm.getQCPlayer(playerAndPortalKey.getKey()).getVisitedWorldId(),
-                                qcOverworldPortalLocation.getId());
-                qcp.db.save(pl);
+                        new QCPortalLink(netherVisitedWorld.getId(), portalLocation,
+                                qcPlayer.getVisitedWorldId(),
+                                overWorldPortalLocation);
+                QuietCraftPlugin.db.save(pl);
 
-                qcp.db.commitTransaction();
+                QuietCraftPlugin.db.commitTransaction();
             }
             finally {
-                qcp.db.endTransaction();
+                QuietCraftPlugin.db.endTransaction();
             }
 
             return;
         }//if creating portal from nether world
 
-        QCVisitedWorld visitedWorld = qcp.pm.getQCPlayer(playerAndPortalKey.getKey()).getVisitedWorld();
+        QCVisitedWorld visitedWorld = qcPlayer.getVisitedWorld();
 
-        qcp.db.beginTransaction();
+        QuietCraftPlugin.db.beginTransaction();
         try {
-            QCLocation qcPortalLocation = createQCLocation(portalLocation);
-
             Location netherWorldLocation =
-                    DbUtil.getObject(QCLocation.class, visitedWorld.getNetherLocation().getId()).
-                            toLocation(WorldUtil.getNetherWorld());
+                    visitedWorld.getNetherLocation(WorldUtil.getNetherWorld());
 
             //since we don't want to try and make sure that a portal generated at a particular location
             //will be exactly at that location, we allow the portal code to move it a little bit
-            netherWorldLocation = constructNetherWorldPortal(netherWorldLocation, true);
+            constructNetherWorldPortal(netherWorldLocation, true);
 
-            QCLocation qcNetherWorldLocation= createQCLocation(netherWorldLocation);
-
-
-                    //create a link from the current location to the nether world.
+            //create a link from the current location to the nether world.
             QCPortalLink pl = new QCPortalLink(
-                    qcp.pm.getQCPlayer(playerAndPortalKey.getKey()).getVisitedWorldId(),
-                    qcPortalLocation.getId(),
+                    qcPlayer.getVisitedWorldId(),
+                    portalLocation,
                     netherVisitedWorld.getId(),
-                    qcNetherWorldLocation.getId());
-            qcp.db.save(pl);
+                    netherWorldLocation);
+            QuietCraftPlugin.db.save(pl);
 
-            qcp.db.commitTransaction();
+            QuietCraftPlugin.db.commitTransaction();
         }
         finally {
-            qcp.db.endTransaction();
+            QuietCraftPlugin.db.endTransaction();
         }
     }
 //TODO 2 make sure that players spawn in populated worlds first!
@@ -450,50 +427,36 @@ public class WorldManager {
         WorldUtil.destroyPortal(pl.getLoc1(),true);
         WorldUtil.destroyPortal(pl.getLoc2(),true);
 
-        qcp.db.delete(pl.getQCLoc1());
-        qcp.db.delete(pl.getQCLoc2());
-        qcp.db.delete(pl);
+        QuietCraftPlugin.db.delete(pl);
     }
 
     /**
      * Creates a portal for the nether world
-     * @return representative location of portal
      */
-    private Location constructNetherWorldPortal(Location netherWorldLocation, boolean active) {
+    private void constructNetherWorldPortal(Location netherWorldLocation, boolean active) {
         int width = MathUtil.normalRandomInt(NETHER_PORTAL_WIDTH_PARAMS);
 
-        Location l = WorldUtil.constructPortal(netherWorldLocation, width,
+        WorldUtil.constructPortal(netherWorldLocation, width,
                 (int)Math.round(width* PORTAL_HEIGHT_TO_WIDTH),
                 true, //TODO 3.5 if we let this be false, portal blocks face sideways
                 //Math.random() < .5,
-                active);
-        return l;
+                active, true //we add ceilings to nether worlds incase there is lava falling down
+                // from the ceiling. Since each world only gets one nether location that can't be
+                // moved, we want to make it extra safe
+        );
     }
 
     /**
      * Creates a portal for the overworld
-     * @return representative location of portal
      */
-    private Location constructOverWorldPortal(Location overWorldLocation, boolean active) {
+    private void constructOverWorldPortal(Location overWorldLocation, boolean active) {
         int width = MathUtil.normalRandomInt(OVERWORLD_PORTAL_WIDTH_PARAMS);
 
-        Location l = WorldUtil.constructPortal(overWorldLocation, width,
+        WorldUtil.constructPortal(overWorldLocation, width,
                 (int)Math.round(width* PORTAL_HEIGHT_TO_WIDTH),
                 true, //TODO 3.5 if we let this be false, portal blocks face sideways
                 //Math.random() < .5,
-                active);
-        return l;
-    }
-
-    private QCLocation createQCLocation(Location portalLocation) {
-        QCLocation qcL = new QCLocation(portalLocation);
-        qcp.db.save(qcL);
-
-        return qcL;
-    }
-
-    public static boolean isNetherWorld(String worldName) {
-        return worldName.equals(WorldUtil.NETHER_WORLD_NAME);
+                active, false);
     }
 
     private static String getWorldNameForPortalKey(ItemStack portalKey) {
@@ -524,34 +487,21 @@ public class WorldManager {
             ItemStack portalKey = PlayerManager.getPortalKey(p);
 
             if(portalKey != null)
-                return new AbstractMap.SimpleEntry<Player, ItemStack>(p, portalKey);
+                return new AbstractMap.SimpleEntry<>(p, portalKey);
         }
 
         return null;
     }
 
-    /**
-     * List of portal areas that were recently constructed (or being constructed)
-     * automatically. We keep track of this so that the block physics code doesn't
-     * remove nether material blocks as we add them
-     */
-    private List<BlockArea> recentConstructedPortalAreas = new ArrayList<>();
-
-    /**
-     * The last time a portal began automatic construction
-     */
-    private long lastPortalConstructionMS;
-
     public void onBlockPhysicsEvent(BlockPhysicsEvent e) {
         clearStaleConstructedPortals();
 
         if(e.getBlock().getType() == Material.PORTAL) {
-            synchronized (recentConstructedPortalAreas) {
-                recentConstructedPortalAreas.stream().
-                        forEach(ba -> {
-                            if (ba.containsBlock(e.getBlock()))
-                                e.setCancelled(true);
-                        });
+            synchronized (WorldUtil.recentConstructedPortalAreas) {
+                WorldUtil.recentConstructedPortalAreas.forEach(ba -> {
+                    if (ba.containsBlock(e.getBlock()))
+                        e.setCancelled(true);
+                });
             }
         }
         //TODO 2 when a portal is destroyed, its corresponding link should be destroyed too
@@ -569,10 +519,10 @@ public class WorldManager {
      * stop blocking the event
      */
     private void clearStaleConstructedPortals() {
-        synchronized(recentConstructedPortalAreas) {
+        synchronized(WorldUtil.recentConstructedPortalAreas) {
             //we give them one second
-            if (lastPortalConstructionMS + 1000 < System.currentTimeMillis())
-                recentConstructedPortalAreas.clear();
+            if (WorldUtil.lastPortalConstructionMS + 1000 < System.currentTimeMillis())
+                WorldUtil.recentConstructedPortalAreas.clear();
         }
     }
 }

@@ -4,6 +4,8 @@ package com.rareventure.quietcraft;
 import com.avaje.ebean.event.BulkTableEvent;
 import com.avaje.ebean.validation.NotNull;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.World;
 
 import javax.persistence.*;
 
@@ -28,18 +30,15 @@ public class QCVisitedWorld {
     private int worldId;
 
     /**
-     * Where new users spawn. Nullable for the "nether" visited world
+     * Where new users spawn. 0,0,0 for the "nether" visited world
      */
-    private int spawnLocationId;
+    private int spawnLocX,spawnLocY,spawnLocZ;
 
     /**
      * Where portals go to in the nether. We have a static location for this, so that nether
      * people can monitor their borders, too, just like overworld people.
-     * <p>
-     * Nullable for the "nether" visited world.
-     * </p>
      */
-    private int netherLocationId;
+    private int netherLocX,netherLocY,netherLocZ;
 
     /**
      * If true, the visited world is considered active. There may be only one active visited
@@ -53,21 +52,28 @@ public class QCVisitedWorld {
     public QCVisitedWorld() {
     }
 
-    public QCVisitedWorld(int id, int worldId, int spawnLocationId, int netherLocationId, boolean active) {
+    public QCVisitedWorld(int id, int worldId, int spawnLocX, int spawnLocY, int spawnLocZ, int netherLocX, int netherLocY, int netherLocZ, boolean active) {
         this.id = id;
         this.worldId = worldId;
-        this.spawnLocationId = spawnLocationId;
-        this.netherLocationId = netherLocationId;
+        this.spawnLocX = spawnLocX;
+        this.spawnLocY = spawnLocY;
+        this.spawnLocZ = spawnLocZ;
+        this.netherLocX = netherLocX;
+        this.netherLocY = netherLocY;
+        this.netherLocZ = netherLocZ;
         this.active = active;
     }
 
-    public QCVisitedWorld(int id, QCWorld world, QCLocation spawnLocation, QCLocation netherLocation, boolean active) {
+    public QCVisitedWorld(int id, QCWorld qcw, Location spawnLocation, Location netherSpawnQCLocation,
+                            boolean active) {
         this.id = id;
-        this.worldId = world.getId();
-        if(spawnLocation != null)
-            this.spawnLocationId = spawnLocation.getId();
-        if(netherLocation != null)
-            this.netherLocationId = netherLocation.getId();
+        this.worldId = qcw.getId();
+        this.spawnLocX = spawnLocation.getBlockX();
+        this.spawnLocY = spawnLocation.getBlockY();
+        this.spawnLocZ = spawnLocation.getBlockZ();
+        this.netherLocX = netherSpawnQCLocation.getBlockX();
+        this.netherLocY = netherSpawnQCLocation.getBlockY();
+        this.netherLocZ = netherSpawnQCLocation.getBlockZ();
         this.active = active;
     }
 
@@ -97,31 +103,18 @@ public class QCVisitedWorld {
         this.id = id;
     }
 
-    public QCLocation getSpawnLocation() {
-        return QuietCraftPlugin.db.find(QCLocation.class).where().
-                eq("id", String.valueOf(spawnLocationId)).findUnique();
+    public void setSpawnLocation(int x, int y, int z) {
+        setSpawnLocX(x);
+        setSpawnLocY(y);
+        setSpawnLocZ(z);
     }
 
-    public void setSpawnLocation(QCLocation spawnLocation) {
-        setSpawnLocationId(spawnLocation.getId());
-    }
-
-    public QCLocation getNetherLocation() {
-        return QuietCraftPlugin.db.find(QCLocation.class).where().
-                eq("id", String.valueOf(netherLocationId)).findUnique();
-    }
-
-    public void setNetherLocation(QCLocation netherLocation) {
-        setNetherLocationId(netherLocation.getId());
-    }
-
+    /**
+     * returns world's name
+     * @return
+     */
     public String getName() {
         return getWorld().getName();
-    }
-
-    public QCVisitedWorld createCopy(QCLocation spawnLocation, QCLocation netherSpawnLocation) {
-        return new QCVisitedWorld(0,this.worldId,spawnLocation.getId(),netherSpawnLocation.getId(), active
-        );
     }
 
     public int getWorldId() {
@@ -132,31 +125,66 @@ public class QCVisitedWorld {
         this.worldId = worldId;
     }
 
-    public int getSpawnLocationId() {
-        return spawnLocationId;
+    public int getSpawnLocX() {
+        return spawnLocX;
     }
 
-    public void setSpawnLocationId(int spawnLocationId) {
-        this.spawnLocationId = spawnLocationId;
+    public void setSpawnLocX(int spawnLocX) {
+        this.spawnLocX = spawnLocX;
     }
 
-    public int getNetherLocationId() {
-        return netherLocationId;
+    public int getSpawnLocY() {
+        return spawnLocY;
     }
 
-    public void setNetherLocationId(int netherLocationId) {
-        this.netherLocationId = netherLocationId;
+    public void setSpawnLocY(int spawnLocY) {
+        this.spawnLocY = spawnLocY;
     }
 
-    @Override
-    public String toString() {
-        return "QCVisitedWorld{" +
-                "id=" + id +
-                ", worldId=" + worldId +
-                ", spawnLocationId=" + spawnLocationId +
-                ", netherLocationId=" + netherLocationId +
-                ", active=" + active +
-                '}';
+    public int getSpawnLocZ() {
+        return spawnLocZ;
+    }
+
+    public void setSpawnLocZ(int spawnLocZ) {
+        this.spawnLocZ = spawnLocZ;
+    }
+
+    public int getNetherLocX() {
+        return netherLocX;
+    }
+
+    public void setNetherLocX(int netherLocX) {
+        this.netherLocX = netherLocX;
+    }
+
+    public int getNetherLocY() {
+        return netherLocY;
+    }
+
+    public void setNetherLocY(int netherLocY) {
+        this.netherLocY = netherLocY;
+    }
+
+    public int getNetherLocZ() {
+        return netherLocZ;
+    }
+
+    public void setNetherLocZ(int netherLocZ) {
+        this.netherLocZ = netherLocZ;
+    }
+
+    /**
+     * Returns the nether portal location for this visited world.
+     * <p>Technically we can get world, but usually this is already
+     * known, so to save the work of looking it up, we just ask for it.
+     * </p>
+     */
+    public Location getNetherLocation(World world) {
+        return new Location(world,getNetherLocX(),getNetherLocY(),getNetherLocZ());
+    }
+
+    public Location getSpawnLocation(World spawnedWorld) {
+        return new Location(spawnedWorld,getSpawnLocX(),getSpawnLocY(),getSpawnLocZ());
     }
 }
 

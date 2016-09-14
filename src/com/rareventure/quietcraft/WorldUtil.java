@@ -8,7 +8,9 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
+import org.bukkit.util.Vector;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -47,6 +49,16 @@ public class WorldUtil {
      * Max height to search for an open area in the nether
      */
     private static final int NETHER_WORLD_MAX_HEIGHT = 125;
+    /**
+     * List of portal areas that were recently constructed (or being constructed)
+     * automatically. We keep track of this so that the block physics code doesn't
+     * remove nether material blocks as we add them
+     */
+    static final List<BlockArea> recentConstructedPortalAreas = new ArrayList<>();
+    /**
+     * The last time a portal began automatic construction
+     */
+    static long lastPortalConstructionMS;
 
     public static Block getHighestFreeBlockAt(final int posX, final int posZ, final World world)
     {
@@ -106,7 +118,6 @@ public class WorldUtil {
      *
      * @param l location inside portal
      * @param isXDim True if portal is lined up with the x dimension
-     * @return
      */
     public static BlockArea findPortal(Location l, boolean isXDim) {
         World w = l.getWorld();
@@ -176,6 +187,8 @@ public class WorldUtil {
         {
             ba.swapXZDim();
         }
+
+        Bukkit.getLogger().info("findPortal ba="+ba);
         return ba;
     }
 
@@ -192,17 +205,13 @@ public class WorldUtil {
     {
         boolean alignedWithX = isPortalAlignedWithX(blocks);
 
-        BlockArea portalArea = WorldUtil.findPortal(new BlockArea(blocks).getCenter(), alignedWithX);
-
-        return portalArea;
+        return WorldUtil.findPortal(new BlockArea(blocks).getCenter(), alignedWithX);
     }
 
     /**
      * Gives a bunch of blocks associated with a portal, finds out
      * whether the portal is aligned with the X dimension or the Z dimension
      *
-     * @param blocks
-     * @return
      */
     private static boolean isPortalAlignedWithX(List<Block> blocks) {
         Block b1 = blocks.get(0);
@@ -220,7 +229,7 @@ public class WorldUtil {
 
     public static void destroyPortal(World w, BlockArea portalArea, boolean hasExplosion) {
         portalArea.getBlocks(w).stream().filter(b -> b.getType() == Material.OBSIDIAN).
-                forEach(b -> b.getBlock().setType(Material.SAND));
+                forEach(b -> b.setType(Material.SAND));
 
         if(hasExplosion)
             w.createExplosion(portalArea.getCenter(), DESTROY_PORTAL_EXPLOSION_RATIO
@@ -248,9 +257,8 @@ public class WorldUtil {
      * finds whether it is aligned in x or z
      */
     public static boolean isMaterialXAligned(Block b) {
-        if(b.getRelative(1,0,0).getType() == b.getType() ||
-           b.getRelative(-1,0,0).getType() == b.getType())
-            return true;
+        if((b.getRelative(1, 0, 0).getType() == b.getType()) ||
+                (b.getRelative(-1, 0, 0).getType() == b.getType())) return true;
 
         return false;
     }
@@ -298,15 +306,35 @@ public class WorldUtil {
     }
 
     /**
-     * Creates a portal with a floor.
+     * Creates a portal with a floor, and optionally a ceiling. Also updates
+     * recentConstructedPortalAreas for block area
+     *
      *  @param l center of portal
      * @param w width of portal
      * @param h height of portal
      * @param xAligned if true, portal will be created along the x axis, otherwise along the z axis
      * @param activate if true, the portal will be active (contain PORTAL, not AIR)
      */
-    public static Location constructPortal(Location l, int w, int h, boolean xAligned, boolean activate) {
+    public static void constructPortal(Location l, int w, int h, boolean xAligned, boolean activate
+    ,boolean withCeiling) {
         Block b1 = l.getBlock();
+
+        {
+            BlockArea ba = new BlockArea();
+            if(xAligned)
+            {
+                ba.expandArea(b1.getX() - w / 2, b1.getY() - 1, b1.getZ() - FLOOR_LENGTH);
+                ba.expandArea(b1.getX() + w / 2, b1.getY() + h + 1, b1.getZ() + FLOOR_LENGTH);
+            }
+            else {
+                ba.expandArea(b1.getX() - FLOOR_LENGTH, b1.getY() - 1, b1.getZ() - w / 2);
+                ba.expandArea(b1.getX() + FLOOR_LENGTH, b1.getY() + h + 1, b1.getZ() + w / 2);
+            }
+            addConstructingBlockArea(ba);
+        }
+
+        //only odd sized portals are allowed, since we must center on location
+        if(w % 2 == 0) w++;
 
         for(int x = 0; x < w; x++)
         {
@@ -314,9 +342,9 @@ public class WorldUtil {
             {
                 Block b;
                 if(xAligned)
-                    b = b1.getRelative(x - w/2,y,0);
+                    b = b1.getRelative(x - w/2,y-1,0);
                 else
-                    b = b1.getRelative(0,y,x - w/2);
+                    b = b1.getRelative(0,y-1,x - w/2);
 
                 if(x == 0 || x == w-1 || y == 0 || y == h-1)
                     b.setType(Material.OBSIDIAN);
@@ -344,19 +372,44 @@ public class WorldUtil {
         }
 
         //create a little floor for their tender feeties
-        for(int x = 0; x < w; x++) {
-            for (int z = -FLOOR_LENGTH; z <= FLOOR_LENGTH; z++) {
-                Block b;
-                if(xAligned)
-                    b=b1.getRelative(x - w/2,-1,z);
-                else
-                    b=b1.getRelative(z,-1,x - w/2);
-                b.setType(Material.SANDSTONE);
-            }
+        BlockArea ba = new BlockArea();
+        if(xAligned) {
+            ba.expandArea(b1.getX() - w / 2, b1.getY() - 2, b1.getZ() - FLOOR_LENGTH);
+            ba.expandArea(b1.getX() + w / 2, b1.getY() - 2, b1.getZ() + FLOOR_LENGTH);
+        }
+        else {
+            ba.expandArea(b1.getX() - FLOOR_LENGTH, b1.getY() - 2, b1.getZ() - w / 2);
+            ba.expandArea(b1.getX() + FLOOR_LENGTH, b1.getY() - 2, b1.getZ() + w / 2);
+        }
+        Bukkit.getLogger().info("ba "+ba);
+        Bukkit.getLogger().info("b1 "+b1.getX()+","+b1.getY()+","+b1.getZ());
+
+        ba.getBlocks(b1.getWorld()).forEach(b ->
+                {
+                    Bukkit.getLogger().info("setting sandstone "+b.getX()+","+b.getY()+","+b.getZ());
+                    b.setType(Material.SANDSTONE);
+                });
+
+        if(withCeiling) {
+            ba.minY += h + 1;
+            ba.maxY += h + 1;
+            ba.getBlocks(b1.getWorld()).forEach(b -> b.setType(Material.SANDSTONE));
         }
 
+        assert(WorldUtil.findPortalLocation(l,xAligned).equals(l));
+    }
 
-        return WorldUtil.findPortalLocation(l,xAligned);
+    /**
+     * Adds a block area to the structures currently being constructed.
+     * Any physics events that occur within 1 second of portal blocks within
+     * this construction will be ignored.
+     */
+    private static void addConstructingBlockArea(BlockArea ba) {
+        synchronized (recentConstructedPortalAreas)
+        {
+            recentConstructedPortalAreas.add(ba);
+            lastPortalConstructionMS = System.currentTimeMillis();
+        }
     }
 
     /**
@@ -365,7 +418,7 @@ public class WorldUtil {
      */
     public static Location getRepresentativePortalLocation(BlockArea portal)
     {
-        Location l = portal.getCenter();
+        Location l = portal.getBlockCenter();
 
         l.setY(portal.minY+1);
 
@@ -378,7 +431,12 @@ public class WorldUtil {
     private static Location findPortalLocation(Location l, boolean xAligned) {
         //we add 1 to location because the location is at the base of the portal,
         //and findPortal only works if inside the portal
-        return getRepresentativePortalLocation(findPortal(l.clone().add(0,1,0),xAligned));
+        BlockArea ba = findPortal(l.clone().add(0, 1, 0), xAligned);
+        Location l2 = getRepresentativePortalLocation(ba);
+
+        Bukkit.getLogger().info("findPortalLocation: ba="+ba+" loc "+l+" result "+l2);
+
+        return l2;
     }
 
     public static World getNetherWorld() {
@@ -402,7 +460,6 @@ public class WorldUtil {
 
     /**
      * Finds a semi safe place to put a spawn location.
-     * @return
      */
     public static Location getRandomSpawnLocation(World w) {
         Location loc;
@@ -425,6 +482,69 @@ public class WorldUtil {
         loc.setY(y);
         return loc;
     }
+
+    public static boolean isAt(Location l, int loc1X, int loc1Y, int loc1Z) {
+        return l.getBlockX() == loc1X
+                && l.getBlockY() == loc1Y
+                && l.getBlockZ() == loc1Z;
+    }
+
+    public static boolean isNetherWorld(String worldName) {
+        return worldName.equals(NETHER_WORLD_NAME);
+    }
+
+    /**
+     * Returns a location that is offset from given location so if a user
+     * teleports there, they won't be smack dab inside a portal, but rather
+     * in a reasonable sensible spot
+     */
+    public static Location findPortalTeleportPlaceForUser(Location l) {
+        Block cb = l.getBlock();
+
+        //-x direction
+        Block b = cb.getRelative(-1,-1,0);
+        if(b.getType() == Material.AIR)
+        {
+            Location r = b.getLocation();
+            r.setDirection(new Vector(-1,0,0));
+
+            return r;
+        }
+
+        //+x direction
+        b = cb.getRelative(1,-1,0);
+        if(b.getType() == Material.AIR)
+        {
+            Location r = b.getLocation();
+            r.setDirection(new Vector(1,0,0));
+
+            return r;
+        }
+
+        //-z direction
+        b = cb.getRelative(0,-1,-1);
+        if(b.getType() == Material.AIR)
+        {
+            Location r = b.getLocation();
+            r.setDirection(new Vector(0,0,-1));
+
+            return r;
+        }
+
+        //+z direction
+        b = cb.getRelative(0,-1,1);
+        if(b.getType() == Material.AIR)
+        {
+            Location r = b.getLocation();
+            r.setDirection(new Vector(0,0,1));
+
+            return r;
+        }
+
+        Bukkit.getLogger().warning("Couldn't find air around portal, choosing original location: "+l);
+        return l;
+    }
 }
-//TODO 2 find why we are spawning underground sometimes
-//TODO 2 find why we sometimes spawn in the wrong world on connect???
+
+//TODO 2 logging, set up a current player thread local and give some context so that we can interpret logging better
+//TODO 2 on block physics events, look for destroyed portals and delete portal link

@@ -6,6 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -35,6 +36,15 @@ public class MainListener implements Listener {
     public MainListener(QuietCraftPlugin qcp)
     {
         this.qcp = qcp;
+    }
+
+    public static boolean anonymousCheck(CommandSender sender) {
+        if (!(sender instanceof Player)) {
+            sender.sendMessage("Cannot execute that command, I don't know who you are!");
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @EventHandler

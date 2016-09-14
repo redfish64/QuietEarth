@@ -30,35 +30,33 @@ public class PortalManager {
 
     private List<QCPortalLink> getPortalLinksFromLocation1(Location l) {
         SqlQuery q = qcp.db.
-                createSqlQuery("select pl.id as pl_id from qc_portal_link pl, qc_location l" +
-                        " where l.id = pl.loc1id" +
-                        " and l.x = :x" +
-                        " and l.y = :y" +
-                        " and l.z = :z" +
-                        " and pl.visited_world_id1 = :world_id ");
+                createSqlQuery("select id from qc_portal_link pl" +
+                        " where loc1x = :x" +
+                        " and loc1y = :y" +
+                        " and loc1z = :z" +
+                        " and visited_world_id1 = :vw_id");
         q.setParameter(1, l.getX())
                 .setParameter(2, l.getY())
                 .setParameter(3, l.getZ())
                 .setParameter(4, qcp.wm.getQCVisitedWorld(l.getWorld().getName()).getId());
 
-        return q.findList().stream().map(row -> getPortalLink(row.getInteger("pl_id"))).
+        return q.findList().stream().map(row -> getPortalLink(row.getInteger("id"))).
                 collect(Collectors.toList());
     }
 
     private List<QCPortalLink> getPortalLinksFromLocation2(Location l) {
         SqlQuery q = qcp.db.
-                createSqlQuery("select pl.id as pl_id from qc_portal_link pl, qc_location l" +
-                        " where l.id = pl.loc2id" +
-                        " and l.x = :x" +
-                        " and l.y = :y" +
-                        " and l.z = :z" +
-                        " and pl.visited_world_id2 = :world_id ");
+                createSqlQuery("select id from qc_portal_link pl" +
+                        " where loc2x = :x" +
+                        " and loc2y = :y" +
+                        " and loc2z = :z" +
+                        " and visited_world_id2 = :vz_id");
         q.setParameter(1, l.getX())
                 .setParameter(2, l.getY())
                 .setParameter(3, l.getZ())
                 .setParameter(4, qcp.wm.getQCVisitedWorld(l.getWorld().getName()).getId());
 
-        return q.findList().stream().map(row -> getPortalLink(row.getInteger("pl_id"))).
+        return q.findList().stream().map(row -> getPortalLink(row.getInteger("id"))).
                 collect(Collectors.toList());
     }
 
