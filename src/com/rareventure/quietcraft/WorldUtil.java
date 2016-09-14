@@ -584,6 +584,43 @@ public class WorldUtil {
         if(f.isLiquid()) return false;
         return true;
     }
+
+    public static final String [] HORIZONTAL_DIRS = {
+            "ahead","ahead right","right","behind right",
+            "behind","behind left","left","ahead left"};
+    public static double DIR_DEGREES = 360./HORIZONTAL_DIRS.length;
+
+    /**
+     * Given a vector to an event source, and a yaw angle, returns a text description of where
+     * the location is relative to the vector.
+     */
+    public static String getTextDirectionFromSource(Vector vecToSource, float yawOfReceiver) {
+        double yawOfVector = MathUtil.getYawOfVector(vecToSource);
+        double pitchOfVector = MathUtil.getPitchOfVector(vecToSource);
+
+        if(pitchOfVector > 60)
+        {
+            return "down";
+        }
+        if(pitchOfVector < -60)
+        {
+            return "up";
+        }
+
+        StringBuffer result = new StringBuffer();
+        if(pitchOfVector > 25)
+            result.append("down ");
+        if(pitchOfVector < -25)
+            result.append("up ");
+
+        //get angle of event in the perspective of the user (on the horizontal plane)
+        double yaw = yawOfVector - yawOfReceiver;
+
+        int index = (int)Math.floor(((yaw + DIR_DEGREES/2 + 720) % 360)/DIR_DEGREES);
+
+        return result.append(HORIZONTAL_DIRS[index]).toString();
+    }
+
 }
 
 //TODO 2 logging, set up a current player thread local and give some context so that we can interpret logging better

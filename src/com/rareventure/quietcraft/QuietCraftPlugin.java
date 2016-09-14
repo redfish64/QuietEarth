@@ -19,6 +19,7 @@ public class QuietCraftPlugin extends JavaPlugin {
     public WorldManager wm;
     public PlayerManager pm;
     public PortalManager portalManager;
+    public ChatManager chatManager;
 
     public void onEnable() {
         //store db as a static variable because there will only be one instance of this
@@ -39,6 +40,8 @@ public class QuietCraftPlugin extends JavaPlugin {
         // the portallink cache)
         portalManager = new PortalManager(this);
 
+        chatManager = new ChatManager();
+
         if(freshInstallation) {
             wm.setupForNewInstall();
         }
@@ -50,6 +53,7 @@ public class QuietCraftPlugin extends JavaPlugin {
         this.getCommand("gm").setExecutor(new HackGiveStuffCommandExecutor());
         this.getCommand("w").setExecutor(new WorldCommandExecutor());
         this.getCommand("cp").setExecutor(new HackCreatePortal());
+        this.getCommand("nb").setExecutor(new HackNoisyBlock(this));
     }
 
     /**

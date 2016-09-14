@@ -38,3 +38,10 @@ commands:
            /cp
            Example: /cp
               ...
+  nb:
+    aliases: []
+    description: ... create a cake nearby. ..
+    usage: |
+           /nb
+           Example: /nb
+              ...

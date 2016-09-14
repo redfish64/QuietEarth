@@ -26,14 +26,13 @@ import java.util.*;
 //  portals to nether
 //  portals from nether (wild portals)
 //  reused world spawn
-//TODO 2 what about timedout items? Do we worry about items not owned by anybody being destroyed?
 
-//TODO 2 flying admin user
+//TODO 3 flying admin user
 
 //TODO 2 if we allow world reuse, handle cases where a user doesn't log in for a long time
 // and the world they were in no longer exists
 
-//TODO 2 new rule: when in nether with at least one soul, all souls drop in nether,
+//TODO 3 new rule: when in nether with at least one soul, all souls drop in nether,
 // player is teleported back to world (so dying in nether isn't so harsh and allows player to
 // try and recover souls)
 

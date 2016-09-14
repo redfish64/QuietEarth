@@ -1,11 +1,15 @@
 package com.rareventure.quietcraft;
 
+import org.bukkit.util.Vector;
+
 import java.util.Random;
 
 /**
  * Created by tim on 9/12/16.
  */
 public class MathUtil {
+    private static final double _2PI = 2 * Math.PI;
+
     /**
      * The normal distribution with a min and max cut off as an int.
      */
@@ -31,6 +35,43 @@ public class MathUtil {
 
             return Math.max(Math.min(v,params.max),params.min);
         }
+    }
+
+    /**
+     * Returns the yaw of a vector in degrees where:
+     * <ul>
+     * <li>+z points forward, 0 degrees
+     * <li>-z points backwards, 180 degrees
+     * <li>+x points left, -90 degrees
+     * <li>-x points right, +90 degrees
+     * </ul>
+     * <p>
+     * This matches minecraft coordinate system</p>
+     */
+    static double getYawOfVector(Vector vector) {
+        final double x = vector.getX();
+        final double z = vector.getZ();
+
+        if (x == 0 && z == 0) {
+            return 0;
+        }
+
+        double theta = Math.atan2(-x, z);
+        return Math.toDegrees((theta + _2PI) % _2PI);
+    }
+
+    /**
+     * Returns the pitch of vector in degrees. As with minecraft pitch,
+     * down is positive and negative is up.
+     */
+    static double getPitchOfVector(Vector vector) {
+        double x = vector.getX();
+        double z = vector.getZ();
+
+        double x2 = x*x;
+        double z2 = z*z;
+        double xz = Math.sqrt(x2 + z2);
+        return (double) Math.toDegrees(Math.atan(-vector.getY() / xz));
     }
 
     public static class RandomNormalParams {

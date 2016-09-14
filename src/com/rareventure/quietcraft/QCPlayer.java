@@ -10,7 +10,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-//TODO 2 when leaving the server, the portal key should drop from the players inventory... and always be there forever
+//TODO 3 when leaving the server, the portal key should drop from the players inventory... and always be there forever
 //.. is this possible? I heard items automatically disappear after 5 minutes.
 
 @Entity()

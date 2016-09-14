@@ -59,7 +59,9 @@ public class PortalManager {
             return new ArrayList<>(r);
         }
     }
-//TODO 2 make sure say is how we want it... just type anythign witout a / at the console
+
+    //TODO 2 make whisper and normal say commands
+
     /**
      * Returns a portal that links to the specified location
      */
@@ -117,8 +119,12 @@ public class PortalManager {
         
         Bukkit.getLogger().info("Destroying portal link "+pl+" p1 destroyed? "+destroyP1+", p2 destroyed? "+destroyP2);
 
-        if(destroyP1) WorldUtil.destroyPortal(pl.getLoc1(),true);
-        if(destroyP2) WorldUtil.destroyPortal(pl.getLoc2(),true);
+        if(destroyP1) {
+            WorldUtil.destroyPortal(pl.getLoc1(),true);
+        }
+        if(destroyP2) {
+            WorldUtil.destroyPortal(pl.getLoc2(),true);
+        }
 
     }
 }

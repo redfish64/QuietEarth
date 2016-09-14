@@ -1,5 +1,6 @@
 package com.rareventure.quietcraft;
 
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -15,7 +16,11 @@ public class WorldCommandExecutor implements CommandExecutor {
         if (sender instanceof Player) {
             Player player = (Player) sender;
 
-            sender.sendMessage("Your world is "+player.getWorld().getName()+" location is "+player.getLocation());
+            Location l = player.getLocation();
+            sender.sendMessage(
+                    String.format("W: %s Lx%8.3f y%8.3f z%8.3f y%8.3f p%8.3f"
+                    ,player.getWorld().getName(),l.getX(),l.getY(),l.getZ(),
+                            l.getYaw(),l.getPitch()));
         } else {
             sender.sendMessage("You can only perform this command as a player");
         }
