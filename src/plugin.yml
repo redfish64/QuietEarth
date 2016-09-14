@@ -4,12 +4,6 @@ author: Tim Engler
 main: com.rareventure.quietcraft.QuietCraftPlugin
 database: true
 commands:
-  runquery:
-    aliases: [rq]
-    description: Runs any old query the player wants and returns the results
-    usage: |
-           /<command> <name> [player]
-           Example: /<command> "select * from QCPlayer"
   kill:
     aliases: []
     description: Kills you
@@ -45,3 +39,24 @@ commands:
            /nb
            Example: /nb
               ...
+  say_mode:
+    aliases: []
+    description: Chatting from now on can be heard by those nearby player.
+    usage: |
+           /say_mode
+           Example: /say_mode
+              Hi guys!
+  shout_mode:
+    aliases: []
+    description: Chatting from now on can be heard by those farther away
+    usage: |
+           /shout_mode
+           Example: /shout_mode
+              Help! Help!
+  whisper_mode:
+    aliases: []
+    description: Chatting from now on will only be heard only by those close by
+    usage: |
+           /whisper_mode
+           Example: /whisper_mode
+              I stashed all my soul gems at ...

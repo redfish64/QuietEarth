@@ -35,10 +35,14 @@ public class PlayerManager {
 
     private EbeanServer db;
 
+    private Map<String,QCPlayer> uuidToQCPlayerCache = new HashMap<>();
+
     public PlayerManager(QuietCraftPlugin qcp)
     {
-        this.db = qcp.getDatabase();
+        this.db = qcp.db;
         this.qcp = qcp;
+
+        db.find(QCPlayer.class).findList().forEach(p -> uuidToQCPlayerCache.put(p.getUuid(),p));
     }
 
     private void addToPlayerLog(QCPlayer qcPlayer, QCPlayerLog.Action action)
@@ -54,7 +58,7 @@ public class PlayerManager {
         if(WorldUtil.isNetherWorld(p.getWorld().getName())) {
             //in the nether, souls aren't removed from inventory (are collectable), and the player
             //loses all their souls
-            QCPlayer qcPlayer = DbUtil.getQCPlayer(p.getUniqueId());
+            QCPlayer qcPlayer = getQCPlayer(p.getUniqueId().toString());
 
             qcPlayer.setSoulsKeptDuringDeath(0);
 
@@ -65,7 +69,7 @@ public class PlayerManager {
 
         int soulCount = getSoulCount(p);
 
-        QCPlayer qcPlayer = DbUtil.getQCPlayer(p.getUniqueId());
+        QCPlayer qcPlayer = getQCPlayer(p.getUniqueId().toString());
 
         qcPlayer.setSoulsKeptDuringDeath(soulCount);
 
@@ -82,6 +86,13 @@ public class PlayerManager {
         }
 
         debugPrintPlayerInfo("onPlayerDeath",p);
+    }
+
+    private QCPlayer getQCPlayer(String uniqueId) {
+        synchronized (uuidToQCPlayerCache)
+        {
+            return uuidToQCPlayerCache.get(uniqueId);
+        }
     }
 
     private int getSoulCount(Player p) {
@@ -106,12 +117,17 @@ public class PlayerManager {
     }
 
     public QCPlayer getQCPlayer(Player player) {
-        return DbUtil.getQCPlayer(player.getUniqueId());
+        return getQCPlayer(player.getUniqueId().toString());
     }
 
     public QCPlayer createQCPlayer(Player player, QCVisitedWorld vw) {
         QCPlayer qcPlayer = new QCPlayer(player.getUniqueId().toString(), vw, SOULS_PER_REBIRTH);
         db.insert(qcPlayer);
+
+        synchronized (uuidToQCPlayerCache)
+        {
+            uuidToQCPlayerCache.put(player.getUniqueId().toString(),qcPlayer);
+        }
 
         return qcPlayer;
     }

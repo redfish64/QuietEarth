@@ -1,16 +1,19 @@
-package com.rareventure.quietcraft;
+package com.rareventure.quietcraft.commands;
 
+import com.rareventure.quietcraft.ChatManager;
+import com.rareventure.quietcraft.QuietCraftPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.craftbukkit.libs.joptsimple.internal.Strings;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
 
-public class SayCommandExecutor implements CommandExecutor {
+public class SetSpeakStyleShout implements CommandExecutor {
     private QuietCraftPlugin qcp;
 
-    public SayCommandExecutor(QuietCraftPlugin qcp) {
+    public SetSpeakStyleShout(QuietCraftPlugin qcp) {
         this.qcp = qcp;
     }
 
@@ -20,9 +23,9 @@ public class SayCommandExecutor implements CommandExecutor {
         if (sender instanceof Player) {
             Player player = (Player) sender;
 
-            qcp.chatManager.say(player,String.join(" ",args));
+            sender.sendMessage("Setting speak style to shout");
 
-            //sender.sendMessage("Ouch. That look like it hurt.");
+            qcp.pm.getQCPlayer(player).defaultSpeakStyle = ChatManager.SpeakStyle.SHOUT;
         } else {
             sender.sendMessage("You can only perform this command as a player");
         }

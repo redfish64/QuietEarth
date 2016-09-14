@@ -1,5 +1,6 @@
-package com.rareventure.quietcraft;
+package com.rareventure.quietcraft.commands;
 
+import com.rareventure.quietcraft.WorldUtil;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;

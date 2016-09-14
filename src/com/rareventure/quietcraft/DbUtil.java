@@ -9,11 +9,6 @@ import java.util.UUID;
  * database related calls
  */
 public class DbUtil {
-    public static QCPlayer getQCPlayer(UUID uniqueId) {
-        return QuietCraftPlugin.db.find(QCPlayer.class).where().
-                eq("uuid", uniqueId.toString()).findUnique();
-    }
-
     /**
      * Gets a database object given an id
      * @param clazz

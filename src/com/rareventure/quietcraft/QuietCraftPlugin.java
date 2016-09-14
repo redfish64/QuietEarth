@@ -1,8 +1,7 @@
 package com.rareventure.quietcraft;
 
 import com.avaje.ebean.EbeanServer;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
+import com.rareventure.quietcraft.commands.*;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -40,7 +39,7 @@ public class QuietCraftPlugin extends JavaPlugin {
         // the portallink cache)
         portalManager = new PortalManager(this);
 
-        chatManager = new ChatManager();
+        chatManager = new ChatManager(this);
 
         if(freshInstallation) {
             wm.setupForNewInstall();
@@ -54,6 +53,9 @@ public class QuietCraftPlugin extends JavaPlugin {
         this.getCommand("w").setExecutor(new WorldCommandExecutor());
         this.getCommand("cp").setExecutor(new HackCreatePortal());
         this.getCommand("nb").setExecutor(new HackNoisyBlock(this));
+        this.getCommand("say_mode").setExecutor(new SetSpeakStyleSay(this));
+        this.getCommand("whisper_mode").setExecutor(new SetSpeakStyleWhisper(this));
+        this.getCommand("shout_mode").setExecutor(new SetSpeakStyleShout(this));
     }
 
     /**

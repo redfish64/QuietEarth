@@ -36,6 +36,9 @@ import java.util.*;
 // player is teleported back to world (so dying in nether isn't so harsh and allows player to
 // try and recover souls)
 
+
+//TODO 2 see if we can change configuration on the fly so we can properly alpha
+
 /**
  * Manages worlds and visited worlds.
  */

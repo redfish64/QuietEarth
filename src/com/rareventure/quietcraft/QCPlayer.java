@@ -1,14 +1,9 @@
 
 package com.rareventure.quietcraft;
 
-import com.avaje.ebean.annotation.EnumValue;
 import com.avaje.ebean.validation.NotNull;
 
-import javax.annotation.Nullable;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 //TODO 3 when leaving the server, the portal key should drop from the players inventory... and always be there forever
 //.. is this possible? I heard items automatically disappear after 5 minutes.
@@ -30,6 +25,9 @@ public class QCPlayer {
      */
     @NotNull
     private int soulsKeptDuringDeath;
+
+    @Transient
+    public ChatManager.SpeakStyle defaultSpeakStyle = ChatManager.SpeakStyle.SHOUT;
 
     public QCPlayer() {
     }

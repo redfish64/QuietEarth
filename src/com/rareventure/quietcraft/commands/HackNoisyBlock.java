@@ -1,5 +1,7 @@
-package com.rareventure.quietcraft;
+package com.rareventure.quietcraft.commands;
 
+import com.rareventure.quietcraft.MathUtil;
+import com.rareventure.quietcraft.QuietCraftPlugin;
 import it.unimi.dsi.fastutil.Hash;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -31,7 +33,7 @@ public class HackNoisyBlock implements CommandExecutor {
 
             if(lastCakeBlock != null)
             {
-                qcp.chatManager.speak("!!NOISY BLOCK!!",lastCakeBlock.getLocation(),MAX_DIST_SQR,"Bye!");
+                qcp.chatManager.speak(null,"!!NOISY BLOCK!!","says",lastCakeBlock.getLocation(),MAX_DIST_SQR,"Bye!");
                 lastCakeBlock.setType(Material.AIR);
                 lastCakeBlock.getRelative(0,1,0).setType(Material.AIR);
             }
@@ -51,7 +53,7 @@ public class HackNoisyBlock implements CommandExecutor {
 
             Bukkit.getLogger().info("CAKE_BLOCK appeared at "+b2);
 
-            qcp.chatManager.speak("!!NOISY BLOCK!!",b2.getLocation(),MAX_DIST_SQR,"Eat me!");
+            qcp.chatManager.speak(null,"!!NOISY BLOCK!!","says",b2.getLocation(),MAX_DIST_SQR,"Eat me!");
         } else {
             sender.sendMessage("You can only perform this command as a player");
         }

@@ -1,4 +1,4 @@
-package com.rareventure.quietcraft;
+package com.rareventure.quietcraft.commands;
 
 import java.util.List;
 

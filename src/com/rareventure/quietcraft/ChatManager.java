@@ -40,27 +40,40 @@ public class ChatManager {
      */
     private static final double SHOUT_SPEECH_DIST_SQR = 100;
 
+    private QuietCraftPlugin qcp;
+
+    public ChatManager(QuietCraftPlugin qcp) {
+        this.qcp = qcp;
+    }
 
     public void onPlayerChat(AsyncPlayerChatEvent event) {
-        shout(event.getPlayer(),event.getMessage());
+        speak(qcp.pm.getQCPlayer(event.getPlayer()).defaultSpeakStyle,
+                event.getPlayer(),
+                event.getMessage());
         event.setCancelled(true);
     }
 
     /**
      * Says something to players around a specific location.
      *
+     * @param self if not null, then message won't be sent to this player
      * @param name name of whatever is speaking.
      * @param loc   location of the thing
      * @param maxDistSqr  the maximum distance a player can hear
      * @param message  the message to be sent
      */
-    public void speak(String name, String action, Location loc, double maxDistSqr, String message)
+    public void speak(Player self, String name, String action, Location loc, double maxDistSqr, String message)
     {
         String normalMessage = name + " "+action+" " +message;
         String inaudibleMessage = name+" "+action+" *in audible*";
         String inaudibleMessage2 = "<*in audible*> "+action+" *in audible*";
         List<Player> allPlayers = loc.getWorld().getPlayers();
         for (Player toPlayer : allPlayers) {
+            if(self != null && toPlayer.equals(self))
+            {
+                continue;
+            }
+
             Location toPlayerLoc = toPlayer.getLocation();
             Vector vecToSoundSource = loc.subtract(toPlayerLoc).toVector();
 
@@ -76,7 +89,7 @@ public class ChatManager {
             else
                 return; // don't send a message past inaudible range
 
-            toPlayer.sendMessage(String.format("\u00A7d%s\u00A7f %s",
+            toPlayer.sendMessage(String.format("\u00A7d%s\u00A7f \"%s\"",
                         WorldUtil.
                         getTextDirectionFromSource(vecToSoundSource, toPlayerLoc.getYaw())
                         ,fullMessage));
@@ -85,20 +98,25 @@ public class ChatManager {
         Bukkit.getLogger().info("Message: "+name+" "+message+" at "+loc);
     }
 
-    public void shout(Player player, String message) {
-        speak("<"+player.getName()+">","shouts",player.getLocation(),SHOUT_SPEECH_DIST_SQR,
+    public void speak(SpeakStyle speakStyle, Player player, String message) {
+        player.sendMessage("You "+speakStyle.selfAction+" \""+message+"\"");
+        speak(player, "<"+player.getName()+">",speakStyle.action,player.getLocation(),speakStyle.distSqr,
                 message);
+
     }
 
-    public void say(Player player, String message) {
-        speak("<"+player.getName()+">","says",player.getLocation(),NORMAL_SPEECH_DIST_SQR,
-                message);
+    public enum SpeakStyle { SHOUT("shouts","shout",100), SAY("says","say",30), WHISPER("whispers","whisper",5);
+        public final String action;
+        public final double distSqr;
+        public final String selfAction;
+
+        SpeakStyle(String action, String selfAction, double dist)
+        {
+            this.distSqr = dist*dist;
+            this.action = action;
+            this.selfAction = selfAction;
+        }
     }
 
-    public void whisper(Player player, String message) {
-        speak("<"+player.getName()+">","whispers",player.getLocation(),WHISPER_SPEECH_DIST_SQR,
-                message);
-    }
-
-    //TODO 2 test voices with another player
+    //TODO 2.5 test voices with another player
 }

@@ -1,4 +1,4 @@
-package com.rareventure.quietcraft;
+package com.rareventure.quietcraft.commands;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
