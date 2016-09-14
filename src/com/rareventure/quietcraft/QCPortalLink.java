@@ -5,10 +5,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 /**
  * Represents a link between two portals in two different worlds.
@@ -46,6 +43,12 @@ public class QCPortalLink {
 
     @NotNull
     private int loc2Z;
+
+    @Transient
+    private Location cachedLoc1;
+
+    @Transient
+    private Location cachedLoc2;
 
 
     public QCPortalLink() {
@@ -121,13 +124,23 @@ public class QCPortalLink {
     }
 
     public Location getLoc1() {
-        World w = DbUtil.getWorldFromQCVisitedWorldId(getVisitedWorldId1());
-        return new Location(w,loc1X, loc1Y, loc1Z);
+        if(cachedLoc1 == null) {
+            World w = DbUtil.getWorldFromQCVisitedWorldId(getVisitedWorldId1());
+            assert(w != null) : "World is null for "+getVisitedWorldId1();
+            cachedLoc1 = new Location(w, loc1X, loc1Y, loc1Z);
+        }
+
+        return cachedLoc1;
     }
 
     public Location getLoc2() {
-        World w = DbUtil.getWorldFromQCVisitedWorldId(getVisitedWorldId1());
-        return new Location(w,loc2X, loc2Y, loc2Z);
+        if(cachedLoc2 == null) {
+            World w = DbUtil.getWorldFromQCVisitedWorldId(getVisitedWorldId2());
+            assert(w != null) : "World is null for "+getVisitedWorldId2();
+            cachedLoc2 = new Location(w, loc2X, loc2Y, loc2Z);
+        }
+
+        return cachedLoc2;
     }
 
     public int getLoc1X() {

@@ -173,16 +173,17 @@ public class QCVisitedWorld {
         this.netherLocZ = netherLocZ;
     }
 
+    public Location getNetherLocation() {
+        return new Location(WorldUtil.getNetherWorld(),
+                getNetherLocX(),getNetherLocY(),getNetherLocZ());
+    }
+
     /**
      * Returns the nether portal location for this visited world.
      * <p>Technically we can get world, but usually this is already
      * known, so to save the work of looking it up, we just ask for it.
      * </p>
      */
-    public Location getNetherLocation(World world) {
-        return new Location(world,getNetherLocX(),getNetherLocY(),getNetherLocZ());
-    }
-
     public Location getSpawnLocation(World spawnedWorld) {
         return new Location(spawnedWorld,getSpawnLocX(),getSpawnLocY(),getSpawnLocZ());
     }

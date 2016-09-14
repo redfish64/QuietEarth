@@ -366,13 +366,15 @@ public class PlayerManager {
         Bukkit.getLogger().info("Portal link for location " +pl);
 
         if(pl == null) {
-            Bukkit.getLogger().info("Could not find link for " +pl);
+            Bukkit.getLogger().info("Could not find link for " +l);
             WorldUtil.destroyPortal(l, false);
             return;
         }
 
         Location otherLocation = pl.getOtherLoc(qcp.wm,l);
-        event.getPlayer().teleport(WorldUtil.findPortalTeleportPlaceForUser(otherLocation));
+        Location teleportLocation = WorldUtil.findPortalTeleportPlaceForUser(otherLocation);
+        WorldUtil.makeTeleportLocationSafe(teleportLocation);
+        event.getPlayer().teleport(teleportLocation);
         event.setCancelled(true);
     }
 }

@@ -31,13 +31,18 @@ public class QuietCraftPlugin extends JavaPlugin {
 
         boolean freshInstallation = setupDatabase();
 
-        portalManager = new PortalManager(this);
         wm = new WorldManager(this);
         pm = new PlayerManager(this);
+
+        //note this MUST be run after world manager is set up, or worlds
+        //will not be created by the time we look for them (when we populate
+        // the portallink cache)
+        portalManager = new PortalManager(this);
 
         if(freshInstallation) {
             wm.setupForNewInstall();
         }
+
 
         getServer().getPluginManager().registerEvents(new MainListener(this), this);
 

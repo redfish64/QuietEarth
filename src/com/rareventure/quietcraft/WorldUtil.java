@@ -27,7 +27,8 @@ public class WorldUtil {
      * When portals are destroyed and exploded, this specifies the ratio of width of portal
      * to explosion power (as defined by World.createExplosion())
      */
-    private static final float DESTROY_PORTAL_EXPLOSION_RATIO = 1.2f;
+    //TODO 3 hack we make this really small while testing so we don't blow ourselves up
+    private static final float DESTROY_PORTAL_EXPLOSION_RATIO = 0.1f;
     /**
      * Maximum distance from 0,0,0 for random spawn locations
      */
@@ -192,7 +193,7 @@ public class WorldUtil {
         return ba;
     }
 
-    //TODO 2 make explosion bigger, 5?
+    //TODO 2.1 make explosion bigger, 5?
     private static final float DESTROY_PORTAL_EXPLOSION_SIZE = 1f;
     private static final int MAX_ACTIVE_PORTAL_LOC_DIST = 3;
 
@@ -396,7 +397,10 @@ public class WorldUtil {
             ba.getBlocks(b1.getWorld()).forEach(b -> b.setType(Material.SANDSTONE));
         }
 
-        assert(WorldUtil.findPortalLocation(l,xAligned).equals(l));
+        assert(WorldUtil.findPortalLocation(l,xAligned).equals(b1.getLocation())) : "portal location "
+                +b1.getLocation()
+                +" doesn't match findPortalLocation "+WorldUtil.findPortalLocation(l,xAligned)
+                +" xAligned "+xAligned;
     }
 
     /**
@@ -475,6 +479,8 @@ public class WorldUtil {
                             MAX_SPAWN_RADIUS * (Math.random() * 2 - 1)
                     );
 
+            loc.getChunk().load();
+
             y = getValidHighestY(loc, SPAWN_LOCATION_BLACKLIST);
         }
         while(y == -1);
@@ -496,14 +502,23 @@ public class WorldUtil {
     /**
      * Returns a location that is offset from given location so if a user
      * teleports there, they won't be smack dab inside a portal, but rather
-     * in a reasonable sensible spot
+     * in a reasonable sensible spot.
+     * <p>The location should be the representative location of the portal</p>
      */
     public static Location findPortalTeleportPlaceForUser(Location l) {
+        Location r = findPortalTeleportPlaceForUser2(l);
+        //put user in the middle (.5) of the block loc, and -1 down which is below the lip of the portal
+        r.add(.5, -1, .5);
+
+        return r;
+    }
+
+    private static Location findPortalTeleportPlaceForUser2(Location l) {
         Block cb = l.getBlock();
 
         //-x direction
-        Block b = cb.getRelative(-1,-1,0);
-        if(b.getType() == Material.AIR)
+        Block b = cb.getRelative(-1,0,0);
+        if(b.getType() != Material.PORTAL)
         {
             Location r = b.getLocation();
             r.setDirection(new Vector(-1,0,0));
@@ -512,8 +527,8 @@ public class WorldUtil {
         }
 
         //+x direction
-        b = cb.getRelative(1,-1,0);
-        if(b.getType() == Material.AIR)
+        b = cb.getRelative(1,0,0);
+        if(b.getType() != Material.PORTAL)
         {
             Location r = b.getLocation();
             r.setDirection(new Vector(1,0,0));
@@ -522,8 +537,8 @@ public class WorldUtil {
         }
 
         //-z direction
-        b = cb.getRelative(0,-1,-1);
-        if(b.getType() == Material.AIR)
+        b = cb.getRelative(0,0,-1);
+        if(b.getType() != Material.PORTAL)
         {
             Location r = b.getLocation();
             r.setDirection(new Vector(0,0,-1));
@@ -532,8 +547,8 @@ public class WorldUtil {
         }
 
         //+z direction
-        b = cb.getRelative(0,-1,1);
-        if(b.getType() == Material.AIR)
+        b = cb.getRelative(0,0,1);
+        if(b.getType() != Material.PORTAL)
         {
             Location r = b.getLocation();
             r.setDirection(new Vector(0,0,1));
@@ -544,7 +559,31 @@ public class WorldUtil {
         Bukkit.getLogger().warning("Couldn't find air around portal, choosing original location: "+l);
         return l;
     }
+
+    /**
+     * Creates some air and puts a place for our feeties at location safe to teleport to
+     */
+    public static void makeTeleportLocationSafe(Location teleportLocation) {
+        Block b = teleportLocation.getBlock();
+        b.setType(Material.AIR);
+        b.getRelative(0,1,0).setType(Material.AIR);
+        Block f = b.getRelative(0,-1,0);
+
+        //TODO 3 make safer?? what about fire?? how safe is too safe
+        if(!isBlockStandable(f))
+            f.setType(Material.SANDSTONE);
+    }
+
+    /**
+     * True if can stand on the block, not water, lava, on fire, etc.
+     */
+    private static boolean isBlockStandable(Block f) {
+        Material m = f.getType();
+        if(!m.isSolid()) return false;
+
+        if(f.isLiquid()) return false;
+        return true;
+    }
 }
 
 //TODO 2 logging, set up a current player thread local and give some context so that we can interpret logging better
-//TODO 2 on block physics events, look for destroyed portals and delete portal link

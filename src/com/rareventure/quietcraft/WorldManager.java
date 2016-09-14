@@ -17,15 +17,11 @@ import java.util.*;
 //TODO 2.5 possibly notify everybody in the nether where the portal opened, and give them a way to see their
 // own location, so they can attack it.
 
-//TODO 2 setup choosing a world using visit ids.
-//TODO 2 Update visit ids periodically (once a day or so)
+//TODO 2 handle creation of new visit worlds to recycle old worlds
 //TODO 3 delete all player logs where visit ids no longer exist to save space??
 
-//TODO 2 get rid of diamond lore
 
-//TODO 2 decide when and how worlds can be revisited. What about multiple spawns per world?
-
-//TODO 2 decide on distance for:
+//TODO 2 decide on random distance for the following. Do we want them close or far away from each other?:
 //  nether spawn
 //  portals to nether
 //  portals from nether (wild portals)
@@ -36,8 +32,6 @@ import java.util.*;
 
 //TODO 2 if we allow world reuse, handle cases where a user doesn't log in for a long time
 // and the world they were in no longer exists
-
-//TODO 2 make sure a user doesn't spawn sufficated in dirt or whatever
 
 //TODO 2 new rule: when in nether with at least one soul, all souls drop in nether,
 // player is teleported back to world (so dying in nether isn't so harsh and allows player to
@@ -67,8 +61,6 @@ public class WorldManager {
 
     private static final MathUtil.RandomNormalParams NETHER_PORTAL_WIDTH_PARAMS =
             new MathUtil.RandomNormalParams(4,3,4,15);
-    //TODO 2 make sure to clear out any blocks where a player might teleport to(nearby the nether)
-    //TODO 2 fix portal physics hack
     /**
      * The ratio between height and width. It's important to make sure that
      * given the minimum width in NETHER_PORTAL_WIDTH_PARAMS, that this
@@ -254,14 +246,14 @@ public class WorldManager {
     public void setupForNewInstall() {
         QCWorld w = new QCWorld(1, WorldUtil.NETHER_WORLD_NAME);
         netherVisitedWorld = new QCVisitedWorld(1,w.getId(),0,0,0,0,0,0,true);
-        qcp.getDatabase().insert(w);
-        qcp.getDatabase().insert(netherVisitedWorld);
+        qcp.db.insert(w);
+        qcp.db.insert(netherVisitedWorld);
         visitedWorlds.add(netherVisitedWorld);
 
         //create a bunch of empty worlds
         //we can't create worlds adhoc, or it freezes the server while the creation is in process
         //so we create them ahead of time
-        //TODO 2 different types of worlds???
+        //TODO 2.5 different types of worlds???
         for (int i = 0; i < MAX_WORLDS; i++)
             createNewWorld();
     }
@@ -379,7 +371,7 @@ public class WorldManager {
 
                 //create a link from the current location to the nether world.
                 QCPortalLink pl =
-                        new QCPortalLink(netherVisitedWorld.getId(), portalLocation,
+                        qcp.portalManager.createPortalLink(netherVisitedWorld.getId(), portalLocation,
                                 qcPlayer.getVisitedWorldId(),
                                 overWorldPortalLocation);
                 QuietCraftPlugin.db.save(pl);
@@ -398,14 +390,18 @@ public class WorldManager {
         QuietCraftPlugin.db.beginTransaction();
         try {
             Location netherWorldLocation =
-                    visitedWorld.getNetherLocation(WorldUtil.getNetherWorld());
+                    visitedWorld.getNetherLocation();
 
-            //since we don't want to try and make sure that a portal generated at a particular location
-            //will be exactly at that location, we allow the portal code to move it a little bit
-            constructNetherWorldPortal(netherWorldLocation, true);
+            QCPortalLink existingPortalLink = qcp.portalManager.
+                    getPortalLinkForLocation(netherWorldLocation);
+            if(existingPortalLink == null)
+                constructNetherWorldPortal(netherWorldLocation, true);
+            else
+                Bukkit.getLogger().info("Not constructing nether world portal because " +
+                        "a portal link already exists: "+existingPortalLink);
 
             //create a link from the current location to the nether world.
-            QCPortalLink pl = new QCPortalLink(
+            QCPortalLink pl = qcp.portalManager.createPortalLink(
                     qcPlayer.getVisitedWorldId(),
                     portalLocation,
                     netherVisitedWorld.getId(),
@@ -497,20 +493,33 @@ public class WorldManager {
         clearStaleConstructedPortals();
 
         if(e.getBlock().getType() == Material.PORTAL) {
+            //look to see if we have recently begun constructing any portals (automatically)
+            //and if so, cancel any physics events associated with them
             synchronized (WorldUtil.recentConstructedPortalAreas) {
-                WorldUtil.recentConstructedPortalAreas.forEach(ba -> {
-                    if (ba.containsBlock(e.getBlock()))
-                        e.setCancelled(true);
-                });
+                //if we cancelled the physics event, we return immediately
+                if(
+                    WorldUtil.recentConstructedPortalAreas.stream().anyMatch(ba -> {
+                        if (ba.containsBlock(e.getBlock())) {
+                            e.setCancelled(true);
+                            return true;
+                        }
+                        return false;
+                    })
+                        )
+                    return;
             }
+
+            //now we need to check if any existing portals link to the given nether block
+            //if so, we need to delete the link and possibly delete the other side of the portal
+            qcp.portalManager.getPortalLinksForLocation(e.getBlock().getLocation())
+                    .forEach(pl -> qcp.portalManager.destroyPortalLink(pl));
         }
-        //TODO 2 when a portal is destroyed, its corresponding link should be destroyed too
+
+
         //TODO 2 for multiple world portals linked to the same nether portal,
         //each player gets a last portal link entered db field, so they go back the same
         //place they left. Maybe 1 out of every 20 times, they go to a random portal linked
         //to the same
-        //TODO 2 when creating a new world portal, we need to check if there is already a
-        //portal established at the same place, and use it if there
     }
 
     /**
