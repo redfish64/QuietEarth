@@ -205,4 +205,11 @@ public class QCPortalLink {
                 ", loc2Z=" + loc2Z +
                 '}';
     }
+
+    public long getOtherVisitedWorldId(int id) {
+        if(id == visitedWorldId2)
+            return visitedWorldId1;
+
+        return visitedWorldId2;
+    }
 }

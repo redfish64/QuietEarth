@@ -41,6 +41,12 @@ public class QCPlayerLog {
         @EnumValue("M")
         MOVED_TO_WORLD,
 
+        /**
+         * Player left a world using a portal
+         */
+        @EnumValue("L")
+        MOVED_FROM_WORLD,
+
     }
 
     @NotNull

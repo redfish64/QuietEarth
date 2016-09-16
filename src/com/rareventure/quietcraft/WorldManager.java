@@ -72,6 +72,34 @@ public class WorldManager {
     private static final MathUtil.RandomNormalParams OVERWORLD_PORTAL_WIDTH_PARAMS =
             new MathUtil.RandomNormalParams(4,1,4,7);
 
+    private static final long MAX_DEATHS_BEFORE_NETHER_SPAWN_MS = 1000 * 3600 * 24;
+
+    /**
+     * The number of deaths in MAX_DEATHS_NETHER_SPAWN_MS before we automatically send
+     * the user to the nether (deaths in nether don't count)
+     */
+    private static final int MAX_DEATHS_BEFORE_NETHER_SPAWN = 3;
+
+    /**
+     * The id of the nether visited world
+     */
+    public static final int NETHER_VISITED_WORLD_ID = 1;
+    private static final int NETHER_WORLD_ID = 1;
+
+    /**
+     * When deciding whether to recycle a world, the time a visited world with no
+     * active players must be inactive before being recycled.
+     * <p>Note that players may have teleported out of the world into the nether and may
+     * want to come back later</p>
+     */
+    private static final long MAX_RECYCLE_LAST_PLAYER_LOG_NO_PLAYERS_MS = 1000 * 3600 * 24;
+
+    /**
+     * When deciding whether to recycle a world, the time a visited world must have no
+     * log events before being recycled (with or without active players)
+     * */
+    private static final long MAX_RECYCLE_LAST_PLAYER_LOG_MS = 1000 * 3600 * 24 * 14;
+
     private final QuietCraftPlugin qcp;
 
     /**
@@ -102,7 +130,7 @@ public class WorldManager {
             //find and populate the netherWorld
             //note that if this is a fresh install, then worlds will be size 0, and netherWorld won't
             //be populated until setupForNewInstall() is called.
-            if (vw.getId() == 1)
+            if (vw.getId() == NETHER_VISITED_WORLD_ID)
                 netherVisitedWorld = vw;
         }
     }
@@ -173,48 +201,118 @@ public class WorldManager {
         }
     }
 
+    //TODO 2 create table indexes
+
+    /**
+     * Finds the visited world that:
+     * <ul>
+     * <li>either has the most live players currently,
+     * or if tied, then the world with the most events,</li>
+     * <li>and the player hasn't visited the world</li>
+     * <li>and is not the nether world</li>
+     * <li>and is active</li>
+     * @return visited world, if any
+     */
+    public QCVisitedWorld findBestActiveWorldForPlayer(String playerId) {
+        //see javadoc of this method for a description of what this does
+        SqlQuery q = qcp.db.
+                createSqlQuery(
+                        " select id,\n" +
+                                "   (select count(*) from qc_player p where p.visited_world_id = vw.id) as pc, \n" +
+                                "   (select count (*) from qc_player_log where visited_world_id = vw.id) as plc\n" +
+                                "  from qc_visited_world vw where vw.active = 1 and vw.id not in\n" +
+                                "    (select visited_world_id from qc_player_log where player_id = :pid)\n" +
+                                "    and vw.id != "+NETHER_VISITED_WORLD_ID+"\n" +
+                                "    order by pc desc,plc desc limit 1;\n");
+
+        q.setParameter(1,playerId);
+        SqlRow sr = q.findUnique();
+        if(sr == null)
+            return null;
+
+        return getQCVisitedWorld(sr.getInteger("id"));
+    }
+
     /**
      * Finds the best world to join for a player that just died to join.
+     * <p>If the player visited all visited worlds, look for an existing
+     * world where the visited world can be destroyed.</p>
      */
-    public QCVisitedWorld findBestWorldForDeadPlayer(Player player) {
-        SqlQuery q = qcp.getDatabase().createSqlQuery("select distinct visited_world_id from qc_player_log where player_id = :uuid");
-        q.setParameter("uuid", player.getUniqueId().toString());
-
-        //finds out the worlds the player already visited
-        Set<SqlRow> playerVisitedWorldIdSqlRows = q.findSet();
-        Set<Integer> playerVisitedWorldIds = new HashSet<>(playerVisitedWorldIdSqlRows.size());
-        for (SqlRow sr : playerVisitedWorldIdSqlRows) {
-            playerVisitedWorldIds.add(sr.getInteger("visited_world_id"));
-        }
-
-        QCVisitedWorld bestW = null;
-
-        for (QCVisitedWorld w : visitedWorlds) {
-            //the player doesn't go to the nether until he's not allowed anywhere else
-            if (w == netherVisitedWorld)
-                continue;
-
-            //don't choose a world that has been spawned in already
-            if (playerVisitedWorldIds.contains(w.getId()))
-                continue;
-
-            if (bestW == null)
-                bestW = w;
-            //TODO 2 make choosing next world use better statistics to find more active worlds
-//            else if (bestW.currentPlayerCount < w.currentPlayerCount)
-//                bestW = w;
-//            else
-//                //choose the most visited world.. since it is the most interesting
-//                if (bestW.getWorldVisitedCount(qcp) < w.getWorldVisitedCount(qcp))
-//                    bestW = w;
-        }
-
-        //if there is no good world for the player anymore, we just send them to the nether
-        if (bestW == null) {
+    public QCVisitedWorld findOrCreateBestWorldForDeadPlayer(Player player) {
+        if(DbUtil.findNumberOfDeathsInTimePeriodForPlayer(player.getUniqueId().toString(),
+                MAX_DEATHS_BEFORE_NETHER_SPAWN_MS) > MAX_DEATHS_BEFORE_NETHER_SPAWN )
+        {
+            Bukkit.getLogger().info("Player "+player+" died too much and must go to the nether");
             return netherVisitedWorld;
         }
 
-        return bestW;
+        //find the best world that already exists
+        QCVisitedWorld bestVW = findBestActiveWorldForPlayer(player.getUniqueId().toString());
+
+        if(bestVW != null)
+            return bestVW;
+
+        //recycle a visited world (if we can)
+        QCVisitedWorld bestVWToRecycle = findBestVisitedWorldToRecycle();
+
+        if(bestVWToRecycle == null)
+        {
+            Bukkit.getLogger().info("No worlds left to recycle, sending player to nether");
+            return netherVisitedWorld;
+        }
+
+        return recycleVisitedWorld(bestVWToRecycle);
+    }
+
+    //TODO 2 can't create a portal until 5 days have passed (prevent soul farming)
+
+    //TODO 2 get rid of max deaths
+
+    private QCVisitedWorld recycleVisitedWorld(QCVisitedWorld bestVWToRecycle) {
+        qcp.db.beginTransaction();
+        try {
+//TODO 1
+        }
+        return null;
+    }
+
+    /**
+     * Finds the visited world which is eligible for recycling and is the best candidate
+     * according to various criteria
+     */
+    private QCVisitedWorld findBestVisitedWorldToRecycle() {
+
+        //finds the visited world that
+        // * is active and is not the nether world
+        // * and has the least amount of active players, and for an equal number of active players,
+        // *   is been inactive the longest amount of time
+        // * and
+        // *   (there are no active players and no one teleported out
+        // *       or
+        // *    there are no active players and someone teleported out and
+        // *            the world has been inactive for MAX_RECYCLE_LAST_PLAYER_LOG_NO_PLAYERS_MS
+        // *       or
+        // *    there are active players and the world has been inactive for
+        // *       MAX_RECYCLE_LAST_PLAYER_LOG_MS)
+        SqlQuery q = qcp.db.
+                createSqlQuery(
+                        "select vw.id as id,\n" +
+                                "       (select count(*) from qc_player p where p.visited_world_id = vw.id) as active_players,\n" +
+                                "       ifnull((select max(timestamp) from qc_player_log l where l.visited_world_id = vw.id),0) as last_action\n" +
+                                "       from qc_visited_world vw\n" +
+                                "       where vw.id != "+NETHER_VISITED_WORLD_ID+\n" +
+                                "       and active = 1\n"+
+                                "       and (active_players = 0 and\n" +
+                                "              (not exists (select 'x' from qc_player_log l where action = 'L' and l.visited_world_id = vw.id)\n" +
+                                "                or last_action < "+MAX_RECYCLE_LAST_PLAYER_LOG_NO_PLAYERS_MS+")\n" +
+                                "           or last_action < "+MAX_RECYCLE_LAST_PLAYER_LOG_MS+")\n" +
+                                " order by active_players, last_action;\n"
+                );
+        SqlRow sr = q.findUnique();
+        if(sr != null)
+            return getQCVisitedWorld(sr.getInteger("id"));
+
+        return null;
     }
 
     private void sendPlayerToNether(Player p) {
@@ -246,8 +344,8 @@ public class WorldManager {
     }
 
     public void setupForNewInstall() {
-        QCWorld w = new QCWorld(1, WorldUtil.NETHER_WORLD_NAME);
-        netherVisitedWorld = new QCVisitedWorld(1,w.getId(),0,0,0,0,0,0,true);
+        QCWorld w = new QCWorld(NETHER_WORLD_ID, WorldUtil.NETHER_WORLD_NAME);
+        netherVisitedWorld = new QCVisitedWorld(NETHER_VISITED_WORLD_ID,w.getId(),0,0,0,0,0,0,true);
         qcp.db.insert(w);
         qcp.db.insert(netherVisitedWorld);
         visitedWorlds.add(netherVisitedWorld);

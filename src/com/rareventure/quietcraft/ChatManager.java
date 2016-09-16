@@ -64,7 +64,7 @@ public class ChatManager {
      */
     public void speak(Player self, String name, String action, Location loc, double maxDistSqr, String message)
     {
-        String normalMessage = name + " "+action+" " +message;
+        String normalMessage = name + " "+action+" \"" +message+"\"";
         String inaudibleMessage = name+" "+action+" *in audible*";
         String inaudibleMessage2 = "<*in audible*> "+action+" *in audible*";
         List<Player> allPlayers = loc.getWorld().getPlayers();
@@ -89,7 +89,7 @@ public class ChatManager {
             else
                 return; // don't send a message past inaudible range
 
-            toPlayer.sendMessage(String.format("\u00A7d%s\u00A7f \"%s\"",
+            toPlayer.sendMessage(String.format("\u00A7d%s\u00A7f %s",
                         WorldUtil.
                         getTextDirectionFromSource(vecToSoundSource, toPlayerLoc.getYaw())
                         ,fullMessage));

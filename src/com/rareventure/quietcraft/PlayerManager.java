@@ -18,12 +18,21 @@ import java.util.*;
 public class PlayerManager {
     private static final int SOULS_PER_REBIRTH = 1;
     private static final Material SOUL_MATERIAL_TYPE = Material.DIAMOND;
-    private static final String SOUL_DISPLAY_NAME = "Soul";
+    private static final String SOUL_DISPLAY_NAME = "Soul Gem";
 
+    //TODO 2 nether care pack
+    //TODO 2 sound travels everywhere in nether
+    //TODO 2 vw that cannot be visited (all players dead or moved to other worlds)
+    //  are recycled immediately (to prevent a griefer from spawn trapping all worlds)
+
+    //TODO 2 no more wild portals
+    //TODO 2 if player dies x number of times in 24 hours, they nether spawn for awhile
+
+    //TODO 2, maybe all portal keys to work as is
     //TODO 2.5 make saying 'hello sailor' cause the person to be immediately transported to the nether
     //with no souls
     private static final List<String> SOUL_LORE = Arrays.asList(
-            ("This is a soul. It's very valuable if you like living in this world.").split("\n"));
+            ("This is a soul gem. It's very valuable, if you like living in this world.").split("\n"));
 
     private static final Material PORTAL_KEY_MATERIAL = Material.FLINT_AND_STEEL;
 
@@ -214,6 +223,8 @@ public class PlayerManager {
         debugPrintPlayerInfo("onPlayerQuit",player);
     }
 
+    //TODO 2 remove "from nether" portals
+
     /**
      * This is called after onDeath() when the player has clicked the respawn button
      * and is ready to teleport to his new home.
@@ -276,7 +287,7 @@ public class PlayerManager {
         try{
             addToPlayerLog(player, QCPlayerLog.Action.PERMA_DEATH);
 
-            vw = qcp.wm.findBestWorldForDeadPlayer(p);
+            vw = qcp.wm.findOrCreateBestWorldForDeadPlayer(p);
 
             player.setVisitedWorld(vw);
             db.update(player);
@@ -385,6 +396,21 @@ public class PlayerManager {
             Bukkit.getLogger().info("Could not find link for " +l);
             WorldUtil.destroyPortal(l, false);
             return;
+        }
+
+        QCPlayer qcPlayer = getQCPlayer(event.getPlayer());
+
+        qcp.db.beginTransaction();
+        try {
+            addToPlayerLog(qcPlayer, QCPlayerLog.Action.MOVED_FROM_WORLD);
+            qcPlayer.setVisitedWorld(qcp.wm.getQCVisitedWorld(
+                    pl.getOtherVisitedWorldId(qcPlayer.getVisitedWorld().getId())));
+            qcp.db.update(qcPlayer);
+            addToPlayerLog(qcPlayer, QCPlayerLog.Action.MOVED_TO_WORLD);
+            qcp.db.commitTransaction();
+        }
+        finally {
+            qcp.db.endTransaction();
         }
 
         Location otherLocation = pl.getOtherLoc(qcp.wm,l);

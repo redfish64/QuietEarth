@@ -78,9 +78,24 @@
 </node>
 </node>
 </node>
-<node CREATED="1467995679929" ID="ID_1767029268" MODIFIED="1467995684013" TEXT="7/8/16">
-<node CREATED="1467995688489" ID="ID_1610539266" MODIFIED="1473784582588" TEXT="multi world">
-<node CREATED="1467445003118" ID="ID_1669710513" MODIFIED="1473784379431" TEXT="database">
+<node CREATED="1467995679929" ID="ID_1767029268" MODIFIED="1473989296657" TEXT="7/8/16">
+<node CREATED="1467996547870" ID="ID_1741852940" MODIFIED="1467996552931" TEXT="startup">
+<node CREATED="1467996554087" ID="ID_1545746531" MODIFIED="1467996557883" TEXT="create/open database"/>
+<node CREATED="1473081969417" ID="ID_845212550" MODIFIED="1473081976021" TEXT="initialize worlds"/>
+</node>
+<node CREATED="1467996559071" ID="ID_664342422" MODIFIED="1467996562123" TEXT="on player login">
+<node CREATED="1467996564439" ID="ID_1175726893" MODIFIED="1467996567715" TEXT="lookup of player"/>
+<node CREATED="1467996573359" ID="ID_1505544654" MODIFIED="1467996578074" TEXT="if player found">
+<node CREATED="1467996579499" ID="ID_123843905" MODIFIED="1473081906093" TEXT="player is assumed to be in the right place, so we don&apos;t move them"/>
+<node CREATED="1473081908345" ID="ID_1419504634" MODIFIED="1473081916621" TEXT="record to db action"/>
+</node>
+<node CREATED="1467996601421" ID="ID_601103134" MODIFIED="1467996613070" TEXT="else">
+<node CREATED="1467996613983" ID="ID_12034274" MODIFIED="1467996617115" TEXT="create new player"/>
+<node CREATED="1473908850861" ID="ID_936361301" MODIFIED="1473908854145" TEXT="spawn player"/>
+</node>
+<node CREATED="1467996645991" ID="ID_510693726" MODIFIED="1467996651475" TEXT="update playerlog"/>
+</node>
+<node CREATED="1467445003118" FOLDED="true" ID="ID_1669710513" MODIFIED="1473908833014" TEXT="database">
 <node CREATED="1467445008976" ID="ID_1726378833" MODIFIED="1467445130668" TEXT="Player">
 <node CREATED="1467445037534" ID="ID_1587864216" MODIFIED="1468003618458" TEXT="uuid"/>
 <node CREATED="1467445059822" ID="ID_950797792" MODIFIED="1473784608759" TEXT="vw_id"/>
@@ -127,33 +142,6 @@
 </node>
 </node>
 </node>
-<node CREATED="1468004720758" ID="ID_1245911041" MODIFIED="1468004724361" TEXT="in memory">
-<node CREATED="1468004699429" ID="ID_1089857093" MODIFIED="1468005000195" TEXT="active worlds">
-<node CREATED="1468004709765" ID="ID_104090092" MODIFIED="1468005011649" TEXT="player_count"/>
-</node>
-</node>
-</node>
-<node CREATED="1467996547870" ID="ID_1741852940" MODIFIED="1467996552931" TEXT="startup">
-<node CREATED="1467996554087" ID="ID_1545746531" MODIFIED="1467996557883" TEXT="create/open database"/>
-<node CREATED="1473081969417" ID="ID_845212550" MODIFIED="1473081976021" TEXT="initialize worlds"/>
-</node>
-<node CREATED="1467996559071" ID="ID_664342422" MODIFIED="1467996562123" TEXT="on player login">
-<node CREATED="1467996564439" ID="ID_1175726893" MODIFIED="1467996567715" TEXT="lookup of player"/>
-<node CREATED="1467996573359" ID="ID_1505544654" MODIFIED="1467996578074" TEXT="if player found">
-<node CREATED="1467996579499" ID="ID_123843905" MODIFIED="1473081906093" TEXT="player is assumed to be in the right place, so we don&apos;t move them"/>
-<node CREATED="1473081908345" ID="ID_1419504634" MODIFIED="1473081916621" TEXT="record to db action"/>
-</node>
-<node CREATED="1467996601421" ID="ID_601103134" MODIFIED="1467996613070" TEXT="else">
-<node CREATED="1467996613983" ID="ID_12034274" MODIFIED="1467996617115" TEXT="create new player"/>
-<node CREATED="1467996617431" ID="ID_98625611" MODIFIED="1468004307986" TEXT="choose world">
-<node CREATED="1468004311646" ID="ID_1107200345" MODIFIED="1468004315849" TEXT="suitable world">
-<node CREATED="1468004324798" ID="ID_1690292589" MODIFIED="1468004348585" TEXT="contains the most active people of all worlds"/>
-<node CREATED="1468004349317" ID="ID_1545438265" MODIFIED="1468004363089" TEXT="of equal active people, contains the most people that ever visited"/>
-</node>
-</node>
-</node>
-<node CREATED="1467996645991" ID="ID_510693726" MODIFIED="1467996651475" TEXT="update playerlog"/>
-</node>
 <node CREATED="1468004532414" ID="ID_731819014" MODIFIED="1468004539393" TEXT="options">
 <node CREATED="1468004540550" ID="ID_1509246602" MODIFIED="1468004562897" TEXT="Should we make each world a copy of the world the person died in?">
 <node CREATED="1468004570446" ID="ID_1723863330" MODIFIED="1468004606721" TEXT="When the player spawns in the new world, its in a slightly different place, incase the spawn point is some sort of trap room"/>
@@ -180,7 +168,7 @@
 <node CREATED="1473099286913" ID="ID_1878431273" MODIFIED="1473099290772" TEXT="about 100 players"/>
 </node>
 </node>
-<node CREATED="1473099421192" ID="ID_842966636" MODIFIED="1473784595908" TEXT="thoughts">
+<node CREATED="1473099421192" FOLDED="true" ID="ID_842966636" MODIFIED="1473851626090" TEXT="thoughts">
 <font NAME="SansSerif" SIZE="12"/>
 <node CREATED="1473099425896" ID="ID_1629893461" MODIFIED="1473099480125" TEXT="If we have a maximum of 50 worlds, it seems more like we are just a perma death server with extra lives">
 <node CREATED="1473099481585" ID="ID_1603276191" MODIFIED="1473099510045" TEXT="All we need to do is prevent the high death users from joining servers populated by more friendly people."/>
@@ -342,37 +330,7 @@
 <node CREATED="1467995735168" ID="ID_221398552" MODIFIED="1473081736366" TEXT="coordinates of player can be revealed allowing players to find where they once were"/>
 </node>
 </node>
-<node CREATED="1473779670385" FOLDED="true" ID="ID_1806096186" MODIFIED="1473784778111" TEXT="thoughts2">
-<node CREATED="1473779673521" ID="ID_679005881" MODIFIED="1473779679093" TEXT="world reuse">
-<node CREATED="1473779680105" ID="ID_1178543141" MODIFIED="1473779729933" TEXT="not eligible if">
-<node CREATED="1473779684209" ID="ID_714270803" MODIFIED="1473779691333" TEXT="players existing in world">
-<node CREATED="1473779692401" ID="ID_98781438" MODIFIED="1473779697757" TEXT="logged in"/>
-<node CREATED="1473779698361" ID="ID_745508255" MODIFIED="1473779706669" TEXT="logged out but within X days">
-<node CREATED="1473780600449" ID="ID_1125172592" MODIFIED="1473780623373" TEXT="Probably 7 days"/>
-</node>
-</node>
-<node CREATED="1473779708281" ID="ID_1228561549" MODIFIED="1473779726421" TEXT="portals exist"/>
-<node CREATED="1473779894833" ID="ID_570379573" MODIFIED="1473781964342" TEXT="player left from a portal within X days">
-<node CREATED="1473779904921" ID="ID_930017209" MODIFIED="1473779912125" TEXT="probably 1 day or less"/>
-<node CREATED="1473780545441" ID="ID_808436687" MODIFIED="1473780582389" TEXT="This prevents the case where everyone in the world take a trip to the nether together, and destroy the portal, since they know they can come back since they have a portal key"/>
-</node>
-</node>
-<node CREATED="1473779873601" ID="ID_1205514430" MODIFIED="1473779880661" TEXT="worlds will be reused oldest first"/>
-<node CREATED="1473780627921" ID="ID_1527181915" MODIFIED="1473780639453" TEXT="players that log in from an old visiting world">
-<node CREATED="1473780645834" ID="ID_1490906036" MODIFIED="1473780647869" TEXT="What do we do?">
-<node CREATED="1473780649665" ID="ID_315100314" MODIFIED="1473780660685" TEXT="Give them a new portal key?">
-<node CREATED="1473780662737" ID="ID_1270185479" MODIFIED="1473780666853" TEXT="What if they didn&apos;t have one?"/>
-<node CREATED="1473780668025" ID="ID_1397679606" MODIFIED="1473780674165" TEXT="Check their inventory and replace it?"/>
-<node CREATED="1473780675273" ID="ID_1292870095" MODIFIED="1473780698621" TEXT="What if they stored it in a box somewhere?"/>
-</node>
-</node>
-</node>
-<node CREATED="1473784392026" ID="ID_1880706728" MODIFIED="1473784399854" TEXT="can we reuse at player spawn?">
-<node CREATED="1473784400770" ID="ID_775517918" MODIFIED="1473784419854" TEXT="We need to choose the oldest eligibleworld">
-<node CREATED="1473784489339" ID="ID_1682022029" MODIFIED="1473784497248" TEXT="players existing in world"/>
-</node>
-</node>
-</node>
+<node CREATED="1473779670385" FOLDED="true" ID="ID_1806096186" MODIFIED="1473989609304" TEXT="thoughts2">
 <node CREATED="1473779739601" ID="ID_1129327386" MODIFIED="1473779867733" TEXT="from other world (including from nether) portals">
 <node CREATED="1473779760681" ID="ID_453209071" MODIFIED="1473779786477" TEXT="do not work if world has been reclaimed"/>
 </node>
@@ -415,24 +373,163 @@
 <node CREATED="1473782071266" ID="ID_1579837478" MODIFIED="1473782089350" TEXT="people spawning in nether shouldn&apos;t happen too often, so we&apos;ll make this future"/>
 </node>
 <node CREATED="1473780870545" ID="ID_1939626376" MODIFIED="1473780885981" TEXT="nether portals should have a ceiling to prevent falling lava"/>
+<node CREATED="1473901760305" ID="ID_978631733" MODIFIED="1473901763021" TEXT="world reuse">
+<node CREATED="1473901764098" ID="ID_1114355802" MODIFIED="1473901791933" TEXT="a griefer could spawn trap and kill themselves for all 30 worlds, thereby preventing anyone else from playing"/>
+<node CREATED="1473901793169" ID="ID_100388392" MODIFIED="1473901818638" TEXT="What if we allowed multiple vw?">
+<node CREATED="1473901805241" ID="ID_580482514" MODIFIED="1473901814621" TEXT="prevent nether spawning, which seems like no fun"/>
+<node CREATED="1473901821698" ID="ID_1358399443" MODIFIED="1473901842341" TEXT="When we run out of worlds, we choose the &quot;best&quot; world, which is the one that is the least active"/>
+<node CREATED="1473901847777" ID="ID_410989670" MODIFIED="1473901879815" TEXT="The main concern is that people find themselves a way back (on their own) to a popular or &quot;valuable&quot; world"/>
+<node CREATED="1473901880417" ID="ID_699776022" MODIFIED="1473901902957" TEXT="So we need to assess a worlds value, and those with little value get chosen first for new vw"/>
+<node CREATED="1473901922017" ID="ID_1795463651" MODIFIED="1473901927773" TEXT="what makes a world valuable?">
+<node CREATED="1473901928881" ID="ID_533483876" MODIFIED="1473901941366" TEXT="a lot of recent visits by distinct individuals"/>
+</node>
+<node CREATED="1473901947217" ID="ID_1185151068" MODIFIED="1473901952743" TEXT="multiple vw player impacts">
+<node CREATED="1473901953873" ID="ID_1843797422" MODIFIED="1473901985909" TEXT="Player would get the vw of whatever world they teleported into last (or their spawn world if they never teleported)"/>
+<node CREATED="1473902036641" ID="ID_76270895" MODIFIED="1473902070758" TEXT="What if someone keeps keys, teleports to nether, hides them all in some chest somewhere and collects them, so they can transport themselves to any world?">
+<node CREATED="1473902112914" ID="ID_1676798969" MODIFIED="1473902131747">
+<richcontent TYPE="NODE"><html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      The key must match the player's vw?
+    </p>
+  </body>
+</html></richcontent>
+<node CREATED="1473902133762" ID="ID_887494305" MODIFIED="1473902156360" TEXT="This would mean that no one could invade a world"/>
+<node CREATED="1473902619571" ID="ID_549328137" MODIFIED="1473902647893" TEXT="Also, technically, whenever a user teleports, they no longer from the old vw, so they wouldn&apos;t be able to use the key as soon as they teleported"/>
+</node>
+<node CREATED="1473902670314" ID="ID_1893266460" MODIFIED="1473902686717" TEXT="What if we simplfied it so that nether &quot;wild&quot; portals don&apos;t work anymore"/>
+<node CREATED="1473902711226" ID="ID_164695705" MODIFIED="1473902731349" TEXT="Then any portal key simply creates a nether portal according to the players vw"/>
+</node>
+</node>
+</node>
+<node CREATED="1473902442185" ID="ID_275430995" MODIFIED="1473902552677" TEXT="What if we deactivated even active vw to allow only one vw at a time?"/>
+</node>
+<node CREATED="1473905410771" ID="ID_1580830566" MODIFIED="1473905415999" TEXT="nether death">
+<node CREATED="1473905417043" ID="ID_1118500889" MODIFIED="1473905443359" TEXT="This is necessary, otherwise people can farm souls by dying and making their way back to the world they like, dropping off souls and going back again"/>
+</node>
+</node>
+<node CREATED="1473906601612" ID="ID_161333668" MODIFIED="1473989610632" TEXT="thoughts3">
+<node CREATED="1473906606924" ID="ID_260224220" MODIFIED="1473906608895" TEXT="world reuse">
+<node CREATED="1473779873601" ID="ID_1205514430" MODIFIED="1473779880661" TEXT="worlds will be reused oldest first"/>
+<node CREATED="1473780627921" ID="ID_1527181915" MODIFIED="1473780639453" TEXT="players that log in from an old visiting world">
+<node CREATED="1473780645834" ID="ID_1490906036" MODIFIED="1473780647869" TEXT="What do we do?">
+<node CREATED="1473780649665" ID="ID_315100314" MODIFIED="1473780660685" TEXT="Give them a new portal key?">
+<node CREATED="1473780662737" ID="ID_1270185479" MODIFIED="1473780666853" TEXT="What if they didn&apos;t have one?"/>
+<node CREATED="1473780668025" ID="ID_1397679606" MODIFIED="1473780674165" TEXT="Check their inventory and replace it?"/>
+<node CREATED="1473780675273" ID="ID_1292870095" MODIFIED="1473780698621" TEXT="What if they stored it in a box somewhere?"/>
+</node>
+</node>
+</node>
+<node CREATED="1473784392026" ID="ID_1880706728" MODIFIED="1473784399854" TEXT="can we reuse at player spawn?">
+<node CREATED="1473784400770" ID="ID_775517918" MODIFIED="1473784419854" TEXT="We need to choose the oldest eligibleworld">
+<node CREATED="1473784489339" ID="ID_1682022029" MODIFIED="1473784497248" TEXT="players existing in world"/>
+</node>
+</node>
+</node>
+<node CREATED="1473908169452" ID="ID_1232406241" MODIFIED="1473908171952" TEXT="wild nether portals">
+<node CREATED="1473908174196" ID="ID_263256965" MODIFIED="1473908187208" TEXT="these are portals from the nether to a random location in the overworld">
+<node CREATED="1473908198340" ID="ID_1385802468" MODIFIED="1473908204784" TEXT="portal key is necessary to activate"/>
+</node>
+<node CREATED="1473908205949" ID="ID_1909800823" MODIFIED="1473908219816" TEXT="They add some complexities">
+<node CREATED="1473908221524" ID="ID_1901411945" MODIFIED="1473908272120" TEXT="If portal key gets into the nether world, and the player knows where it is (through cheating and finding location), they are effectively invincible, since they can always come back, and existing players in world can&apos;t stop them"/>
+</node>
+<node CREATED="1473908350660" ID="ID_1016323474" MODIFIED="1473908360544" TEXT="wild portals shouldn&apos;t exist"/>
+<node CREATED="1473908483348" ID="ID_1063803026" MODIFIED="1473908487656" TEXT="what about tame portals?">
+<node CREATED="1473908489052" ID="ID_1466442687" MODIFIED="1473908518808" TEXT="these are nether portals that always go to some constant place, maybe nearby spawn area"/>
+<node CREATED="1473908520764" ID="ID_423250241" MODIFIED="1473908534160" TEXT="This would allow the owners of the worlds to make a spawn trap">
+<node CREATED="1473908537268" ID="ID_528469469" MODIFIED="1473908553313" TEXT="Of course, such a trap couldn&apos;t be perfect, since the nether world owner may have any sort of tools"/>
+<node CREATED="1473908561868" ID="ID_51322175" MODIFIED="1473908603337" TEXT="But it would be very difficult to acquire from the nether"/>
+<node CREATED="1473908603940" ID="ID_426301073" MODIFIED="1473908627112" TEXT="If you got some tools within another overworld, though, you&apos;d probably have enough"/>
+</node>
+<node CREATED="1473908792589" ID="ID_1286281529" MODIFIED="1473908799560" TEXT="these might work, but no for now"/>
+</node>
+</node>
+<node CREATED="1473908361524" ID="ID_664719724" MODIFIED="1473908367240" TEXT="portals from other worlds">
+<node CREATED="1473908370268" ID="ID_333976112" MODIFIED="1473908380176" TEXT="same issue as wild portals">
+<node CREATED="1473908381068" ID="ID_1377720911" MODIFIED="1473908416832" TEXT="someone buries a portal key in nether, and uses it in another world, making themselves invincible"/>
+</node>
+</node>
+<node CREATED="1473989882693" ID="ID_1195460939" MODIFIED="1473989885974" TEXT="spawning">
+<node CREATED="1473982940723" ID="ID_426695901" MODIFIED="1473982946718" TEXT="spawn griefing">
+<node CREATED="1473983030458" ID="ID_1593200669" MODIFIED="1473983043366" TEXT="a griefer could go from world to world, spawn trapping it and then killing themselves"/>
+<node CREATED="1473983085594" ID="ID_53321904" MODIFIED="1473983089134" TEXT="solution">
+<node CREATED="1473983090266" ID="ID_1003956730" MODIFIED="1473983395518" TEXT="If the player that created the world dies, and there is no one else in it, maybe we could destroy it immediately">
+<node CREATED="1473983396370" FOLDED="true" ID="ID_192259411" MODIFIED="1473989677718" TEXT="Maybe when someone teleports to the nether, it doesn&apos;t affect their world status">
+<node CREATED="1473983452642" ID="ID_1141976332" MODIFIED="1473983503174" TEXT="Then we just look for players that belong to the world, if there are none, the visited world dies immediately"/>
+<node CREATED="1473983508194" ID="ID_688004596" MODIFIED="1473983539094" TEXT="This way a griefer could spawn trap only a single world. As soon as they die to try and repeat the process, their work will be undone."/>
+<node CREATED="1473983540347" ID="ID_1335261511" MODIFIED="1473983560663" TEXT="And it won&apos;t matter if they teleport to the nether first, or they teleport from the nether to another world"/>
+</node>
+<node CREATED="1473989678573" ID="ID_614901342" MODIFIED="1473989725449" TEXT="Problem is that if someone teleports to the nether and goes and visits a new world, they&apos;ll come back and there world is destroyed (if they were the only one in it), and their portal key doesn&apos;t work anymore"/>
+<node CREATED="1473989772197" ID="ID_773674617" MODIFIED="1473989792033" TEXT="Maybe players still respawn in their original world, unless they sleep in a bed in the new world">
+<node CREATED="1473989793909" ID="ID_1299801024" MODIFIED="1473989807529" TEXT="This would also prevent users from getting trapped in a new world simply from trying to visit it"/>
+<node CREATED="1473989808093" ID="ID_622484230" MODIFIED="1473989819689" TEXT="The people of the new world might be assholes and spawn trap them"/>
+</node>
+</node>
+</node>
+</node>
+<node CREATED="1473989890085" ID="ID_1050156097" MODIFIED="1473989906610" TEXT="dying 5 times to leave a world the player doesn&apos;t like is kind of tedious">
+<node CREATED="1473989907909" ID="ID_410767854" MODIFIED="1473993810948" TEXT="Maybe players only get souls when sleep in a bed for the first time"/>
+<node CREATED="1473993840856" ID="ID_809451257" MODIFIED="1473993858580" TEXT="Maybe a &quot;leaveworldforever&quot; command"/>
+<node CREATED="1473993985056" ID="ID_1897260024" MODIFIED="1473993988756" TEXT="too much complexity"/>
+</node>
+</node>
+<node CREATED="1473982947050" ID="ID_44108683" MODIFIED="1473982955519" TEXT="soul nether farming">
+<node CREATED="1473983050410" ID="ID_898084964" MODIFIED="1473983079438" TEXT="A player can store souls in the nether, or with someone else, kill themselves and then repeat the process"/>
+<node CREATED="1473983155754" ID="ID_577604611" MODIFIED="1473983165702" TEXT="solutions">
+<node CREATED="1473983166562" ID="ID_823780281" MODIFIED="1473983168150" TEXT="green souls">
+<node CREATED="1473983169146" ID="ID_1166336488" MODIFIED="1473983255542" TEXT="souls remain &quot;green&quot;, can&apos;t be used in any other world than the one they were created it,until being held by the original owner for at least 5 days">
+<node CREATED="1473983206131" ID="ID_543142662" MODIFIED="1473983284166" TEXT="We could even extend this to just the player, in that the souls can&apos;t be used by anyone else"/>
+<node CREATED="1473983569882" ID="ID_640857275" MODIFIED="1473983613022" TEXT="This would mean that to farm souls, one would have to wait 5 days before being able to repeat the process, and would have to stay alive for each character they were"/>
+<node CREATED="1473986991812" ID="ID_1966801375" MODIFIED="1473987010480" TEXT="It&apos;s nice, but maybe too complex">
+<node CREATED="1473987012004" ID="ID_605277893" MODIFIED="1473987030464" TEXT="We could make them secretly green, somehow?"/>
+<node CREATED="1473987212404" ID="ID_852211017" MODIFIED="1473987224264" TEXT="Maybe souls don&apos;t appear for 5 days in the players inventory"/>
+<node CREATED="1473987315669" ID="ID_1127460596" MODIFIED="1473987328105" TEXT="I think that we just don&apos;t explain it to the user"/>
+<node CREATED="1473987330284" ID="ID_86924573" MODIFIED="1473987343864" TEXT="Just say they are green in the lore, but otherwise they appear normal."/>
+<node CREATED="1473987344868" ID="ID_1350853978" MODIFIED="1473987354648" TEXT="They are usable by anyone in the users world"/>
+<node CREATED="1473987354956" ID="ID_185056705" MODIFIED="1473987400144" TEXT="They are not usable by anyone else, until 5 days have passed with the user not having died"/>
+<node CREATED="1473987401324" ID="ID_894327378" MODIFIED="1473987408304" TEXT="Maybe just use a soul id?">
+<node CREATED="1473988677413" ID="ID_1147436964" MODIFIED="1473988694753" TEXT="we can store a soul id using this code and it won&apos;t be visible to the user">
+<node CREATED="1473988696229" ID="ID_622859183" MODIFIED="1473988702641" TEXT="https://bukkit.org/threads/store-information-persistently-on-item-itemstack.174080/"/>
+</node>
+</node>
+</node>
+</node>
+</node>
+<node CREATED="1473989200277" ID="ID_842142517" MODIFIED="1473989218329" TEXT="can&apos;t create a portal for 5 days from initial spawn">
+<node CREATED="1473989219285" ID="ID_696073265" MODIFIED="1473989255265" TEXT="This would prevent a player from farming unless they can convince someone else in the new world to let them use a portal, which would be difficult, but kind of fun"/>
+</node>
+</node>
+</node>
+<node CREATED="1473982956490" ID="ID_1524993120" MODIFIED="1473982986534" TEXT="max deaths">
+<node CREATED="1473982988122" ID="ID_867169938" MODIFIED="1473983016486" TEXT="If a player dies in a world that is created by someone else, we shouldn&apos;t increase max deaths, because it may not be their fault">
+<node CREATED="1473983020370" ID="ID_1174177842" MODIFIED="1473983026030" TEXT="due to spawn traps or just mean people"/>
+</node>
+</node>
+<node CREATED="1473989565301" ID="ID_1446853363" MODIFIED="1473989571457" TEXT="do we need max deaths anymore?">
+<node CREATED="1473989572422" ID="ID_1919415533" MODIFIED="1473989589593" TEXT="It&apos;s only purpose was to prevent soul farming which we solved already"/>
+<node CREATED="1473989592669" ID="ID_1680462203" MODIFIED="1473989595401" TEXT="Get rid of it"/>
+</node>
 </node>
 <node CREATED="1473329224300" ID="ID_999690107" MODIFIED="1473329225537" TEXT="portals">
 <node CREATED="1473344962057" ID="ID_224671769" MODIFIED="1473759613455" TEXT="each user gets a special portal key. when a portal is made, this key must be nearby">
-<node CREATED="1473345017233" ID="ID_596003341" MODIFIED="1473345050380" TEXT="Portals made in the nether with this block will only go to the world of the portal block"/>
 <node CREATED="1473759759963" ID="ID_365677963" MODIFIED="1473759788711" TEXT="This prevents a random user from opening up a portal to hell and letting other random users inside the world">
 <node CREATED="1473759789924" ID="ID_1835980555" MODIFIED="1473759799591" TEXT="The user would have to be coaxed to give up their portal key"/>
 </node>
-<node CREATED="1473764869141" ID="ID_1817584664" MODIFIED="1473764879817" TEXT="Portal keys are associated with visited world, not actual world">
-<node CREATED="1473764881525" ID="ID_1436586991" MODIFIED="1473764897281" TEXT="When world is reused, portal key from old world no longer works"/>
 </node>
+<node CREATED="1473989460381" ID="ID_355776453" MODIFIED="1473989471041" TEXT="users can&apos;t create portals until 5 days have passed">
+<node CREATED="1473989471997" ID="ID_1976519499" MODIFIED="1473989512097" TEXT="prevents rapid soul farming. If user can&apos;t create a portal to a nether, they can&apos;t get their souls out, unless another user helps them, which would be unlikely because they are in a new world"/>
 </node>
 <node CREATED="1473759623867" ID="ID_1924238193" MODIFIED="1473759665815" TEXT="portals from each world go only to one &quot;nether spawn point&quot; for that world">
 <node CREATED="1473759666907" ID="ID_471626626" MODIFIED="1473777788804" TEXT="This way, someone in the nether can control the world nether portals and become &quot;king of the nether&quot;">
 <node CREATED="1473759700867" ID="ID_45020791" MODIFIED="1473759743199" TEXT="By strangling the portal to the nether, the world will slowly die, since newbies will run out, and souls that are lost cannot be regained"/>
 </node>
 </node>
-<node CREATED="1473759862315" ID="ID_581196899" MODIFIED="1473759877175" TEXT="portals from nether can be created, too, as long as a player has a portal key">
-<node CREATED="1473759878451" ID="ID_242091547" MODIFIED="1473759904903" TEXT="This means that losing a portal key can be dangerous"/>
+<node CREATED="1473759862315" ID="ID_581196899" MODIFIED="1473908876441" TEXT="portals from nether can&apos;t be created">
+<node CREATED="1473908880741" ID="ID_1001799671" MODIFIED="1473908887328" TEXT="portal keys only work from their own world"/>
+<node CREATED="1473908887573" ID="ID_1844012388" MODIFIED="1473908907048" TEXT="This prevents a player from hiding a key in the nether, and using it to always be able to teleport to their world of choice"/>
 </node>
 </node>
 <node CREATED="1473763933293" ID="ID_1457528766" MODIFIED="1473763933993" TEXT="nether">
@@ -453,13 +550,6 @@
 </node>
 </node>
 </node>
-<node CREATED="1473764906573" ID="ID_1331054879" MODIFIED="1473764908289" TEXT="world reuse">
-<node CREATED="1473764909365" ID="ID_75196820" MODIFIED="1473764923689" TEXT="abandonment">
-<node CREATED="1473764925061" ID="ID_829875226" MODIFIED="1473764933625" TEXT="Occurs when all of the following">
-<node CREATED="1473764934670" ID="ID_974322471" MODIFIED="1473764944138" TEXT="no portals exist to other worlds"/>
-</node>
-</node>
-</node>
 <node CREATED="1473763557829" ID="ID_760795941" MODIFIED="1473784788400" TEXT="user manual">
 <node CREATED="1473763560637" ID="ID_508662675" MODIFIED="1473763571017" TEXT="Subjects">
 <node CREATED="1473764026101" ID="ID_1519681681" MODIFIED="1473764027658" TEXT="pvp">
@@ -468,9 +558,23 @@
 </node>
 <node CREATED="1473763572165" ID="ID_1498478071" MODIFIED="1473763582745" TEXT="semi-perma death">
 <node CREATED="1473763631141" ID="ID_1111254238" MODIFIED="1473763632625" TEXT="souls"/>
+<node CREATED="1473905456219" ID="ID_162968790" MODIFIED="1473905463335" TEXT="die too much and wind up in the nether"/>
 </node>
 <node CREATED="1473763636541" ID="ID_713038597" MODIFIED="1473763638161" TEXT="nether">
 <node CREATED="1473763640949" ID="ID_412189619" MODIFIED="1473763650769" TEXT="souls drop when player dies"/>
+<node CREATED="1473905613907" ID="ID_492955853" MODIFIED="1473905615983" TEXT="nether death">
+<node CREATED="1473905617059" ID="ID_1823471153" MODIFIED="1473905619567" TEXT="nether care pack">
+<node CREATED="1473905627979" ID="ID_1209532824" MODIFIED="1473905628880" TEXT="wood"/>
+<node CREATED="1473905631115" ID="ID_1969183150" MODIFIED="1473905633023" TEXT="cobblestone"/>
+<node CREATED="1473905633331" ID="ID_952445658" MODIFIED="1473905636080" TEXT="tree samplings"/>
+<node CREATED="1473905636947" ID="ID_320125582" MODIFIED="1473905638151" TEXT="food"/>
+<node CREATED="1473905638451" ID="ID_456377512" MODIFIED="1473905641351" TEXT="wheat seeds"/>
+<node CREATED="1473905641755" ID="ID_501111257" MODIFIED="1473905643151" TEXT="coal"/>
+<node CREATED="1473905643739" ID="ID_422413575" MODIFIED="1473905645279" TEXT="dirt"/>
+<node CREATED="1473905645603" ID="ID_371013394" MODIFIED="1473905647735" TEXT="strings"/>
+</node>
+</node>
+<node CREATED="1473905655131" ID="ID_411406373" MODIFIED="1473905672319" TEXT="sound travels everywhere in nether, be careful when speaking"/>
 </node>
 <node CREATED="1473763583013" ID="ID_1767177315" MODIFIED="1473763584465" TEXT="griefers">
 <node CREATED="1473763964005" ID="ID_748733712" MODIFIED="1473763977139" TEXT="kill the griefer and he can probably never come back"/>
@@ -478,13 +582,32 @@
 </node>
 <node CREATED="1473763584901" ID="ID_214638953" MODIFIED="1473763611956" TEXT="portals">
 <node CREATED="1473763624846" ID="ID_555212777" MODIFIED="1473763628889" TEXT="portal keys"/>
+<node CREATED="1473989303405" ID="ID_1632408994" MODIFIED="1473989322841" TEXT="can&apos;t create a portal until 5 days have passed"/>
 <node CREATED="1473763620989" ID="ID_229375727" MODIFIED="1473763622857" TEXT="to nether"/>
-<node CREATED="1473763591949" ID="ID_362344784" MODIFIED="1473763593721" TEXT="from nether"/>
+<node CREATED="1473763591949" ID="ID_362344784" MODIFIED="1473908977473" TEXT="from nether not allowed"/>
 <node CREATED="1473763594197" ID="ID_435025403" MODIFIED="1473763599633" TEXT="multiple portals to nether"/>
 <node CREATED="1473763600572" ID="ID_1630882486" MODIFIED="1473763604569" TEXT="destroying portals"/>
+<node CREATED="1473905488803" ID="ID_1626154183" MODIFIED="1473905495455" TEXT="getting back to your old world">
+<node CREATED="1473905496619" ID="ID_420299527" MODIFIED="1473905503823" TEXT="convince friends to open a portal"/>
+<node CREATED="1473905504443" ID="ID_824999444" MODIFIED="1473905514303" TEXT="listen for your friends to guide you to the portal"/>
+<node CREATED="1473905514708" ID="ID_919099478" MODIFIED="1473905517881" TEXT="travel there"/>
+<node CREATED="1473905518811" ID="ID_70535457" MODIFIED="1473905535543" TEXT="soulgems will drop in nether, be careful!">
+<node CREATED="1473905536707" ID="ID_1085082126" MODIFIED="1473908962689" TEXT="After you die too much, you can be permentally stuck in nether"/>
+</node>
+</node>
 </node>
 <node CREATED="1473764057069" ID="ID_714860943" MODIFIED="1473764060257" TEXT="ancient worlds">
 <node CREATED="1473764061309" ID="ID_1241853049" MODIFIED="1473764074993" TEXT="will be revisitable after abandoned"/>
+</node>
+<node CREATED="1473851518464" ID="ID_1286172958" MODIFIED="1473851541105" TEXT="talking">
+<node CREATED="1473851541089" ID="ID_638734069" MODIFIED="1473851542034" TEXT="modes">
+<node CREATED="1473851520455" ID="ID_485206569" MODIFIED="1473851521434" TEXT="shout"/>
+<node CREATED="1473851521822" ID="ID_880536472" MODIFIED="1473851522802" TEXT="say"/>
+<node CREATED="1473851523150" ID="ID_582050319" MODIFIED="1473851525274" TEXT="whisper"/>
+</node>
+<node CREATED="1473851542414" ID="ID_526485569" MODIFIED="1473851547986" TEXT="people can only hear so far away"/>
+<node CREATED="1473851551102" ID="ID_1659467467" MODIFIED="1473851552546" TEXT="directions"/>
+<node CREATED="1473905472915" ID="ID_835136913" MODIFIED="1473905478303" TEXT="in the nether everyone hears all"/>
 </node>
 </node>
 </node>
@@ -493,6 +616,59 @@
 <node CREATED="1473850312227" ID="ID_326062731" MODIFIED="1473850318670" TEXT="scenarios">
 <node CREATED="1473850319786" ID="ID_1402518467" MODIFIED="1473850327583" TEXT="pile up bricks near a portal">
 <node CREATED="1473850329051" ID="ID_1478192687" MODIFIED="1473850337343" TEXT="portal will destroy itself (bukkit does this)"/>
+</node>
+</node>
+<node CREATED="1473908987157" ID="ID_685119456" MODIFIED="1473908993865" TEXT="chatting with others"/>
+</node>
+<node CREATED="1473779673521" ID="ID_679005881" MODIFIED="1473779679093" TEXT="world reuse">
+<node CREATED="1473779680105" ID="ID_1178543141" MODIFIED="1473779729933" TEXT="not eligible if">
+<node CREATED="1473779684209" ID="ID_714270803" MODIFIED="1473779691333" TEXT="players existing in world">
+<node CREATED="1473779692401" ID="ID_98781438" MODIFIED="1473779697757" TEXT="logged in"/>
+<node CREATED="1473779698361" ID="ID_745508255" MODIFIED="1473779706669" TEXT="logged out but within X days">
+<node CREATED="1473780600449" ID="ID_1125172592" MODIFIED="1473780623373" TEXT="Probably 7 days"/>
+</node>
+</node>
+<node CREATED="1473779708281" ID="ID_1228561549" MODIFIED="1473779726421" TEXT="portals exist"/>
+<node CREATED="1473779894833" ID="ID_570379573" MODIFIED="1473781964342" TEXT="player left from a portal within X days">
+<node CREATED="1473779904921" ID="ID_930017209" MODIFIED="1473779912125" TEXT="probably 1 day or less"/>
+<node CREATED="1473780545441" ID="ID_808436687" MODIFIED="1473780582389" TEXT="This prevents the case where everyone in the world take a trip to the nether together, and destroy the portal, since they know they can come back since they have a portal key"/>
+</node>
+</node>
+<node CREATED="1473906609972" ID="ID_1943850214" MODIFIED="1473906613487" TEXT="vw death">
+<node CREATED="1473906619931" ID="ID_396290153" MODIFIED="1473906625159" TEXT="requirements">
+<node CREATED="1473906625948" ID="ID_1746736939" MODIFIED="1473906633175" TEXT="all dead or only inactive players">
+<node CREATED="1473906634019" ID="ID_1004627191" MODIFIED="1473906637727" TEXT="inactive &gt; 2 weeks"/>
+</node>
+<node CREATED="1473906652372" ID="ID_1805220454" MODIFIED="1473906674672" TEXT="no teleported players or last teleport greater than 1 day ago"/>
+</node>
+<node CREATED="1473906678548" ID="ID_1947678860" MODIFIED="1473906681935" TEXT="when to test">
+<node CREATED="1473906683820" ID="ID_1577839019" MODIFIED="1473906758832" TEXT="player world death"/>
+<node CREATED="1473906766108" ID="ID_1397946180" MODIFIED="1473907384312" TEXT="when creating a new vw, we look for old ones to delete"/>
+<node CREATED="1473907728076" ID="ID_426301743" MODIFIED="1473907763960" TEXT="only delete the one which has the oldest inactive players and last teleport">
+<node CREATED="1473907783556" ID="ID_1367734785" MODIFIED="1473907810928" TEXT="Specifically, first choose no teleport worlds, regardless of inactive player status"/>
+<node CREATED="1473907811556" ID="ID_642549987" MODIFIED="1473907820336" TEXT="Then choose ones with the oldest teleport"/>
+</node>
+</node>
+<node CREATED="1473906871196" ID="ID_447674859" MODIFIED="1473907352384" TEXT="action">
+<node CREATED="1473907408492" ID="ID_1824329271" MODIFIED="1473907424864" TEXT="all players with the old vw get the new vw"/>
+<node CREATED="1473907437148" ID="ID_1002623613" MODIFIED="1473907447944" TEXT="all vw portals are destroyed"/>
+<node CREATED="1473907425812" ID="ID_790985917" MODIFIED="1473907903712" TEXT="vw is marked inactive"/>
+</node>
+<node CREATED="1473907515372" ID="ID_1027149180" MODIFIED="1473907517280" TEXT="notes">
+<node CREATED="1473907520612" ID="ID_878534883" MODIFIED="1473907683920" TEXT="even the perma nether respawning relies on player log to find death count, it shouldn&apos;t be an issue, because we only clean up dead worlds when respawning new ones"/>
+<node CREATED="1473907912068" ID="ID_523205392" MODIFIED="1473907934401" TEXT="we keep the player logs around for log information and to check for issues"/>
+</node>
+</node>
+<node CREATED="1473906613748" ID="ID_341327863" MODIFIED="1473906618040" TEXT="vw birth">
+<node CREATED="1473906799284" ID="ID_193291094" MODIFIED="1473906803704" TEXT="requirements">
+<node CREATED="1473906804779" ID="ID_383839939" MODIFIED="1473907846096" TEXT="world has no existing alive vw, or"/>
+<node CREATED="1473907846380" ID="ID_1154742552" MODIFIED="1473907859176" TEXT="has the oldest most likely candidate for vw death"/>
+</node>
+<node CREATED="1473906854660" ID="ID_1484233484" MODIFIED="1473906856615" TEXT="when to test">
+<node CREATED="1473906857572" ID="ID_1290024797" MODIFIED="1473906862416" TEXT="on player world death"/>
+</node>
+<node CREATED="1473906879820" ID="ID_932483262" MODIFIED="1473906883784" TEXT="action">
+<node CREATED="1473906884228" ID="ID_795778250" MODIFIED="1473906898607" TEXT="create new vw world, with random spawn, nether spawn and vw name"/>
 </node>
 </node>
 </node>
