@@ -21,7 +21,7 @@ public class QCPortalLink {
     private int id;
 
     @NotNull
-    private int visitedWorldId1;
+    private int worldId1;
 
     @NotNull
     private int loc1X;
@@ -33,7 +33,7 @@ public class QCPortalLink {
     private int loc1Z;
 
     @NotNull
-    private int visitedWorldId2;
+    private int worldId2;
 
     @NotNull
     private int loc2X;
@@ -54,42 +54,44 @@ public class QCPortalLink {
     public QCPortalLink() {
     }
 
-    public QCPortalLink(int visitedWorldId1, int loc1X, int loc1Y, int loc1Z, int visitedWorldId2, int loc2X, int loc2Y, int loc2Z) {
-        this.visitedWorldId1 = visitedWorldId1;
+    public QCPortalLink(int worldId1, int loc1X, int loc1Y, int loc1Z, int worldId2, int loc2X, int loc2Y, int loc2Z, Location cachedLoc1, Location cachedLoc2) {
+        this.worldId1 = worldId1;
         this.loc1X = loc1X;
         this.loc1Y = loc1Y;
         this.loc1Z = loc1Z;
-        this.visitedWorldId2 = visitedWorldId2;
+        this.worldId2 = worldId2;
         this.loc2X = loc2X;
         this.loc2Y = loc2Y;
         this.loc2Z = loc2Z;
+        this.cachedLoc1 = cachedLoc1;
+        this.cachedLoc2 = cachedLoc2;
     }
 
-    public QCPortalLink(int vwId1, Location portalLocation, int vwId2, Location overWorldPortalLocation) {
-        this.visitedWorldId1 = vwId1;
+    public QCPortalLink(int wId1, Location portalLocation, int wId2, Location overWorldPortalLocation) {
+        this.worldId1 = wId1;
         this.loc1X = portalLocation.getBlockX();
         this.loc1Y = portalLocation.getBlockY();
         this.loc1Z = portalLocation.getBlockZ();
-        this.visitedWorldId2 = vwId2;
+        this.worldId2 = wId2;
         this.loc2X = overWorldPortalLocation.getBlockX();
         this.loc2Y = overWorldPortalLocation.getBlockY();
         this.loc2Z = overWorldPortalLocation.getBlockZ();
     }
 
-    public int getVisitedWorldId1() {
-        return visitedWorldId1;
+    public int getWorldId1() {
+        return worldId1;
     }
 
-    public void setVisitedWorldId1(int visitedWorldId1) {
-        this.visitedWorldId1 = visitedWorldId1;
+    public void setWorldId1(int worldId1) {
+        this.worldId1 = worldId1;
     }
 
-    public int getVisitedWorldId2() {
-        return visitedWorldId2;
+    public int getWorldId2() {
+        return worldId2;
     }
 
-    public void setVisitedWorldId2(int visitedWorldId2) {
-        this.visitedWorldId2 = visitedWorldId2;
+    public void setWorldId2(int worldId2) {
+        this.worldId2 = worldId2;
     }
 
     /**
@@ -100,19 +102,19 @@ public class QCPortalLink {
      */
     public Location getOtherLoc(WorldManager wm, Location l) {
 
-        if(WorldUtil.isAt(l,loc1X,loc1Y,loc1Z) && wm.getQCVisitedWorld(l.getWorld().getName()).getId() ==
-                getVisitedWorldId1())
+        if(WorldUtil.isAt(l,loc1X,loc1Y,loc1Z) && wm.getQCWorld(l.getWorld().getName()).getId() ==
+                getWorldId1())
             return new Location(getWorld2(wm),loc2X,loc2Y,loc2Z);
 
         return new Location(getWorld1(wm),loc1X,loc1Y,loc1Z);
     }
 
     private World getWorld1(WorldManager wm) {
-        return Bukkit.getWorld(wm.getQCVisitedWorld(visitedWorldId1).getName());
+        return Bukkit.getWorld(wm.getQCWorld(worldId1).getName());
     }
 
     private World getWorld2(WorldManager wm) {
-        return Bukkit.getWorld(wm.getQCVisitedWorld(visitedWorldId2).getName());
+        return Bukkit.getWorld(wm.getQCWorld(worldId2).getName());
     }
 
     public int getId() {
@@ -125,8 +127,8 @@ public class QCPortalLink {
 
     public Location getLoc1() {
         if(cachedLoc1 == null) {
-            World w = DbUtil.getWorldFromQCVisitedWorldId(getVisitedWorldId1());
-            assert(w != null) : "World is null for "+getVisitedWorldId1();
+            World w = DbUtil.getWorldFromQCWorldId(getWorldId1());
+            assert(w != null) : "World is null for "+getWorldId1();
             cachedLoc1 = new Location(w, loc1X, loc1Y, loc1Z);
         }
 
@@ -135,8 +137,8 @@ public class QCPortalLink {
 
     public Location getLoc2() {
         if(cachedLoc2 == null) {
-            World w = DbUtil.getWorldFromQCVisitedWorldId(getVisitedWorldId2());
-            assert(w != null) : "World is null for "+getVisitedWorldId2();
+            World w = DbUtil.getWorldFromQCWorldId(getWorldId2());
+            assert(w != null) : "World is null for "+getWorldId2();
             cachedLoc2 = new Location(w, loc2X, loc2Y, loc2Z);
         }
 
@@ -195,21 +197,21 @@ public class QCPortalLink {
     public String toString() {
         return "QCPortalLink{" +
                 "id=" + id +
-                ", visitedWorldId1=" + visitedWorldId1 +
+                ", worldId1=" + worldId1 +
                 ", loc1X=" + loc1X +
                 ", loc1Y=" + loc1Y +
                 ", loc1Z=" + loc1Z +
-                ", visitedWorldId2=" + visitedWorldId2 +
+                ", worldId2=" + worldId2 +
                 ", loc2X=" + loc2X +
                 ", loc2Y=" + loc2Y +
                 ", loc2Z=" + loc2Z +
                 '}';
     }
 
-    public long getOtherVisitedWorldId(int id) {
-        if(id == visitedWorldId2)
-            return visitedWorldId1;
+    public long getOtherWorldId(int id) {
+        if(id == worldId2)
+            return worldId1;
 
-        return visitedWorldId2;
+        return worldId2;
     }
 }

@@ -40,7 +40,7 @@ public class DbUtil {
                 createSqlQuery(
                         " select count(*) as c from qc_player_log where timestamp >= :time and " +
                                 "player_id = :pid and action = 'X' and visited_world_id != "+
-                                WorldManager.NETHER_VISITED_WORLD_ID);
+                                WorldManager.NETHER_WORLD_ID);
 
         q.setParameter(1,System.currentTimeMillis() - timeMs);
         q.setParameter(2,playerId);

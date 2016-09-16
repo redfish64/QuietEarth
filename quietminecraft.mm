@@ -95,7 +95,7 @@
 </node>
 <node CREATED="1467996645991" ID="ID_510693726" MODIFIED="1467996651475" TEXT="update playerlog"/>
 </node>
-<node CREATED="1467445003118" FOLDED="true" ID="ID_1669710513" MODIFIED="1473908833014" TEXT="database">
+<node CREATED="1467445003118" ID="ID_1669710513" MODIFIED="1474004070182" TEXT="database">
 <node CREATED="1467445008976" ID="ID_1726378833" MODIFIED="1467445130668" TEXT="Player">
 <node CREATED="1467445037534" ID="ID_1587864216" MODIFIED="1468003618458" TEXT="uuid"/>
 <node CREATED="1467445059822" ID="ID_950797792" MODIFIED="1473784608759" TEXT="vw_id"/>
@@ -106,14 +106,11 @@
 <node CREATED="1468054943401" ID="ID_1386911060" MODIFIED="1468054945035" TEXT="World">
 <node CREATED="1468054946105" ID="ID_1671473401" MODIFIED="1468054952069" TEXT="id"/>
 <node CREATED="1468054952433" ID="ID_1289061435" MODIFIED="1468054954029" TEXT="name"/>
-</node>
-<node CREATED="1473782106042" ID="ID_561265688" MODIFIED="1473782108071" TEXT="VisitedWorld">
-<node CREATED="1473782109498" ID="ID_1318187908" MODIFIED="1473782110270" TEXT="id"/>
-<node CREATED="1473782221074" ID="ID_1926893251" MODIFIED="1473782224862" TEXT="nickname">
-<node CREATED="1473782226450" ID="ID_1929490821" MODIFIED="1473782252238" TEXT="Used to give the world a random name"/>
-</node>
 <node CREATED="1473782110794" ID="ID_1040217542" MODIFIED="1473782127574" TEXT="nether_portal_loc[x,y,z]"/>
-<node CREATED="1473782128058" ID="ID_89568102" MODIFIED="1473782136270" TEXT="span_loc[x,y,z]"/>
+<node CREATED="1473782128058" ID="ID_89568102" MODIFIED="1474004127405" TEXT="spawn_loc[x,y,z]"/>
+<node CREATED="1474004089185" ID="ID_1453135595" MODIFIED="1474004092589" TEXT="recycle_count">
+<node CREATED="1474004099713" ID="ID_992361410" MODIFIED="1474004122789" TEXT="whenever the world becomes empty we change the spawn_loc and nether_portal so it can act as a &quot;new&quot; world"/>
+</node>
 </node>
 <node CREATED="1473782137626" ID="ID_1718827732" MODIFIED="1473782140334" TEXT="PortalLink">
 <node CREATED="1473782141490" ID="ID_105936424" MODIFIED="1473782143478" TEXT="id"/>
@@ -128,7 +125,8 @@
 </node>
 <node CREATED="1467445118489" ID="ID_1944689299" MODIFIED="1467445126463" TEXT="PlayerLog">
 <node CREATED="1467445138537" ID="ID_1787179342" MODIFIED="1468003630410" TEXT="player_uuid"/>
-<node CREATED="1467445144819" ID="ID_1836162242" MODIFIED="1473784620560" TEXT="vw_id"/>
+<node CREATED="1467445144819" ID="ID_1836162242" MODIFIED="1474004134749" TEXT="world_id"/>
+<node CREATED="1474004135297" ID="ID_1588781196" MODIFIED="1474004138214" TEXT="world_recycle_count"/>
 <node CREATED="1467445155252" ID="ID_50553467" MODIFIED="1467445263089" TEXT="datetime"/>
 <node CREATED="1467445165533" ID="ID_1060242751" MODIFIED="1467445166971" TEXT="action">
 <node CREATED="1467445174836" ID="ID_693366832" MODIFIED="1468005051817" TEXT="login"/>
@@ -500,6 +498,64 @@
 </node>
 <node CREATED="1473989200277" ID="ID_842142517" MODIFIED="1473989218329" TEXT="can&apos;t create a portal for 5 days from initial spawn">
 <node CREATED="1473989219285" ID="ID_696073265" MODIFIED="1473989255265" TEXT="This would prevent a player from farming unless they can convince someone else in the new world to let them use a portal, which would be difficult, but kind of fun"/>
+<node CREATED="1474004171026" ID="ID_666665900" MODIFIED="1474004199150" TEXT="Maybe we should limit this to the farmers only. So if someone looks like they are farming, then we turn on this restriction, or gradually ramp it up to a maximum">
+<node CREATED="1474004202489" ID="ID_1081223428" MODIFIED="1474006956384" TEXT="But how to detect farmers?">
+<node CREATED="1474006789083" ID="ID_730193200" MODIFIED="1474006795135" TEXT="souls must be teleported out to farm"/>
+<node CREATED="1474006795746" ID="ID_478238145" MODIFIED="1474006811910" TEXT="player must die to restart farming"/>
+<node CREATED="1474006956379" ID="ID_745194326" MODIFIED="1474006962815" TEXT="increases to likelihood of farming">
+<node CREATED="1474006837731" ID="ID_873937581" MODIFIED="1474006864679" TEXT="so anytime someone teleports out and dies it increases the likelihood of farming"/>
+</node>
+<node CREATED="1474006929395" ID="ID_535532109" MODIFIED="1474006935558" TEXT="decreases to the likelihood of farming">
+<node CREATED="1474006865075" ID="ID_1619795239" MODIFIED="1474006926966" TEXT="if someone lives a long time"/>
+<node CREATED="1474006907283" ID="ID_1631897004" MODIFIED="1474006922551" TEXT="few souls left"/>
+</node>
+<node CREATED="1474007643987" ID="ID_41507903" MODIFIED="1474007651735" TEXT="average teleported out souls per hour?">
+<node CREATED="1474007655643" ID="ID_1954253031" MODIFIED="1474007671567" TEXT="and if it gets too high, we prevent creating another portal until this value decreases"/>
+<node CREATED="1474007684387" ID="ID_1527778642" MODIFIED="1474007733072" TEXT="anytime souls teleport out, this value increases"/>
+<node CREATED="1474007733179" ID="ID_1992591683" MODIFIED="1474007740808" TEXT="souls teleport back in, it decreases"/>
+<node CREATED="1474007811333" ID="ID_478412171" MODIFIED="1474007871480">
+<richcontent TYPE="NODE"><html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      so its simply:
+    </p>
+    <p>
+      
+    </p>
+    <p>
+      &#160;((souls out) -&#160;(souls in)) / (time user alive) = (soul farming per ms)
+    </p>
+  </body>
+</html>
+</richcontent>
+</node>
+<node CREATED="1474007899819" ID="ID_1857470490" MODIFIED="1474007921087" TEXT="except that if a merchant gets a lot of souls from other people (not from farming) we shouldn&apos;t lock him out from teleporting"/>
+<node CREATED="1474007921531" ID="ID_1639508668" MODIFIED="1474007944863" TEXT="So the only souls that should count are the ones created in a world"/>
+<node CREATED="1474007947251" ID="ID_1351025645" MODIFIED="1474007990767" TEXT="So we have">
+<node CREATED="1474007984451" ID="ID_675552629" MODIFIED="1474007986399" TEXT="souls_created"/>
+<node CREATED="1474007991851" ID="ID_1187123038" MODIFIED="1474008003079" TEXT="souls_received"/>
+<node CREATED="1474008083427" ID="ID_585255821" MODIFIED="1474008092136" TEXT="souls_given"/>
+<node CREATED="1474008092379" ID="ID_1095828814" MODIFIED="1474008096208" TEXT="souls_teleported_out"/>
+</node>
+</node>
+</node>
+</node>
+</node>
+<node CREATED="1474020432331" ID="ID_1426944359" MODIFIED="1474020449653" TEXT="we keep track of souls in/souls out per world">
+<node CREATED="1474020451754" ID="ID_1084621699" MODIFIED="1474020480645" TEXT="This prevents gangs of soul farmers from teaming up and giving souls to the &quot;fresh&quot; guy to teleport out with"/>
+<node CREATED="1474020483249" ID="ID_531060110" MODIFIED="1474020526029" TEXT="In general, if you have enough souls to go over the 1 soul per 1 day limit, the portal destroys itself when when you try to enter">
+<node CREATED="1474020669721" ID="ID_1459825989" MODIFIED="1474020703677" TEXT="The general affect is that for old worlds, souls can come in and out willy nilly, but for young worlds, they will be restricted"/>
+</node>
+<node CREATED="1474020531081" ID="ID_819763485" MODIFIED="1474020992830" TEXT="If your character hasn&apos;t lived for a long time, maybe you get a newbie grace period"/>
+<node CREATED="1474020617370" ID="ID_1974761986" MODIFIED="1474020625645" TEXT="What about if your character has been in the world for a long time?">
+<node CREATED="1474020722425" ID="ID_118916507" MODIFIED="1474020731213" TEXT="It would be an old world anyway, so it shouldn&apos;t really be affected"/>
+</node>
+<node CREATED="1474020638986" ID="ID_1535303472" MODIFIED="1474020645725" TEXT="Or maybe the souls themselves have an age?">
+<node CREATED="1474020972826" ID="ID_187314014" MODIFIED="1474020977725" TEXT="too complex, we&apos;d need to id souls"/>
+</node>
 </node>
 </node>
 </node>
@@ -511,6 +567,13 @@
 <node CREATED="1473989565301" ID="ID_1446853363" MODIFIED="1473989571457" TEXT="do we need max deaths anymore?">
 <node CREATED="1473989572422" ID="ID_1919415533" MODIFIED="1473989589593" TEXT="It&apos;s only purpose was to prevent soul farming which we solved already"/>
 <node CREATED="1473989592669" ID="ID_1680462203" MODIFIED="1473989595401" TEXT="Get rid of it"/>
+</node>
+<node CREATED="1473994875233" ID="ID_1289918792" MODIFIED="1473994891781" TEXT="why do we need visitedworlds if we only visit one world at a time?">
+<node CREATED="1473994893057" ID="ID_175996120" MODIFIED="1473994909861" TEXT="If we just use QCWorld, and get rid of visited worlds, it would be simpler"/>
+<node CREATED="1473994910145" ID="ID_712984805" MODIFIED="1473994936861" TEXT="When we want to &quot;recycle&quot; a world, we simply change the spawn point and the nether spawn point"/>
+<node CREATED="1473994943217" ID="ID_306956184" MODIFIED="1473994974805" TEXT="No, we still need visited worlds, otherwise we can&apos;t tell when a player has visited a world already"/>
+<node CREATED="1473994975305" ID="ID_132945468" MODIFIED="1473994996702" TEXT="Unless we add a special counter indicating everytime we recycled the world"/>
+<node CREATED="1473995299977" ID="ID_1525107835" MODIFIED="1473995324789" TEXT="Also we may want to have multiple visited worlds active at once one day"/>
 </node>
 </node>
 <node CREATED="1473329224300" ID="ID_999690107" MODIFIED="1473329225537" TEXT="portals">

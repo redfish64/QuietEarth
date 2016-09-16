@@ -74,7 +74,7 @@ public class WorldManager {
     /**
      * The id of the nether world
      */
-    private static final int NETHER_WORLD_ID = 1;
+    public static final int NETHER_WORLD_ID = 1;
 
     /**
      * When deciding whether to recycle a world, the time a visited world must have no
@@ -173,30 +173,48 @@ public class WorldManager {
             return netherQCWorld;
         }
 
-        return recycleWorld(bestWToRecycle);
+        recycleWorld(bestWToRecycle);
+
+        return bestWToRecycle;
     }
 
     //TODO 2 can't create a portal until 5 days have passed (prevent soul farming)
 
     //TODO 2 player doesn't switch worlds unless they sleep in a bed in the new one
 
+    //TODO 2 worlds don't allow there exit flow of souls to increase a certain amount
+    //per day. The number of souls in/out and date of last recycle is recorded in world
+    //to do this
+
     /**
-     * Recycles the world. This changes the spawn and nether points and increments
-     * the world counter
-     *
-     * @param w
-     * @return
+     * Recycles the world. This changes the spawn and nether points, increments
+     * the world counter, and destroys all previous portals
      */
-    private QCWorld recycleWorld(QCWorld w) {
-        //TODO 1 FIXME
+    private void recycleWorld(QCWorld w) {
         qcp.db.beginTransaction();
         try {
+            Location spawnLocation = WorldUtil.getRandomSpawnLocation(w.getWorld());
+            Location randomNetherPortalLocation = createRandomNetherPortalLocation();
+
+            w.setSpawnLocation(spawnLocation);
+            w.setNetherLocation(randomNetherPortalLocation);
+
+            w.setRecycleCounter(w.getRecycleCounter()+1);
 
         }
         finally {
             qcp.db.endTransaction();
         }
-        return null;
+
+        //destroy all the old portal links, so that the recycled world won't be
+        //enterable from the nether
+        getAllPortalLinks(w.getId()).forEach( pl -> destroyPortalsForPortalLink(pl));
+    }
+
+    private List<QCPortalLink> getAllPortalLinks(int worldId) {
+        return qcp.db.find(QCPortalLink.class).where("world_id1 = :wid or world_id2 = :wid")
+                .setParameter(1,worldId)
+                .setParameter(2,worldId).findList();
     }
 
     /**
@@ -530,5 +548,9 @@ public class WorldManager {
             if (WorldUtil.lastPortalConstructionMS + 1000 < System.currentTimeMillis())
                 WorldUtil.recentConstructedPortalAreas.clear();
         }
+    }
+
+    public QCWorld getQCWorld(String name) {
+        return worlds.stream().filter(w -> w.getName().equals(name)).findFirst().get();
     }
 }

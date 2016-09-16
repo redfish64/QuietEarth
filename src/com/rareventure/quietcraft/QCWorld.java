@@ -2,6 +2,7 @@
 package com.rareventure.quietcraft;
 
 import com.avaje.ebean.validation.NotNull;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 
@@ -140,6 +141,22 @@ public class QCWorld {
 
     public void setRecycleCounter(int recycleCounter) {
         this.recycleCounter = recycleCounter;
+    }
+
+    public World getWorld() {
+        return Bukkit.getWorld(getName());
+    }
+
+    public void setSpawnLocation(Location spawnLocation) {
+        setSpawnLocX(spawnLocation.getBlockX());
+        setSpawnLocY(spawnLocation.getBlockY());
+        setSpawnLocZ(spawnLocation.getBlockZ());
+    }
+
+    public void setNetherLocation(Location netherLocation) {
+        setNetherLocX(netherLocation.getBlockX());
+        setNetherLocY(netherLocation.getBlockY());
+        setNetherLocZ(netherLocation.getBlockZ());
     }
 }
 
