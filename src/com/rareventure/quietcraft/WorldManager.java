@@ -79,14 +79,6 @@ public class WorldManager {
     private static final int NETHER_WORLD_ID = 1;
 
     /**
-     * When deciding whether to recycle a world, the time a visited world with no
-     * active players must be inactive before being recycled.
-     * <p>Note that players may have teleported out of the world into the nether and may
-     * want to come back later</p>
-     */
-    private static final long MAX_RECYCLE_LAST_PLAYER_LOG_NO_PLAYERS_MS = 1000 * 3600 * 24;
-
-    /**
      * When deciding whether to recycle a world, the time a visited world must have no
      * log events before being recycled (with or without active players)
      * */
@@ -231,13 +223,6 @@ public class WorldManager {
      * world where the visited world can be destroyed.</p>
      */
     public QCVisitedWorld findOrCreateBestWorldForDeadPlayer(Player player) {
-        if(DbUtil.findNumberOfDeathsInTimePeriodForPlayer(player.getUniqueId().toString(),
-                MAX_DEATHS_BEFORE_NETHER_SPAWN_MS) > MAX_DEATHS_BEFORE_NETHER_SPAWN )
-        {
-            Bukkit.getLogger().info("Player "+player+" died too much and must go to the nether");
-            return netherVisitedWorld;
-        }
-
         //find the best world that already exists
         QCVisitedWorld bestVW = findBestActiveWorldForPlayer(player.getUniqueId().toString());
 
@@ -258,12 +243,12 @@ public class WorldManager {
 
     //TODO 2 can't create a portal until 5 days have passed (prevent soul farming)
 
-    //TODO 2 get rid of max deaths
+    //TODO 2 player doesn't switch worlds unless they sleep in a bed in the new one
 
     private QCVisitedWorld recycleVisitedWorld(QCVisitedWorld bestVWToRecycle) {
         qcp.db.beginTransaction();
         try {
-//TODO 1
+            
         }
         return null;
     }
@@ -279,11 +264,6 @@ public class WorldManager {
         // * and has the least amount of active players, and for an equal number of active players,
         // *   is been inactive the longest amount of time
         // * and
-        // *   (there are no active players and no one teleported out
-        // *       or
-        // *    there are no active players and someone teleported out and
-        // *            the world has been inactive for MAX_RECYCLE_LAST_PLAYER_LOG_NO_PLAYERS_MS
-        // *       or
         // *    there are active players and the world has been inactive for
         // *       MAX_RECYCLE_LAST_PLAYER_LOG_MS)
         SqlQuery q = qcp.db.
@@ -292,13 +272,11 @@ public class WorldManager {
                                 "       (select count(*) from qc_player p where p.visited_world_id = vw.id) as active_players,\n" +
                                 "       ifnull((select max(timestamp) from qc_player_log l where l.visited_world_id = vw.id),0) as last_action\n" +
                                 "       from qc_visited_world vw\n" +
-                                "       where vw.id != "+NETHER_VISITED_WORLD_ID+\n" +
+                                "       where vw.id != "+NETHER_VISITED_WORLD_ID+"\n" +
                                 "       and active = 1\n"+
-                                "       and (active_players = 0 and\n" +
-                                "              (not exists (select 'x' from qc_player_log l where action = 'L' and l.visited_world_id = vw.id)\n" +
-                                "                or last_action < "+MAX_RECYCLE_LAST_PLAYER_LOG_NO_PLAYERS_MS+")\n" +
-                                "           or last_action < "+MAX_RECYCLE_LAST_PLAYER_LOG_MS+")\n" +
-                                " order by active_players, last_action;\n"
+                                "       and (active_players = 0 " +
+                                " or last_action < "+MAX_RECYCLE_LAST_PLAYER_LOG_MS+")\n" +
+                                " order by active_players, last_action limit 1;\n"
                 );
         SqlRow sr = q.findUnique();
         if(sr != null)
