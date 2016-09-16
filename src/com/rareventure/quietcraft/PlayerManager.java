@@ -22,8 +22,8 @@ public class PlayerManager {
 
     //TODO 2 nether care pack
     //TODO 2 sound travels everywhere in nether
-    //TODO 2 vw that cannot be visited (all players dead or moved to other worlds)
-    //  are recycled immediately (to prevent a griefer from spawn trapping all worlds)
+    //TODO 2 vw that cannot be visited (all players dead or moved to other qcWorlds)
+    //  are recycled immediately (to prevent a griefer from spawn trapping all qcWorlds)
 
     //TODO 2 no more wild portals
     //TODO 2 if player dies x number of times in 24 hours, they nether spawn for awhile
@@ -315,7 +315,7 @@ public class PlayerManager {
             //revisited
             //TODO 2.5 maybe allow someone to revisit a world if they were the only one who revisited it
             //since the abandonment time (in another random spawn location of course... create a
-            // new visit id). Or should the visited worlds be based on the people in them? In other
+            // new visit id). Or should the visited qcWorlds be based on the people in them? In other
             // words, dying in a world with only one player doesn't prevent that world from being
             // visited again.
 

@@ -8,7 +8,7 @@ import org.bukkit.World;
 import javax.persistence.*;
 
 /**
- * Represents a link between two portals in two different worlds.
+ * Represents a link between two portals in two different qcWorlds.
  * <p>Note that we don't get notified when a portal is destroyed, so multiple portal links from and
  * to the same place may be created</p>
  */

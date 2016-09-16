@@ -12,11 +12,11 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
 
-//TODO 2 update visit id and change spawn point of worlds when visit id changes
+//TODO 2 update visit id and change spawn point of qcWorlds when visit id changes
 //TODO 2.5 possibly notify everybody in the nether where the portal opened, and give them a way to see their
 // own location, so they can attack it.
 
-//TODO 2 handle creation of new visit worlds to recycle old worlds
+//TODO 2 handle creation of new visit qcWorlds to recycle old qcWorlds
 //TODO 3 delete all player logs where visit ids no longer exist to save space??
 
 
@@ -39,13 +39,13 @@ import java.util.*;
 //TODO 2 see if we can change configuration on the fly so we can properly alpha
 
 /**
- * Manages worlds and visited worlds.
+ * Manages qcWorlds and visited qcWorlds.
  */
 public class WorldManager {
     private static final int MAX_WORLDS = 3;
 
     /**
-     * The amount of time before we start recycling old worlds as new
+     * The amount of time before we start recycling old qcWorlds as new
      */
     private static final long ABANDONED_WORLD_CUTOFF_MS = 1000L * 60L * 60L * 24L * 30L
             ;
@@ -85,32 +85,32 @@ public class WorldManager {
     private final QuietCraftPlugin qcp;
 
     /**
-     * All worlds of the server
+     * All qcWorlds of the server
      */
-    public List<QCWorld> worlds;
+    public List<QCWorld> qcWorlds;
     public QCWorld netherQCWorld;
 
     public WorldManager(QuietCraftPlugin qcp) {
         this.qcp = qcp;
 
-        worlds = new ArrayList<>();
-        worlds.addAll(qcp.getDatabase().find(QCWorld.class).findList());
+        qcWorlds = new ArrayList<>();
+        qcWorlds.addAll(qcp.getDatabase().find(QCWorld.class).findList());
 
-        for (QCWorld w : worlds) {
+        for (QCWorld w : qcWorlds) {
             //we must call createworld for each world in setup, otherwise we won't be able
             //to respawn to it during gameplay
             //Calling createWorld() whether it exists or not, freezes the entire server for 10-20 seconds
             //so we have to do this ahead of time. A waste of memory? Yes.
             //Alternatives? None that are so good as far as I can tell...
-            //Note that I tried 30 worlds and it clocked in under 2 gig, so I'm just going to leave it this
+            //Note that I tried 30 qcWorlds and it clocked in under 2 gig, so I'm just going to leave it this
             //way. There isn't much I can do. Maybe allow multiple servers, but I think if we can get abandoned
-            //worlds to work, we'll be ok
+            //qcWorlds to work, we'll be ok
             //TODO 4 Can we fix this somehow
             WorldCreator c = new WorldCreator(w.getName());
             c.createWorld();
 
             //find and populate the netherQCWorld
-            //note that if this is a fresh install, then worlds will be size 0, and netherQCWorld won't
+            //note that if this is a fresh install, then qcWorlds will be size 0, and netherQCWorld won't
             //be populated until setupForNewInstall() is called.
             if (w.getId() == NETHER_WORLD_ID)
                 netherQCWorld = w;
@@ -124,9 +124,8 @@ public class WorldManager {
      * <ul>
      * <li>either has the most live players currently,
      * or if tied, then the world with the most events,</li>
-     * <li>and the player hasn't visited the world</li>
+     * <li>and the player hasn't visited the latest recycled version of the world</li>
      * <li>and is not the nether world</li>
-     * <li>and is active</li>
      *
      * @param playerId it is allowed for the player id to be of a player that has not
      *                 yet joined (doesn't have a QCPlayer record)
@@ -137,11 +136,12 @@ public class WorldManager {
         SqlQuery q = qcp.db.
                 createSqlQuery(
                         " select id,\n" +
-                                "   (select count(*) from qc_player p where p.visited_world_id = vw.id) as pc, \n" +
-                                "   (select count (*) from qc_player_log where visited_world_id = vw.id) as plc\n" +
-                                "  from qc_visited_world vw where vw.active = 1 and vw.id not in\n" +
-                                "    (select visited_world_id from qc_player_log where player_id = :pid)\n" +
-                                "    and vw.id != "+NETHER_WORLD_ID+"\n" +
+                                "   (select count(*) from qc_player p where p.world_id = w.id) as pc, \n" +
+                                "   (select count (*) from qc_player_log where world_id = w.id) as plc\n" +
+                                "  from qc_world w where not exists \n" +
+                                "    (select 'x' from qc_player_log l where player_id = :pid and " +
+                                "       l.world_id = w.id and l.world_recycle_counter = w.recycle_counter)\n" +
+                                "    and w.id != "+NETHER_WORLD_ID+"\n" +
                                 "    order by pc desc,plc desc limit 1;\n");
 
         q.setParameter(1,playerId);
@@ -154,7 +154,7 @@ public class WorldManager {
 
     /**
      * Finds the best world to join for a player that just died to join.
-     * <p>If the player visited all visited worlds, look for an existing
+     * <p>If the player visited all visited qcWorlds, look for an existing
      * world where the visited world can be destroyed.</p>
      */
     public QCWorld findOrCreateBestWorldForDeadPlayer(Player player) {
@@ -169,7 +169,7 @@ public class WorldManager {
 
         if(bestWToRecycle == null)
         {
-            Bukkit.getLogger().info("No worlds left to recycle, sending player to nether");
+            Bukkit.getLogger().info("No qcWorlds left to recycle, sending player to nether");
             return netherQCWorld;
         }
 
@@ -180,9 +180,9 @@ public class WorldManager {
 
     //TODO 2 can't create a portal until 5 days have passed (prevent soul farming)
 
-    //TODO 2 player doesn't switch worlds unless they sleep in a bed in the new one
+    //TODO 2 player doesn't switch qcWorlds unless they sleep in a bed in the new one
 
-    //TODO 2 worlds don't allow there exit flow of souls to increase a certain amount
+    //TODO 2 qcWorlds don't allow there exit flow of souls to increase a certain amount
     //per day. The number of souls in/out and date of last recycle is recorded in world
     //to do this
 
@@ -256,7 +256,7 @@ public class WorldManager {
     }
 
     public QCWorld getQCWorld(long id) {
-        for (QCWorld w : worlds) {
+        for (QCWorld w : qcWorlds) {
             if (w.getId() == id)
                 return w;
         }
@@ -265,16 +265,15 @@ public class WorldManager {
     }
 
     public void setupForNewInstall() {
-        QCWorld w = new QCWorld(WorldUtil.NETHER_WORLD_NAME,0,0,0,0,0,0);
-        w.setId(NETHER_WORLD_ID);
-        qcp.db.insert(w);
+        netherQCWorld = new QCWorld(WorldUtil.NETHER_WORLD_NAME,0,0,0,0,0,0);
+        netherQCWorld.setId(NETHER_WORLD_ID);
         qcp.db.insert(netherQCWorld);
-        worlds.add(netherQCWorld);
+        qcWorlds.add(netherQCWorld);
 
-        //create a bunch of empty worlds
-        //we can't create worlds adhoc, or it freezes the server while the creation is in process
+        //create a bunch of empty qcWorlds
+        //we can't create qcWorlds adhoc, or it freezes the server while the creation is in process
         //so we create them ahead of time
-        //TODO 2.5 different types of worlds???
+        //TODO 2.5 different types of qcWorlds???
         for (int i = 0; i < MAX_WORLDS; i++)
             createNewWorld();
     }
@@ -292,7 +291,7 @@ public class WorldManager {
     //TODO 3 add a worldcreatorparams object for setting up different parameters for new world generation
     //(especially for hell and purgatory)
     public synchronized QCWorld createNewWorld(String name) {
-        int id = worlds.size() + 1;
+        int id = qcWorlds.size() + 1;
 
         if (name == null) {
             name = "world_qc" + (id-1); //TODO 3 maybe come up with a random name generator
@@ -309,6 +308,7 @@ public class WorldManager {
         QCWorld qcw = new QCWorld(name, spawnLocation, randomNetherPortalLocation);
         qcw.setId(id);
 
+        qcWorlds.add(qcw);
         qcp.getDatabase().insert(qcw);
 
         return qcw;
@@ -361,42 +361,14 @@ public class WorldManager {
         BlockArea ba = WorldUtil.getPortalArea(event.getBlocks());
         Location portalLocation = WorldUtil.getRepresentativePortalLocation(ba);
 
-        //if we are creating a portal in the nether, we choose the world to go to
-        //based on the portal key used.
+        //we don't allow portals from the nether, because it gets out of control
+        //if a worlds portal keys gets distributed outside the world
         if(WorldUtil.isNetherWorld(event.getWorld().getName()))
         {
-            World overWorld = Bukkit.getWorld(getWorldNameForPortalKey(playerAndPortalKey.getValue()));
+            qcp.getLogger().info("denied portal creation");
+            event.setCancelled(true);
 
-            // netherworld portals go to a random place in the overworld
-            // (the idea is that getting a portal key from another player is valuable and can
-            //  be used to sneak into the overworld)
-            Location overWorldPortalLocation = WorldUtil.getRandomSpawnLocation(overWorld);
-
-            constructOverWorldPortal(overWorldPortalLocation, true);
-
-            QuietCraftPlugin.db.beginTransaction();
-            try {
-                //destroy any existing portals that exist in the same spot
-                qcp.portalManager.getPortalLinksForLocation(portalLocation).
-                        forEach(this::destroyPortalsForPortalLink);
-                qcp.portalManager.getPortalLinksForLocation(overWorldPortalLocation).
-                        forEach(this::destroyPortalsForPortalLink);
-
-
-                //create a link from the current location to the nether world.
-                QCPortalLink pl =
-                        qcp.portalManager.createPortalLink(netherQCWorld.getId(),
-                                portalLocation,
-                                qcPlayer.getWorldId(),
-                                overWorldPortalLocation);
-                QuietCraftPlugin.db.save(pl);
-
-                QuietCraftPlugin.db.commitTransaction();
-            }
-            finally {
-                QuietCraftPlugin.db.endTransaction();
-            }
-
+            WorldUtil.destroyPortal(event.getBlocks(), true);
             return;
         }//if creating portal from nether world
 
@@ -429,7 +401,7 @@ public class WorldManager {
             QuietCraftPlugin.db.endTransaction();
         }
     }
-//TODO 2 make sure that players spawn in populated worlds first!
+//TODO 2 make sure that players spawn in populated qcWorlds first!
     /**
      * Destroys portals on both sides of a portal link, and then deletes the portal link,
      * and qclocations from the database
@@ -451,7 +423,7 @@ public class WorldManager {
                 (int)Math.round(width* PORTAL_HEIGHT_TO_WIDTH),
                 true, //TODO 3.5 if we let this be false, portal blocks face sideways
                 //Math.random() < .5,
-                active, true //we add ceilings to nether worlds incase there is lava falling down
+                active, true //we add ceilings to nether qcWorlds incase there is lava falling down
                 // from the ceiling. Since each world only gets one nether location that can't be
                 // moved, we want to make it extra safe
         );
@@ -551,6 +523,6 @@ public class WorldManager {
     }
 
     public QCWorld getQCWorld(String name) {
-        return worlds.stream().filter(w -> w.getName().equals(name)).findFirst().get();
+        return qcWorlds.stream().filter(w -> w.getName().equals(name)).findFirst().get();
     }
 }

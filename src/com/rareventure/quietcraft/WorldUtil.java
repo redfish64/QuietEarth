@@ -387,7 +387,6 @@ public class WorldUtil {
 
         ba.getBlocks(b1.getWorld()).forEach(b ->
                 {
-                    Bukkit.getLogger().info("setting sandstone "+b.getX()+","+b.getY()+","+b.getZ());
                     b.setType(Material.SANDSTONE);
                 });
 

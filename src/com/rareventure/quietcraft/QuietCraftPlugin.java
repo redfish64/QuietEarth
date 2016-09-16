@@ -34,7 +34,7 @@ public class QuietCraftPlugin extends JavaPlugin {
         wm = new WorldManager(this);
         pm = new PlayerManager(this);
 
-        //note this MUST be run after world manager is set up, or worlds
+        //note this MUST be run after world manager is set up, or qcWorlds
         //will not be created by the time we look for them (when we populate
         // the portallink cache)
         portalManager = new PortalManager(this);
