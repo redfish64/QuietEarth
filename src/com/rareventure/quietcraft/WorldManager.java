@@ -72,14 +72,6 @@ public class WorldManager {
     private static final MathUtil.RandomNormalParams OVERWORLD_PORTAL_WIDTH_PARAMS =
             new MathUtil.RandomNormalParams(4,1,4,7);
 
-    private static final long MAX_DEATHS_BEFORE_NETHER_SPAWN_MS = 1000 * 3600 * 24;
-
-    /**
-     * The number of deaths in MAX_DEATHS_NETHER_SPAWN_MS before we automatically send
-     * the user to the nether (deaths in nether don't count)
-     */
-    private static final int MAX_DEATHS_BEFORE_NETHER_SPAWN = 3;
-
     /**
      * The id of the nether visited world
      */
