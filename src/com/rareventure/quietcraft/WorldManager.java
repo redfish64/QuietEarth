@@ -228,7 +228,7 @@ public class WorldManager {
         SqlQuery q = qcp.db.
                 createSqlQuery(
         "select w.id as id,\n" +
-        "       (select count(*) from qc_player p where p.id != :pid and p.world_id = w.id) as active_players,\n" +
+        "       (select count(*) from qc_player p where p.uuid != :pid and p.world_id = w.id) as active_players,\n" +
         "       ifnull((select max(timestamp) from qc_player_log l where l.world_id = w.id),0) as last_action\n" +
         "       from qc_world w\n" +
         "       where w.id != "+NETHER_WORLD_ID+"\n" +

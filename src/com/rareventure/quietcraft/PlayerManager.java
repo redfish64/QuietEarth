@@ -20,7 +20,6 @@ public class PlayerManager {
     private static final Material SOUL_MATERIAL_TYPE = Material.DIAMOND;
     private static final String SOUL_DISPLAY_NAME = "Soul Gem";
 
-    //TODO 2 sound travels everywhere in nether
     //TODO 2 vw that cannot be visited (all players dead or moved to other qcWorlds)
     //  are recycled immediately (to prevent a griefer from spawn trapping all qcWorlds)
 

@@ -64,10 +64,15 @@ public class ChatManager {
      */
     public void speak(Player self, String name, String action, Location loc, double maxDistSqr, String message)
     {
+        List<Player> allPlayers = loc.getWorld().getPlayers();
+        
         String normalMessage = name + " "+action+" \"" +message+"\"";
         String inaudibleMessage = name+" "+action+" *in audible*";
         String inaudibleMessage2 = "<*in audible*> "+action+" *in audible*";
-        List<Player> allPlayers = loc.getWorld().getPlayers();
+
+        //in the nether, sound travels infinitely far
+        boolean isNetherWorld = WorldUtil.isNetherWorld(loc.getWorld());
+
         for (Player toPlayer : allPlayers) {
             if(self != null && toPlayer.equals(self))
             {
@@ -80,7 +85,8 @@ public class ChatManager {
             double distSqr = vecToSoundSource.lengthSquared();
             String fullMessage;
 
-            if (distSqr < maxDistSqr)
+            //in the nether, sound travels infinitely far
+            if (distSqr < maxDistSqr || isNetherWorld)
                 fullMessage = normalMessage;
             else if (distSqr < maxDistSqr * INAUDIBLE_DIST_PERC_SQR)
                 fullMessage = inaudibleMessage;

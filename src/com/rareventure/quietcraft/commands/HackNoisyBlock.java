@@ -11,6 +11,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 
 public class HackNoisyBlock implements CommandExecutor {
 
@@ -43,6 +44,17 @@ public class HackNoisyBlock implements CommandExecutor {
             int x = MathUtil.normalRandomInt(RNP) * (Math.random() < .5 ? 1 : -1);
             int y = MathUtil.normalRandomInt(RNP) * (Math.random() < .5 ? 1 : -1);
             int z = MathUtil.normalRandomInt(RNP) * (Math.random() < .5 ? 1 : -1);
+
+            if(args.length > 0)
+            {
+                float dist = Float.parseFloat(args[0]);
+                Vector v = new Vector(x,y,z);
+                v.normalize();
+                v.multiply(dist);
+                x = v.getBlockX();
+                y = v.getBlockY();
+                z = v.getBlockZ();
+            }
 
             Block b2 = l.getBlock().getRelative(x,y,z);
 

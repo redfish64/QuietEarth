@@ -34,9 +34,9 @@ commands:
               ...
   nb:
     aliases: []
-    description: ... create a cake nearby. ..
+    description: ... create a cake nearby in a random direction ..
     usage: |
-           /nb
+           /nb [dist]
            Example: /nb
               ...
   say_mode:
