@@ -165,7 +165,7 @@ public class WorldManager {
             return bestW;
 
         //recycle a visited world (if we can)
-        QCWorld bestWToRecycle = findBestWorldToRecycle();
+        QCWorld bestWToRecycle = findBestWorldToRecycle(player.getUniqueId().toString());
 
         if(bestWToRecycle == null)
         {
@@ -191,37 +191,32 @@ public class WorldManager {
      * the world counter, and destroys all previous portals
      */
     private void recycleWorld(QCWorld w) {
-        qcp.db.beginTransaction();
-        try {
-            Location spawnLocation = WorldUtil.getRandomSpawnLocation(w.getWorld());
-            Location randomNetherPortalLocation = createRandomNetherPortalLocation();
+        Location spawnLocation = WorldUtil.getRandomSpawnLocation(w.getWorld());
+        Location randomNetherPortalLocation = createRandomNetherPortalLocation();
 
-            w.setSpawnLocation(spawnLocation);
-            w.setNetherLocation(randomNetherPortalLocation);
+        w.setSpawnLocation(spawnLocation);
+        w.setNetherLocation(randomNetherPortalLocation);
 
-            w.setRecycleCounter(w.getRecycleCounter()+1);
+        w.setRecycleCounter(w.getRecycleCounter()+1);
+        qcp.db.save(w);
 
-        }
-        finally {
-            qcp.db.endTransaction();
-        }
 
         //destroy all the old portal links, so that the recycled world won't be
         //enterable from the nether
-        getAllPortalLinks(w.getId()).forEach( pl -> destroyPortalsForPortalLink(pl));
+        getAllPortalLinks(w.getId()). forEach( pl -> destroyPortalsForPortalLink(pl));
     }
 
     private List<QCPortalLink> getAllPortalLinks(int worldId) {
         return qcp.db.find(QCPortalLink.class).where("world_id1 = :wid or world_id2 = :wid")
-                .setParameter(1,worldId)
-                .setParameter(2,worldId).findList();
+                .setParameter(1,worldId).findList();
     }
 
     /**
      * Finds the world which is eligible for recycling and is the best candidate
      * according to various criteria
+     * @param deadPlayer
      */
-    private QCWorld findBestWorldToRecycle() {
+    private QCWorld findBestWorldToRecycle(String deadPlayerId) {
 
         //finds the visited world that
         // * is active and is not the nether world
@@ -233,15 +228,14 @@ public class WorldManager {
         SqlQuery q = qcp.db.
                 createSqlQuery(
         "select w.id as id,\n" +
-        "       (select count(*) from qc_player p where p.world_id = w.id) as active_players,\n" +
+        "       (select count(*) from qc_player p where p.id != :pid and p.world_id = w.id) as active_players,\n" +
         "       ifnull((select max(timestamp) from qc_player_log l where l.world_id = w.id),0) as last_action\n" +
         "       from qc_world w\n" +
         "       where w.id != "+NETHER_WORLD_ID+"\n" +
-        "       and active = 1\n"+
         "       and (active_players = 0 " +
         " or last_action < "+MAX_RECYCLE_LAST_PLAYER_LOG_MS+")\n" +
         " order by active_players, last_action limit 1;\n"
-                );
+                ).setParameter(1,deadPlayerId);
         SqlRow sr = q.findUnique();
         if(sr != null)
             return getQCWorld(sr.getInteger("id"));
@@ -407,10 +401,10 @@ public class WorldManager {
      * and qclocations from the database
      */
     private void destroyPortalsForPortalLink(QCPortalLink pl) {
+
+        //the block physics stuff will delete the portals from the db for us
         WorldUtil.destroyPortal(pl.getLoc1(),true);
         WorldUtil.destroyPortal(pl.getLoc2(),true);
-
-        QuietCraftPlugin.db.delete(pl);
     }
 
     /**

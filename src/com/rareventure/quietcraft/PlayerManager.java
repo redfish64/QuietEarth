@@ -20,7 +20,6 @@ public class PlayerManager {
     private static final Material SOUL_MATERIAL_TYPE = Material.DIAMOND;
     private static final String SOUL_DISPLAY_NAME = "Soul Gem";
 
-    //TODO 2 nether care pack
     //TODO 2 sound travels everywhere in nether
     //TODO 2 vw that cannot be visited (all players dead or moved to other qcWorlds)
     //  are recycled immediately (to prevent a griefer from spawn trapping all qcWorlds)
@@ -219,6 +218,26 @@ public class PlayerManager {
         }
     }
 
+    //TODO 3 make sure player can survive with nether care pack
+
+    /**
+     * Gives the player their initial items when they die and join the nether
+     */
+    private void giveNetherCarePack(Player player) {
+        Inventory i = player.getInventory();
+        i.clear();
+
+        i.addItem(new ItemStack(Material.LOG, 30));
+        i.addItem(new ItemStack(Material.COBBLESTONE, 40));
+        i.addItem(new ItemStack(Material.SAPLING, 5));
+        i.addItem(new ItemStack(Material.RAW_BEEF, 5));
+        i.addItem(new ItemStack(Material.SEEDS, 10));
+        i.addItem(new ItemStack(Material.DIRT, 64));
+        i.addItem(new ItemStack(Material.DIRT, 64));
+        i.addItem(new ItemStack(Material.DIRT, 64));
+        i.addItem(new ItemStack(Material.STRING, 5));
+    }
+
     public void onPlayerQuit(Player player) {
         addToPlayerLog(getQCPlayer(player), QCPlayerLog.Action.QUIT);
         debugPrintPlayerInfo("onPlayerQuit",player);
@@ -313,17 +332,13 @@ public class PlayerManager {
                 p.sendMessage("The world slowly comes into place. You blink twice... wait a minute, where *ARE* you?");
             //TODO 3 maybe put up a message indicating how much time before an abandoned world can be
             //revisited
-            //TODO 2.5 maybe allow someone to revisit a world if they were the only one who revisited it
-            //since the abandonment time (in another random spawn location of course... create a
-            // new visit id). Or should the visited qcWorlds be based on the people in them? In other
-            // words, dying in a world with only one player doesn't prevent that world from being
-            // visited again.
 
 
             //in the nether the spawn location is always random, to prevent someone from creating a booby
             //trap at a spawn location
             spawnLocation = WorldUtil.getRandomSpawnLocation(Bukkit.getWorld(WorldUtil.NETHER_WORLD_NAME));
 
+            giveNetherCarePack(p);
         }
         else
         {
