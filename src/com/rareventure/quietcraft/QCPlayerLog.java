@@ -56,7 +56,14 @@ public class QCPlayerLog {
     private Date timestamp;
 
     @NotNull
-    private int visitedWorldId;
+    private int worldId;
+
+    /**
+     * The recycle counter of the world for the log. This changes in the qc_world table
+     * everytime the world is recycled (ie a new spawn and nether portal is generated for it)
+     */
+    @NotNull
+    private int worldRecycleCounter;
 
     @NotNull
     private Action action;
@@ -66,10 +73,11 @@ public class QCPlayerLog {
 
     public QCPlayerLog() {}
 
-    public QCPlayerLog(String playerId, Date timestamp, int visitedWorldId, Action action) {
+    public QCPlayerLog(String playerId, Date timestamp, int worldId, int worldRecycleCounter, Action action) {
         this.playerId = playerId;
         this.timestamp = timestamp;
-        this.visitedWorldId = visitedWorldId;
+        this.worldId = worldId;
+        this.worldRecycleCounter = worldRecycleCounter;
         this.action = action;
     }
 
@@ -90,16 +98,16 @@ public class QCPlayerLog {
         this.timestamp = timestamp;
     }
 
-    public QCVisitedWorld getVisitedWorld() {
-        return QuietCraftPlugin.db.find(QCVisitedWorld.class).where().
-                eq("id", String.valueOf(visitedWorldId)).findUnique();
+    public QCWorld getQCWorld() {
+        return QuietCraftPlugin.db.find(QCWorld.class).where().
+                eq("id", String.valueOf(worldId)).findUnique();
     }
 
-    public void setVisitedWorld(QCVisitedWorld visitedWorld) {
+    public void setQCWorld(QCWorld world) {
         //warning! WE MUST use the bean method setVisitedWorldId(), or ebean doesn't
         // see the object as changed
         // and won't save it (and comedy will ensue)
-        setVisitedWorldId(visitedWorld.getId());
+        setWorldId(world.getId());
     }
 
     public Action getAction() {
@@ -118,12 +126,20 @@ public class QCPlayerLog {
         this.playerId = playerId;
     }
 
-    public int getVisitedWorldId() {
-        return visitedWorldId;
+    public int getWorldId() {
+        return worldId;
     }
 
-    public void setVisitedWorldId(int visitedWorldId) {
-        this.visitedWorldId = visitedWorldId;
+    public void setWorldId(int worldId) {
+        this.worldId = worldId;
+    }
+
+    public int getWorldRecycleCounter() {
+        return worldRecycleCounter;
+    }
+
+    public void setWorldRecycleCounter(int worldRecycleCounter) {
+        this.worldRecycleCounter = worldRecycleCounter;
     }
 
     public int getId() {

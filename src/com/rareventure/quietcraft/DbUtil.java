@@ -26,8 +26,8 @@ public class DbUtil {
     }
 
 
-    public static World getWorldFromQCVisitedWorldId(int vwId) {
-        QCVisitedWorld vw = getObject(QCVisitedWorld.class, vwId);
+    public static World getWorldFromQCWorldId(int vwId) {
+        QCWorld vw = getObject(QCWorld.class, vwId);
         return Bukkit.getWorld(vw.getName());
     }
 

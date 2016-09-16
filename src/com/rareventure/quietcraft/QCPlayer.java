@@ -15,8 +15,18 @@ public class QCPlayer {
     @Id
     private String uuid;
 
+    //TODO 2 make sure that when teleporting to another world, the player will respawn
+    // in their bed in the first world (or the spawn of the first world if their bed was
+    //  destroyed ... if we change our mind and want the player to respawn in the current
+    //  world, we still need to update their worldid and recyclecount)
+
+
+    /**
+     * The home world of the player
+     */
     @NotNull
-    private int visitedWorldId;
+    private int worldId;
+
 
     /**
      * The number of souls kept while dead. When a player dies
@@ -32,9 +42,9 @@ public class QCPlayer {
     public QCPlayer() {
     }
 
-    public QCPlayer(String uuid, QCVisitedWorld visitedWorld, int soulsKeptDuringDeath) {
+    public QCPlayer(String uuid, QCWorld world, int soulsKeptDuringDeath) {
         this.uuid = uuid;
-        this.visitedWorldId = visitedWorld.getId();
+        this.worldId = world.getId();
         this.soulsKeptDuringDeath = soulsKeptDuringDeath;
     }
 
@@ -46,13 +56,13 @@ public class QCPlayer {
         this.uuid = uuid;
     }
 
-    public QCVisitedWorld getVisitedWorld() {
-        return QuietCraftPlugin.db.find(QCVisitedWorld.class).where().
-                eq("id", String.valueOf(visitedWorldId)).findUnique();
+    public QCWorld getWorld() {
+        return QuietCraftPlugin.db.find(QCWorld.class).where().
+                eq("id", String.valueOf(worldId)).findUnique();
     }
 
-    public void setVisitedWorld(QCVisitedWorld visitedWorld) {
-        setVisitedWorldId(visitedWorld.getId());
+    public void setVisitedWorld(QCWorld world) {
+        setWorldId(world.getId());
     }
 
     public int getSoulsKeptDuringDeath() {
@@ -63,20 +73,25 @@ public class QCPlayer {
         this.soulsKeptDuringDeath = soulsKeptDuringDeath;
     }
 
-    public int getVisitedWorldId() {
-        return visitedWorldId;
+    public int getWorldId() {
+        return worldId;
     }
 
-    public void setVisitedWorldId(int visitedWorldId) {
-        this.visitedWorldId = visitedWorldId;
+    public void setWorldId(int worldId) {
+        this.worldId = worldId;
     }
 
     @Override
     public String toString() {
         return "QCPlayer{" +
                 "uuid='" + uuid + '\'' +
-                ", visitedWorldId=" + visitedWorldId +
+                ", worldId=" + worldId +
                 ", soulsKeptDuringDeath=" + soulsKeptDuringDeath +
+                ", defaultSpeakStyle=" + defaultSpeakStyle +
                 '}';
+    }
+
+    public void setWorld(QCWorld w) {
+        setWorldId(w.getId());
     }
 }

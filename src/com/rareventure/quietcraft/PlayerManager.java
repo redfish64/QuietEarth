@@ -56,8 +56,9 @@ public class PlayerManager {
 
     private void addToPlayerLog(QCPlayer qcPlayer, QCPlayerLog.Action action)
     {
+        QCWorld w = qcPlayer.getWorld();
         db.insert(new QCPlayerLog(qcPlayer.getUuid(),new Date(),
-                qcPlayer.getVisitedWorld().getId(),
+                w.getId(), w.getRecycleCounter(),
                 action));
     }
 
@@ -129,8 +130,8 @@ public class PlayerManager {
         return getQCPlayer(player.getUniqueId().toString());
     }
 
-    public QCPlayer createQCPlayer(Player player, QCVisitedWorld vw) {
-        QCPlayer qcPlayer = new QCPlayer(player.getUniqueId().toString(), vw, SOULS_PER_REBIRTH);
+    public QCPlayer createQCPlayer(Player player, QCWorld w) {
+        QCPlayer qcPlayer = new QCPlayer(player.getUniqueId().toString(), w, SOULS_PER_REBIRTH);
         db.insert(qcPlayer);
 
         synchronized (uuidToQCPlayerCache)
@@ -150,7 +151,7 @@ public class PlayerManager {
             //new player
             if(qcPlayer == null)
             {
-                QCVisitedWorld w = qcp.wm.findFirstJoinVisitedWorld();
+                QCWorld w = qcp.wm.findBestActiveWorldForPlayer(player.getUniqueId().toString());
                 qcPlayer = createQCPlayer(player,w);
 
                 player.sendMessage("You have been born in world '"+w.getName()+"'");
@@ -233,7 +234,7 @@ public class PlayerManager {
      */
     public Location onRespawn(Player p) {
         QCPlayer player = qcp.pm.getQCPlayer(p);
-        QCVisitedWorld vw;
+        QCWorld w;
         int soulCount = player.getSoulsKeptDuringDeath();
 
         if(soulCount > 0) {
@@ -244,7 +245,7 @@ public class PlayerManager {
                 player.setSoulsKeptDuringDeath(soulCount);
                 db.update(player);
 
-                vw = player.getVisitedWorld();
+                w = player.getWorld();
 
                 if(soulCount == 0)
                     p.sendMessage("You have no souls left, you are not long for this world.");
@@ -280,18 +281,18 @@ public class PlayerManager {
             if(bedSpawnLocation != null && bedSpawnLocation.getWorld() == p.getWorld())
                 return bedSpawnLocation;
 
-            return Bukkit.getWorld(vw.getName()).getSpawnLocation();
+            return Bukkit.getWorld(w.getName()).getSpawnLocation();
         }
 
         db.beginTransaction();
         try{
             addToPlayerLog(player, QCPlayerLog.Action.PERMA_DEATH);
 
-            vw = qcp.wm.findOrCreateBestWorldForDeadPlayer(p);
+            w = qcp.wm.findOrCreateBestWorldForDeadPlayer(p);
 
-            player.setVisitedWorld(vw);
+            player.setWorld(w);
             db.update(player);
-            Bukkit.getLogger().info("onRespawn set visited world "+vw+","+player);
+            Bukkit.getLogger().info("onRespawn set world "+w+","+player);
 
             debugPrintPlayerInfo("onRespawn without souls left",p);
 
@@ -306,7 +307,7 @@ public class PlayerManager {
 
         Location spawnLocation;
 
-        if(vw == qcp.wm.netherVisitedWorld) {
+        if(WorldUtil.isNetherWorld(w.getName())) {
             //we only want this message to appear the first time the player entered the nether
             if(!WorldUtil.isNetherWorld(p.getWorld().getName()))
                 p.sendMessage("The world slowly comes into place. You blink twice... wait a minute, where *ARE* you?");
@@ -326,12 +327,12 @@ public class PlayerManager {
         }
         else
         {
-            World spawnedWorld = Bukkit.getWorld(vw.getName());
+            World spawnedWorld = Bukkit.getWorld(w.getName());
 
             giveInitialPackageToPlayer(p,spawnedWorld, SOULS_PER_REBIRTH, true);
-            p.sendMessage("You have been reborn into " + vw.getName());
+            p.sendMessage("You have been reborn into " + w.getName());
 
-            spawnLocation = vw.getSpawnLocation(spawnedWorld);
+            spawnLocation = w.getSpawnLocation(spawnedWorld);
         }
 
 
@@ -400,23 +401,14 @@ public class PlayerManager {
 
         QCPlayer qcPlayer = getQCPlayer(event.getPlayer());
 
-        qcp.db.beginTransaction();
-        try {
-            addToPlayerLog(qcPlayer, QCPlayerLog.Action.MOVED_FROM_WORLD);
-            qcPlayer.setVisitedWorld(qcp.wm.getQCVisitedWorld(
-                    pl.getOtherVisitedWorldId(qcPlayer.getVisitedWorld().getId())));
-            qcp.db.update(qcPlayer);
-            addToPlayerLog(qcPlayer, QCPlayerLog.Action.MOVED_TO_WORLD);
-            qcp.db.commitTransaction();
-        }
-        finally {
-            qcp.db.endTransaction();
-        }
-
         Location otherLocation = pl.getOtherLoc(qcp.wm,l);
         Location teleportLocation = WorldUtil.findPortalTeleportPlaceForUser(otherLocation);
         WorldUtil.makeTeleportLocationSafe(teleportLocation);
         event.getPlayer().teleport(teleportLocation);
         event.setCancelled(true);
     }
+
+    //TODO 2 when a player sleeps in a bed in a new world, we change their worldId
+    //TODO 2 figure out what we want in the qcplayerlog, we no longer are using
+    // MOVE_TO_WORLD, MOVE_FROM_WORLD actions
 }
