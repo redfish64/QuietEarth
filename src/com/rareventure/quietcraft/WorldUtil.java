@@ -24,16 +24,6 @@ public class WorldUtil {
     private static final int FLOOR_LENGTH = 2;
 
     /**
-     * When portals are destroyed and exploded, this specifies the ratio of width of portal
-     * to explosion power (as defined by World.createExplosion())
-     */
-    //TODO 3 hack we make this really small while testing so we don't blow ourselves up
-    private static final float DESTROY_PORTAL_EXPLOSION_RATIO = 0.1f;
-    /**
-     * Maximum distance from 0,0,0 for random spawn locations
-     */
-    private static final double MAX_SPAWN_RADIUS = 10000.;
-    /**
      * Places we make sure the spawn location is not at.
      */
     private static final HashSet<Material> SPAWN_LOCATION_BLACKLIST =
@@ -193,8 +183,6 @@ public class WorldUtil {
         return ba;
     }
 
-    //TODO 2.1 make explosion bigger, 5?
-    private static final float DESTROY_PORTAL_EXPLOSION_SIZE = 1f;
     private static final int MAX_ACTIVE_PORTAL_LOC_DIST = 3;
 
     public static void createPortal()
@@ -228,18 +216,18 @@ public class WorldUtil {
         throw new IllegalArgumentException("Blocks don't contain any difference in X or Z!");
     }
 
-    public static void destroyPortal(World w, BlockArea portalArea, boolean hasExplosion) {
+    public static void destroyPortal(World w, BlockArea portalArea, double explosionSize) {
         portalArea.getBlocks(w).stream().filter(b -> b.getType() == Material.OBSIDIAN).
                 forEach(b -> b.setType(Material.SAND));
 
-        if(hasExplosion)
-            w.createExplosion(portalArea.getCenter(), DESTROY_PORTAL_EXPLOSION_RATIO
-                    * portalArea.getLengthX());
+        if(explosionSize > 0)
+            w.createExplosion(portalArea.getCenter(), (float) (explosionSize
+                                * portalArea.getLengthX()));
 
     }
 
-    public static void destroyPortal(List<Block> blocks, boolean hasExplosion) {
-        destroyPortal(blocks.get(0).getWorld(), getPortalArea(blocks), hasExplosion);
+    public static void destroyPortal(List<Block> blocks, double explosionSize) {
+        destroyPortal(blocks.get(0).getWorld(), getPortalArea(blocks), explosionSize);
     }
 
     /**
@@ -449,14 +437,14 @@ public class WorldUtil {
     /**
      * Destroys the portal near the given location
      */
-    public static boolean destroyPortal(Location loc, boolean hasExplosion) {
+    public static boolean destroyPortal(Location loc, double explosionSize) {
         BlockArea ba = findPortal(loc,true);
         if(ba == null) ba = findPortal(loc,false);
 
         if(ba == null)
             return false;
 
-        destroyPortal(loc.getWorld(),ba, hasExplosion);
+        destroyPortal(loc.getWorld(),ba, explosionSize);
 
         return true;
     }
@@ -464,7 +452,7 @@ public class WorldUtil {
     /**
      * Finds a semi safe place to put a spawn location.
      */
-    public static Location getRandomSpawnLocation(World w) {
+    public static Location getRandomSpawnLocation(World w, MathUtil.RandomNormalParams rnp) {
         Location loc;
         int y;
         do {
@@ -473,9 +461,9 @@ public class WorldUtil {
                     // (x+k)^2 or something
 
                     new Location(w,
-                            MAX_SPAWN_RADIUS * (Math.random() * 2 - 1),
+                            MathUtil.normalRandomInt(rnp),
                             0,
-                            MAX_SPAWN_RADIUS * (Math.random() * 2 - 1)
+                            MathUtil.normalRandomInt(rnp)
                     );
 
             loc.getChunk().load();

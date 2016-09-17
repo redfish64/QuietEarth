@@ -28,7 +28,7 @@ public class MathUtil {
     /**
      * The normal (bell curve) distribution with a min and max.
      */
-    private static double normalRandom(RandomNormalParams params) {
+    public static double normalRandom(RandomNormalParams params) {
         synchronized (random)
         {
             double v = random.nextGaussian() * params.std + params.mean;
@@ -72,6 +72,10 @@ public class MathUtil {
         double z2 = z*z;
         double xz = Math.sqrt(x2 + z2);
         return (double) Math.toDegrees(Math.atan(-vector.getY() / xz));
+    }
+
+    public static double sqr(double v) {
+        return v*v;
     }
 
     public static class RandomNormalParams {

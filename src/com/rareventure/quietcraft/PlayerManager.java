@@ -16,26 +16,49 @@ import java.util.*;
  * Contains standard procedures for handling interaction with the system state and database
  */
 public class PlayerManager {
-    private static final int SOULS_PER_REBIRTH = 1;
-    private static final Material SOUL_MATERIAL_TYPE = Material.DIAMOND;
-    private static final String SOUL_DISPLAY_NAME = "Soul Gem";
-//TODO 2 open bugtracker account or create our own
+    private final MathUtil.RandomNormalParams NETHER_SPAWN_RNP =
+            new MathUtil.RandomNormalParams(
+                    QuietCraftPlugin.cfg.getInt("player_manager.nether_spawn.mean"),
+                    QuietCraftPlugin.cfg.getInt("player_manager.nether_spawn.std"),
+                    QuietCraftPlugin.cfg.getInt("player_manager.nether_spawn.min"),
+                    QuietCraftPlugin.cfg.getInt("player_manager.nether_spawn.max"));
+
+    public final MathUtil.RandomNormalParams OVERWORLD_SPAWN_RNP =
+            new MathUtil.RandomNormalParams(
+                    QuietCraftPlugin.cfg.getInt("player_manager.overworld_spawn.mean"),
+                    QuietCraftPlugin.cfg.getInt("player_manager.overworld_spawn.std"),
+                    QuietCraftPlugin.cfg.getInt("player_manager.overworld_spawn.min"),
+                    QuietCraftPlugin.cfg.getInt("player_manager.overworld_spawn.max"));
+
+    private final int SOULS_PER_REBIRTH = QuietCraftPlugin.cfg.getInt("player_manager.souls_per_rebirth");
+
+    private final Material SOUL_MATERIAL_TYPE =
+            Material.getMaterial(QuietCraftPlugin.cfg.getString("player_manager.soul_material_type"));
+
+    private final String SOUL_DISPLAY_NAME =
+            QuietCraftPlugin.cfg.getString("player_manager.soul_display_name");
+
+    //TODO 2.1 open bugtracker account or create our own
     //TODO 3 make saying 'hello sailor' cause the person to be immediately transported to the nether
     //with no souls
-    private static final List<String> SOUL_LORE = Arrays.asList(
-            ("This is a soul gem. It's very valuable, if you like living in this world.").split("\n"));
 
-    private static final Material PORTAL_KEY_MATERIAL = Material.FLINT_AND_STEEL;
+    //TODO 2 make commands to edit config. When config is editted, reinstantiate PlayerManager,ChatManager, etc.
+    private final List<String> SOUL_LORE =
+                    QuietCraftPlugin.cfg.getStringList("player_manager.soul_lore");
 
-    private static final List<String> PORTAL_KEY_LORE = Arrays.asList(
-            ("This flint of steel seems magical somehow...").split("\n"));
-    public static final String PORTAL_KEY_DISPLAY_NAME_ENDING = " portal key";
+    private final Material PORTAL_KEY_MATERIAL_TYPE =
+            Material.getMaterial(QuietCraftPlugin.cfg.getString("player_manager.portal_key_material_type"));
+
+    private final List<String> PORTAL_KEY_LORE =
+            QuietCraftPlugin.cfg.getStringList("player_manager.portal_key_lore");
+    public final String PORTAL_KEY_DISPLAY_NAME_ENDING =
+            QuietCraftPlugin.cfg.getString("player_manager.portal_key_display_name_ending");
 
     /**
-     * The maximum net number of souls that can leave a world per day
+     * The maximum net number of souls that can leave a world per hour by teleporting
      */
-    //We allow only one soul to leave per day
-    private static final float MAX_ALLOWED_SOUL_OUTFLOW_PER_HOUR = 60; //TODO 2 TIMHACK 1f/24f;
+    private final float MAX_ALLOWED_SOUL_OUTFLOW_PER_HOUR =
+            (float) QuietCraftPlugin.cfg.getDouble("player_manager.max_allowed_soul_outflow_per_day")/24f;
 
     private final QuietCraftPlugin qcp;
 
@@ -198,7 +221,7 @@ public class PlayerManager {
 
         if(isFirstAppearance)
         {
-            ItemStack is = new ItemStack(PORTAL_KEY_MATERIAL);
+            ItemStack is = new ItemStack(PORTAL_KEY_MATERIAL_TYPE);
             ItemMeta im = is.getItemMeta();
 
             im.setDisplayName(world.getName()+PORTAL_KEY_DISPLAY_NAME_ENDING);
@@ -253,9 +276,6 @@ public class PlayerManager {
         addToPlayerLog(getQCPlayer(player), QCPlayerLog.Action.QUIT);
         debugPrintPlayerInfo("onPlayerQuit",player);
     }
-
-    //TODO 2 soul inflow outflow in world can't be too much or portal can't be entered
-    //TODO 2 when a world has too much outflow of souls, prevent portals from being entered
 
     //TODO 3 eliminate "bed obstructed" message... difficult, may need to filter packets???
     /**
@@ -354,7 +374,8 @@ public class PlayerManager {
 
             //in the nether the spawn location is always random, to prevent someone from creating a booby
             //trap at a spawn location
-            spawnLocation = WorldUtil.getRandomSpawnLocation(Bukkit.getWorld(WorldUtil.NETHER_WORLD_NAME));
+            spawnLocation = WorldUtil.getRandomSpawnLocation(Bukkit.getWorld(WorldUtil.NETHER_WORLD_NAME),
+                    NETHER_SPAWN_RNP);
 
             giveNetherCarePack(p);
         }
@@ -396,10 +417,10 @@ public class PlayerManager {
      * @param p player
      * @return portal key in players inventory, or null if it doesn't exist
      */
-    public static ItemStack getPortalKey(Player p) {
+    public ItemStack getPortalKey(Player p) {
         for(ItemStack i : p.getInventory())
         {
-            if(i != null && i.getType() == PORTAL_KEY_MATERIAL && i.getItemMeta() != null
+            if(i != null && i.getType() == PORTAL_KEY_MATERIAL_TYPE && i.getItemMeta() != null
                     && i.getItemMeta().getDisplayName() != null
                     && i.getItemMeta().getDisplayName().endsWith(PORTAL_KEY_DISPLAY_NAME_ENDING))
                 return i;
@@ -409,7 +430,7 @@ public class PlayerManager {
     }
 
     //TODO 2 create some reasonable logging messages so when we go alpha we'll have more to go on
-
+    //TODO 2 configuration
     /**
      * Called when a player is about to be teleported by a portal
      */
@@ -430,7 +451,7 @@ public class PlayerManager {
 
         if(pl == null) {
             Bukkit.getLogger().info("Could not find link for " +l);
-            WorldUtil.destroyPortal(l, false);
+            WorldUtil.destroyPortal(l, 0);
             return;
         }
 

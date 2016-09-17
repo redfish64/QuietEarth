@@ -14,31 +14,18 @@ import java.util.List;
  */
 public class ChatManager {
     /**
-     * The perctange distance after max dist where the speaker can be identified, but the
+     * The percentage distance after max dist where the speaker can be identified, but the
      * message not heard
      */
-    private static final double INAUDIBLE_DIST_PERC_SQR = 1.5*1.5;
+    private final double INAUDIBLE_DIST_RATIO_SQR =
+            MathUtil.sqr(QuietCraftPlugin.cfg.getDouble("chat_manager/inaudible_dist_perc")/100.);
 
     /**
-     * The perctange distance after max dist where the speaker can't be identified, nor the
+     * The percentage distance after max dist where the speaker can't be identified, nor the
      * message not heard
      */
-    private static final double INAUDIBLE_DIST_PERC2_SQR = 2*2;
-
-    /**
-     * The distance in order to hear someone speaking at a normal level
-     */
-    private static final double NORMAL_SPEECH_DIST_SQR = 30;
-
-    /**
-     * The distance in order to hear someone whispering
-     */
-    private static final double WHISPER_SPEECH_DIST_SQR = 5;
-
-    /**
-     * The distance in order to hear someone shouting
-     */
-    private static final double SHOUT_SPEECH_DIST_SQR = 100;
+    private final double INAUDIBLE_DIST_RATIO2_SQR =
+            MathUtil.sqr(QuietCraftPlugin.cfg.getDouble("chat_manager/inaudible_dist_perc2")/100.);
 
     private QuietCraftPlugin qcp;
 
@@ -88,9 +75,9 @@ public class ChatManager {
             //in the nether, sound travels infinitely far
             if (distSqr < maxDistSqr || isNetherWorld)
                 fullMessage = normalMessage;
-            else if (distSqr < maxDistSqr * INAUDIBLE_DIST_PERC_SQR)
+            else if (distSqr < maxDistSqr * INAUDIBLE_DIST_RATIO_SQR)
                 fullMessage = inaudibleMessage;
-            else if (distSqr < maxDistSqr * INAUDIBLE_DIST_PERC2_SQR)
+            else if (distSqr < maxDistSqr * INAUDIBLE_DIST_RATIO2_SQR)
                 fullMessage = inaudibleMessage2;
             else
                 return; // don't send a message past inaudible range
@@ -105,22 +92,30 @@ public class ChatManager {
     }
 
     public void speak(SpeakStyle speakStyle, Player player, String message) {
-        player.sendMessage("You "+speakStyle.selfAction+" \""+message+"\"");
-        speak(player, "<"+player.getName()+">",speakStyle.action,player.getLocation(),speakStyle.distSqr,
+        player.sendMessage("You " + speakStyle.selfAction + " \"" + message + "\"");
+        speak(player, "<" + player.getName() + ">", speakStyle.action, player.getLocation(),
+                speakStyle.getDistSqr(),
                 message);
 
     }
 
-    public enum SpeakStyle { SHOUT("shouts","shout",100), SAY("says","say",30), WHISPER("whispers","whisper",5);
-        public final String action;
-        public final double distSqr;
-        public final String selfAction;
+    public enum SpeakStyle { SHOUT("shouts","shout","chat_manager.shout_speech_dist"),
+                             SAY("says","say","chat_manager.normal_speech_dist"),
+                             WHISPER("whispers","whisper","chat_manager.whisper_speech_dist");
 
-        SpeakStyle(String action, String selfAction, double dist)
+        public final String action;
+        public final String selfAction;
+        private final String configPath ;
+
+        SpeakStyle(String action, String selfAction, String configPath)
         {
-            this.distSqr = dist*dist;
             this.action = action;
             this.selfAction = selfAction;
+            this.configPath = configPath;
+        }
+
+        public double getDistSqr() {
+            return MathUtil.sqr(QuietCraftPlugin.cfg.getDouble(configPath));
         }
     }
 

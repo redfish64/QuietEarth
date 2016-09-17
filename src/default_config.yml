@@ -1,0 +1,90 @@
+hello.world: foobar
+
+chat_manager:
+  #The percentage distance after max dist where the speaker can be identified, but the
+  #message not heard
+  inaudible_dist_perc: 150
+
+  #The percentage distance after max dist where the speaker can't be identified, nor the
+  #message heard
+  inaudible_dist_perc2: 200
+  shout_speech_dist: 100
+  normal_speech_dist: 30
+  whisper_speech_dist: 5
+
+player_manager:
+  #number of souls given per rebirth
+  souls_per_rebirth: 4
+  soul_material_type: DIAMOND
+  soul_display_name: Soul Gem
+  soul_lore:
+    - This is a soul.
+    - It is very valuable if you
+    - like living in the world
+  portal_key_material_type: FLINT_AND_STEEL
+  portal_key_lore:
+    - This flint and steel seems
+    - very magical somehow...
+  portal_key_display_name_ending: " portal key"
+
+  #The maximum net number of souls that can leave a world per day by teleporting
+  max_allowed_soul_outflow_per_day: 1
+
+  #the random number generator parameters for spawning a nether person (a user who
+  # has visited all available worlds and there are none left)
+  nether_spawn:
+    mean: 1000
+    std: 500
+    min: 10
+    max: 5000
+
+  #the rng params for the spawning location in the overworld
+  overworld_spawn:
+    mean: 2000
+    std: 1000
+    min: 0
+    max: 100000
+
+world_manager:
+  max_worlds: 3
+
+  #The max distance from a portal for a player to have a portal key in order to
+  #have the portal created when lit.
+  max_key_portal_distance: 5
+
+  nether_portal_width:
+    mean: 4
+    std: 3
+    min: 4
+    max: 15
+
+  #The ratio between height and width. It's important to make sure that
+  #given the minimum width in NETHER_PORTAL_WIDTH_PARAMS, that this
+  #value creates a valid height.
+  portal_height_to_width: 1.5
+
+  overworld_portal_width:
+    mean: 4
+    std: 1
+    min: 4
+    max: 7
+
+  #the rng params for the spawning location in the overworld
+  nether_portal:
+    mean: 1000
+    std: 500
+    min: 10
+    max: 5000
+
+  #When portals are destroyed and exploded, this specifies the percentage of width of portal
+  #to explosion power (as defined by World.createExplosion()). So if the width of a portal
+  #is 6, this value is 150%, then the total power would be 9
+  portal_explosion_perc:
+    mean: 100
+    std: 50
+    min: 0
+    max: 500
+
+  #When deciding whether to recycle a world, the time a visited world must have no
+  #log events before being recycled (with or without active players)
+  max_recycle_last_player_log_days: 14
