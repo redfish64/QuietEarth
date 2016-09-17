@@ -26,6 +26,7 @@ public class HackJumpToWorld implements CommandExecutor {
             if(args.length != 1)
             {
                 sender.sendMessage(command.getUsage()+": need a world id");
+                return true;
             }
 
             int id = Integer.parseInt(args[0]);
@@ -36,7 +37,10 @@ public class HackJumpToWorld implements CommandExecutor {
 
             Location l = qcw.getSpawnLocation(w);
 
+            WorldUtil.makeTeleportLocationSafe(l);
             player.teleport(l);
+
+            sender.sendMessage("Jumped to world "+w.getName());
         } else {
             sender.sendMessage("You can only perform this command as a player");
         }

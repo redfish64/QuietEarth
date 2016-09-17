@@ -19,7 +19,7 @@ public class PlayerManager {
     private static final int SOULS_PER_REBIRTH = 1;
     private static final Material SOUL_MATERIAL_TYPE = Material.DIAMOND;
     private static final String SOUL_DISPLAY_NAME = "Soul Gem";
-
+//TODO 2 open bugtracker account or create our own
     //TODO 3 make saying 'hello sailor' cause the person to be immediately transported to the nether
     //with no souls
     private static final List<String> SOUL_LORE = Arrays.asList(
@@ -30,6 +30,12 @@ public class PlayerManager {
     private static final List<String> PORTAL_KEY_LORE = Arrays.asList(
             ("This flint of steel seems magical somehow...").split("\n"));
     public static final String PORTAL_KEY_DISPLAY_NAME_ENDING = " portal key";
+
+    /**
+     * The maximum net number of souls that can leave a world per day
+     */
+    //We allow only one soul to leave per day
+    private static final float MAX_ALLOWED_SOUL_OUTFLOW_PER_HOUR = 60; //TODO 2 TIMHACK 1f/24f;
 
     private final QuietCraftPlugin qcp;
 
@@ -62,6 +68,10 @@ public class PlayerManager {
             QCPlayer qcPlayer = getQCPlayer(p.getUniqueId().toString());
 
             qcPlayer.setSoulsKeptDuringDeath(0);
+
+            //we also add one extra soul. This makes it so winning any PVP in the nether
+            //gives the victor at least one soul
+            addSoulsToInventory(p,1);
 
             db.update(qcPlayer);
             return;
@@ -148,6 +158,7 @@ public class PlayerManager {
                 player.sendMessage("You have been born in world '"+w.getName()+"'");
 
                 Location spawnLocation = Bukkit.getWorld(w.getName()).getSpawnLocation();
+                WorldUtil.makeTeleportLocationSafe(spawnLocation);
                 player.teleport(spawnLocation);
                 giveInitialPackageToPlayer(player, player.getWorld(), SOULS_PER_REBIRTH, true);
 
@@ -155,6 +166,8 @@ public class PlayerManager {
             }
             else {
                 addToPlayerLog(qcPlayer, QCPlayerLog.Action.JOIN);
+
+                WorldUtil.makeTeleportLocationSafe(player.getLocation());
 
                 player.sendMessage("You are in world '" +
                         player.getWorld().getName() + "'");
@@ -194,6 +207,12 @@ public class PlayerManager {
             is.setItemMeta(im);
             i.addItem(is);
         }
+
+        addSoulsToInventory(player, soulCount);
+    }
+
+    private void addSoulsToInventory(Player player, int soulCount) {
+        Inventory i = player.getInventory();
 
         //TODO 3 choose a better material type for souls
         while(soulCount != 0) {
@@ -395,6 +414,8 @@ public class PlayerManager {
      * Called when a player is about to be teleported by a portal
      */
     public void onPlayerPortalEvent(PlayerPortalEvent event) {
+        Player player = event.getPlayer();
+
         BlockArea b = WorldUtil.findActivePortal(event.getFrom());
 
         if (b == null) {
@@ -413,13 +434,94 @@ public class PlayerManager {
             return;
         }
 
-        QCPlayer qcPlayer = getQCPlayer(event.getPlayer());
+        QCWorld w1 = qcp.wm.getQCWorld(pl.getWorldId1());
+        QCWorld w2 = qcp.wm.getQCWorld(pl.getWorldId2());
 
-        Location otherLocation = pl.getOtherLoc(qcp.wm,l);
+        QCWorld fw, tw;
+        Location otherLocation;
+
+        if(pl.isLocationAtP1(qcp.wm,l))
+        {
+            fw = w1;
+            tw = w2;
+            otherLocation = pl.getLoc2();
+        }
+        else
+        {
+            fw = w2;
+            tw = w1;
+            otherLocation = pl.getLoc1();
+        }
+
+        //we add one for the soul of the player himself. In the nether, he will drop one soul for it
+        int souls = getSoulCount(player) + 1;
+
+        //check if the outflow would be too much
+        float outflow = fw.calcSoulOutflowHours(souls);
+        if(outflow > MAX_ALLOWED_SOUL_OUTFLOW_PER_HOUR)
+        {
+            float waitTime = fw.calcSoulOutflowWaitHours(souls, MAX_ALLOWED_SOUL_OUTFLOW_PER_HOUR);
+            int soulsAllowedForTeleport = fw.calcSoulsAllowedForTeleport(MAX_ALLOWED_SOUL_OUTFLOW_PER_HOUR);
+
+            if(soulsAllowedForTeleport >= 1 ) {
+                if(souls > 1)
+                    player.sendMessage(String.format("You are trying to leave with too many souls. Wait "
+                            + "%s or remove %d souls from inventory",
+                            calcTimeFromHours(waitTime),
+                            souls - soulsAllowedForTeleport));
+                else
+                    player.sendMessage("You are trying to leave too soon. Wait "+calcTimeFromHours(waitTime));
+            }
+            else
+            {
+                float oneSoulWaitTime = fw.calcSoulOutflowWaitHours(1, MAX_ALLOWED_SOUL_OUTFLOW_PER_HOUR);
+                player.sendMessage(String.format("You are trying to leave with too many souls. Wait %s" +
+                    " or remove all souls from inventory and wait %s",
+                        calcTimeFromHours(waitTime), calcTimeFromHours(oneSoulWaitTime)));
+            }
+
+            //teleport the user a little outside the portal
+            Location teleportLocation = WorldUtil.findPortalTeleportPlaceForUser(l);
+            WorldUtil.makeTeleportLocationSafe(teleportLocation);
+            player.teleport(teleportLocation);
+            event.setCancelled(true);
+            return;
+        }
+
+
+        qcp.db.beginTransaction();
+        try {
+            fw.addSouls(-souls);
+            tw.addSouls(souls);
+            qcp.db.update(fw);
+            qcp.db.update(tw);
+
+            qcp.db.commitTransaction();
+        }
+        finally {
+            qcp.db.endTransaction();
+        }
+
         Location teleportLocation = WorldUtil.findPortalTeleportPlaceForUser(otherLocation);
         WorldUtil.makeTeleportLocationSafe(teleportLocation);
-        event.getPlayer().teleport(teleportLocation);
+        player.teleport(teleportLocation);
         event.setCancelled(true);
+    }
+
+    private String calcTimeFromHours(float waitTime) {
+        if(waitTime > 48)
+        {
+            return String.format("%8.3f days",waitTime/24);
+        }
+        if(waitTime > 2)
+        {
+            return String.format("%8.3f hours",waitTime);
+        }
+        if(waitTime > 2f/60)
+        {
+            return String.format("%8.3f minutes",waitTime*60);
+        }
+        return String.format("%8.3f seconds",waitTime*3600);
     }
 
     //TODO 2 when a player sleeps in a bed in a new world, we change their worldId

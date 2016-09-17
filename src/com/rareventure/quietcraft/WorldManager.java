@@ -198,6 +198,8 @@ public class WorldManager {
         w.setNetherLocation(randomNetherPortalLocation);
 
         w.setRecycleCounter(w.getRecycleCounter()+1);
+        w.setLastRecycleTimestamp(new Date());
+        w.setSoulInflowOutflow(0);
         qcp.db.save(w);
 
 
@@ -214,7 +216,6 @@ public class WorldManager {
     /**
      * Finds the world which is eligible for recycling and is the best candidate
      * according to various criteria
-     * @param deadPlayer
      */
     private QCWorld findBestWorldToRecycle(String deadPlayerId) {
 
@@ -246,6 +247,7 @@ public class WorldManager {
     private void sendPlayerToNether(Player p) {
         World nether = Bukkit.getWorld("world_nether");
         Location loc = nether.getSpawnLocation();
+        WorldUtil.makeTeleportLocationSafe(loc);
         p.teleport(loc);
     }
 

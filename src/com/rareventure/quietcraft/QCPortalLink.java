@@ -102,8 +102,7 @@ public class QCPortalLink {
      */
     public Location getOtherLoc(WorldManager wm, Location l) {
 
-        if(WorldUtil.isAt(l,loc1X,loc1Y,loc1Z) && wm.getQCWorld(l.getWorld().getName()).getId() ==
-                getWorldId1())
+        if(isLocationAtP1(wm,l))
             return new Location(getWorld2(wm),loc2X,loc2Y,loc2Z);
 
         return new Location(getWorld1(wm),loc1X,loc1Y,loc1Z);
@@ -213,5 +212,10 @@ public class QCPortalLink {
             return worldId1;
 
         return worldId2;
+    }
+
+    public boolean isLocationAtP1(WorldManager wm, Location l) {
+        return WorldUtil.isAt(l,loc1X,loc1Y,loc1Z) && wm.getQCWorld(l.getWorld().getName()).getId() ==
+                getWorldId1();
     }
 }

@@ -7,6 +7,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @Entity()
 @Table(name="qc_world")
@@ -36,6 +37,18 @@ public class QCWorld {
      */
     private int recycleCounter;
 
+    /**
+     * The date the world was last recycled (or the date it came into existance if never recycled)
+     */
+    private Date lastRecycleTimestamp;
+
+    /**
+     * The total number of souls teleported in/out since world was last recycled.
+     * This is not affected by deaths or births of players in the world.
+     * A positive value indicates that more souls have come in than come out.
+     */
+    private int soulInflowOutflow;
+
     public QCWorld()
     {}
 
@@ -48,6 +61,7 @@ public class QCWorld {
         this.netherLocX = netherLocX;
         this.netherLocY = netherLocY;
         this.netherLocZ = netherLocZ;
+        this.lastRecycleTimestamp = new Date();
     }
 
     public QCWorld(String name, Location spawnLocation, Location netherPortalLocation) {
@@ -120,6 +134,14 @@ public class QCWorld {
         this.netherLocZ = netherLocZ;
     }
 
+    public Date getLastRecycleTimestamp() {
+        return lastRecycleTimestamp;
+    }
+
+    public void setLastRecycleTimestamp(Date lastRecycleTimestamp) {
+        this.lastRecycleTimestamp = lastRecycleTimestamp;
+    }
+
     public Location getNetherLocation() {
         return new Location(WorldUtil.getNetherWorld(),
                 getNetherLocX(),getNetherLocY(),getNetherLocZ());
@@ -143,6 +165,14 @@ public class QCWorld {
         this.recycleCounter = recycleCounter;
     }
 
+    public int getSoulInflowOutflow() {
+        return soulInflowOutflow;
+    }
+
+    public void setSoulInflowOutflow(int soulInflowOutflow) {
+        this.soulInflowOutflow = soulInflowOutflow;
+    }
+
     public World getWorld() {
         return Bukkit.getWorld(getName());
     }
@@ -157,6 +187,47 @@ public class QCWorld {
         setNetherLocX(netherLocation.getBlockX());
         setNetherLocY(netherLocation.getBlockY());
         setNetherLocZ(netherLocation.getBlockZ());
+    }
+
+    public void addSouls(int souls) {
+        setSoulInflowOutflow(this.soulInflowOutflow + souls);
+    }
+
+    /**
+     * Calculates the outflow of souls per hour
+     * @param additionalOutflowSouls additional souls to be taken out in the next teleport
+     */
+    public float calcSoulOutflowHours(int additionalOutflowSouls) {
+        int inflow = this.soulInflowOutflow - additionalOutflowSouls;
+
+        return ((float)-inflow)/getHoursSinceLastRecycle();
+    }
+
+    private float getHoursSinceLastRecycle() {
+        return (System.currentTimeMillis() - this.lastRecycleTimestamp.getTime()) /
+                1000f / 3600f;
+    }
+
+    /**
+     * Returns the amount of hours necessary to wait before the user can be allowed to leave with
+     * the given number of souls and the max allowed soul outflow
+     */
+    public float calcSoulOutflowWaitHours(int additionalOutflowSouls, float maxAllowedSoulOutflowPerHour) {
+        int inflow = this.soulInflowOutflow - additionalOutflowSouls;
+        float totalNecessaryHours = -inflow / maxAllowedSoulOutflowPerHour;
+        float remainingHours = totalNecessaryHours - getHoursSinceLastRecycle();
+
+        return Math.max(0, remainingHours);
+    }
+
+    /**
+     * Returns the total number of souls that could be transported out at the current time, given
+     * a maximum number of souls allowed out per hour
+     */
+    public int calcSoulsAllowedForTeleport(float maxAllowedSoulOutflowPerHour) {
+        int totalAllowedOutflow = (int) Math.floor(maxAllowedSoulOutflowPerHour * getHoursSinceLastRecycle());
+
+        return totalAllowedOutflow - (-this.soulInflowOutflow);
     }
 }
 
