@@ -14,13 +14,8 @@ public class QCPlayer {
 
     @Id
     private String uuid;
-
-    //TODO 2 make sure that when teleporting to another world, the player will respawn
-    // in their bed in the first world (or the spawn of the first world if their bed was
-    //  destroyed ... if we change our mind and want the player to respawn in the current
-    //  world, we still need to update their worldid and recyclecount)
-
-
+    
+//TODO 2 get rid of displaying world names... or do something with them
     /**
      * The home world of the player
      */

@@ -39,6 +39,13 @@ commands:
            /nb [dist]
            Example: /nb
               ...
+  jw:
+    aliases: []
+    description: ... jumps to world specified by id..
+    usage: |
+           /jw [world_id]
+           Example: /jw
+              ...
   say_mode:
     aliases: []
     description: Chatting from now on can be heard by those nearby player.

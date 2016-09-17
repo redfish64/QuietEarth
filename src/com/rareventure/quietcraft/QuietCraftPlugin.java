@@ -53,6 +53,7 @@ public class QuietCraftPlugin extends JavaPlugin {
         this.getCommand("w").setExecutor(new WorldCommandExecutor());
         this.getCommand("cp").setExecutor(new HackCreatePortal());
         this.getCommand("nb").setExecutor(new HackNoisyBlock(this));
+        this.getCommand("jw").setExecutor(new HackJumpToWorld(this));
         this.getCommand("say_mode").setExecutor(new SetSpeakStyleSay(this));
         this.getCommand("whisper_mode").setExecutor(new SetSpeakStyleWhisper(this));
         this.getCommand("shout_mode").setExecutor(new SetSpeakStyleShout(this));

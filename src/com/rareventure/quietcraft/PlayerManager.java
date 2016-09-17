@@ -20,14 +20,7 @@ public class PlayerManager {
     private static final Material SOUL_MATERIAL_TYPE = Material.DIAMOND;
     private static final String SOUL_DISPLAY_NAME = "Soul Gem";
 
-    //TODO 2 vw that cannot be visited (all players dead or moved to other qcWorlds)
-    //  are recycled immediately (to prevent a griefer from spawn trapping all qcWorlds)
-
-    //TODO 2 no more wild portals
-    //TODO 2 if player dies x number of times in 24 hours, they nether spawn for awhile
-
-    //TODO 2, maybe all portal keys to work as is
-    //TODO 2.5 make saying 'hello sailor' cause the person to be immediately transported to the nether
+    //TODO 3 make saying 'hello sailor' cause the person to be immediately transported to the nether
     //with no souls
     private static final List<String> SOUL_LORE = Arrays.asList(
             ("This is a soul gem. It's very valuable, if you like living in this world.").split("\n"));
@@ -242,8 +235,10 @@ public class PlayerManager {
         debugPrintPlayerInfo("onPlayerQuit",player);
     }
 
-    //TODO 2 remove "from nether" portals
+    //TODO 2 soul inflow outflow in world can't be too much or portal can't be entered
+    //TODO 2 when a world has too much outflow of souls, prevent portals from being entered
 
+    //TODO 3 eliminate "bed obstructed" message... difficult, may need to filter packets???
     /**
      * This is called after onDeath() when the player has clicked the respawn button
      * and is ready to teleport to his new home.
@@ -296,11 +291,16 @@ public class PlayerManager {
 
             debugPrintPlayerInfo("onRespawn with souls left",p);
             Location bedSpawnLocation = p.getBedSpawnLocation();
-            if(bedSpawnLocation != null && bedSpawnLocation.getWorld() == p.getWorld())
+            if(bedSpawnLocation != null) {
+                debugPrintPlayerInfo("respawning to bed", p);
                 return bedSpawnLocation;
+            }
 
+            debugPrintPlayerInfo("respawning to spawn point", p);
             return Bukkit.getWorld(w.getName()).getSpawnLocation();
         }
+
+        p.setBedSpawnLocation(null);
 
         db.beginTransaction();
         try{

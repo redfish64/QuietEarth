@@ -60,8 +60,6 @@ public class PortalManager {
         }
     }
 
-    //TODO 2 make whisper and normal say commands
-
     /**
      * Returns a portal that links to the specified location
      */

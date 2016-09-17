@@ -65,7 +65,7 @@ public class HackNoisyBlock implements CommandExecutor {
 
             Bukkit.getLogger().info("CAKE_BLOCK appeared at "+b2);
 
-            qcp.chatManager.speak(null,"!!NOISY BLOCK!!","says",b2.getLocation(),MAX_DIST_SQR,"Eat me!");
+            qcp.chatManager.speak(null,"!!NOISY BLOCK!!","says",b2.getLocation(),MAX_DIST_SQR,"Hi there!");
         } else {
             sender.sendMessage("You can only perform this command as a player");
         }
