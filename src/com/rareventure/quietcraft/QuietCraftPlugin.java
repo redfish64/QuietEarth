@@ -59,11 +59,11 @@ public class QuietCraftPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new MainListener(this), this);
 
         this.getCommand("kill").setExecutor(new KillCommandExecutor());
-        this.getCommand("gm").setExecutor(new HackGiveStuffCommandExecutor());
+        this.getCommand("gm").setExecutor(new AdminGiveStuffCommandExecutor());
         this.getCommand("w").setExecutor(new WorldCommandExecutor());
-        this.getCommand("cp").setExecutor(new HackCreatePortal());
-        this.getCommand("nb").setExecutor(new HackNoisyBlock(this));
-        this.getCommand("jw").setExecutor(new HackJumpToWorld(this));
+        this.getCommand("cp").setExecutor(new AdminCreatePortal());
+        this.getCommand("nb").setExecutor(new AdminNoisyBlock(this));
+        this.getCommand("jw").setExecutor(new AdminJumpToWorld(this));
         this.getCommand("say_mode").setExecutor(new SetSpeakStyleSay(this));
         this.getCommand("whisper_mode").setExecutor(new SetSpeakStyleWhisper(this));
         this.getCommand("shout_mode").setExecutor(new SetSpeakStyleShout(this));
@@ -88,6 +88,8 @@ public class QuietCraftPlugin extends JavaPlugin {
         }
 
         this.cfg = getConfig();
+
+        Config.reloadConfig();
 
         getLogger().info("config file test: "+cfg.getString("hello.world"));
     }

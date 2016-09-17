@@ -37,73 +37,11 @@ import java.util.*;
  * Manages qcWorlds and visited qcWorlds.
  */
 public class WorldManager {
-    /**
-     * When portals are destroyed and exploded, this specifies the ratio of width of portal
-     * to explosion power (as defined by World.createExplosion())
-     */
-    public final MathUtil.RandomNormalParams PORTAL_EXPLOSION_SIZE_PERC_RNP =
-            new MathUtil.RandomNormalParams(
-                    QuietCraftPlugin.cfg.getDouble("world_manager.portal_explosion_perc.mean"),
-                    QuietCraftPlugin.cfg.getDouble("world_manager.portal_explosion_perc.std"),
-                    QuietCraftPlugin.cfg.getDouble("world_manager.portal_explosion_perc.min"),
-                    QuietCraftPlugin.cfg.getDouble("world_manager.portal_explosion_perc.max"));
-
-    public final MathUtil.RandomNormalParams NETHER_PORTAL_RNP =
-            new MathUtil.RandomNormalParams(
-                    QuietCraftPlugin.cfg.getInt("world_manager.nether_portal.mean"),
-                    QuietCraftPlugin.cfg.getInt("world_manager.nether_portal.std"),
-                    QuietCraftPlugin.cfg.getInt("world_manager.nether_portal.min"),
-                    QuietCraftPlugin.cfg.getInt("world_manager.nether_portal.max"));
-
-    private final int MAX_WORLDS =
-            QuietCraftPlugin.cfg.getInt("world_manager.max_worlds");
 
     //TODO 2.5 saying "hello sailor" should kill player and send them to the nether (they'll respawn in the next
     // world when they die in the nether)
     // should check for 17173 speak (1's as l's, etc.) as well, maybe
 
-    /**
-     * The max distance from a portal for a player to have a portal key in order to
-     * have the portal created when lit.
-     */
-    private final int MAX_KEY_PORTAL_DISTANCE =
-            QuietCraftPlugin.cfg.getInt("world_manager.max_key_portal_distance");
-
-    private final MathUtil.RandomNormalParams NETHER_PORTAL_WIDTH_PARAMS =
-            new MathUtil.RandomNormalParams(
-                    QuietCraftPlugin.cfg.getInt("world_manager.nether_portal_width.mean"),
-                    QuietCraftPlugin.cfg.getInt("world_manager.nether_portal_width.std"),
-                    QuietCraftPlugin.cfg.getInt("world_manager.nether_portal_width.min"),
-                    QuietCraftPlugin.cfg.getInt("world_manager.nether_portal_width.max"));
-
-    /**
-     * The ratio between height and width. It's important to make sure that
-     * given the minimum width in NETHER_PORTAL_WIDTH_PARAMS, that this
-     * value creates a valid height.
-     */
-    private final double PORTAL_HEIGHT_TO_WIDTH =
-            QuietCraftPlugin.cfg.getDouble("world_manager.portal_height_to_width");
-
-    private final MathUtil.RandomNormalParams OVERWORLD_PORTAL_WIDTH_PARAMS =
-            new MathUtil.RandomNormalParams(
-                    QuietCraftPlugin.cfg.getInt("world_manager.overworld_portal_width.mean"),
-                    QuietCraftPlugin.cfg.getInt("world_manager.overworld_portal_width.std"),
-                    QuietCraftPlugin.cfg.getInt("world_manager.overworld_portal_width.min"),
-                    QuietCraftPlugin.cfg.getInt("world_manager.overworld_portal_width.max"));
-
-
-    /**
-     * The id of the nether world
-     */
-    public static final int NETHER_WORLD_ID = 1;
-
-    /**
-     * When deciding whether to recycle a world, the time a visited world must have no
-     * log events before being recycled (with or without active players)
-     * */
-    private final long MAX_RECYCLE_LAST_PLAYER_LOG_MS =
-            (long)(QuietCraftPlugin.cfg.getDouble("world_manager.max_recycle_last_player_log_days")
-            * 1000 * 3600 * 24);
 
     private final QuietCraftPlugin qcp;
 
@@ -135,7 +73,7 @@ public class WorldManager {
             //find and populate the netherQCWorld
             //note that if this is a fresh install, then qcWorlds will be size 0, and netherQCWorld won't
             //be populated until setupForNewInstall() is called.
-            if (w.getId() == NETHER_WORLD_ID)
+            if (w.getId() == Config.NETHER_WORLD_ID)
                 netherQCWorld = w;
         }
     }
@@ -164,7 +102,7 @@ public class WorldManager {
                                 "  from qc_world w where not exists \n" +
                                 "    (select 'x' from qc_player_log l where player_id = :pid and " +
                                 "       l.world_id = w.id and l.world_recycle_counter = w.recycle_counter)\n" +
-                                "    and w.id != "+NETHER_WORLD_ID+"\n" +
+                                "    and w.id != "+ Config.NETHER_WORLD_ID+"\n" +
                                 "    order by pc desc,plc desc limit 1;\n");
 
         q.setParameter(1,playerId);
@@ -214,7 +152,7 @@ public class WorldManager {
      * the world counter, and destroys all previous portals
      */
     private void recycleWorld(QCWorld w) {
-        Location spawnLocation = WorldUtil.getRandomSpawnLocation(w.getWorld(), qcp.pm.OVERWORLD_SPAWN_RNP);
+        Location spawnLocation = WorldUtil.getRandomSpawnLocation(w.getWorld(), Config.OVERWORLD_SPAWN_RNP);
         Location randomNetherPortalLocation = createRandomNetherPortalLocation();
 
         w.setSpawnLocation(spawnLocation);
@@ -255,9 +193,9 @@ public class WorldManager {
         "       (select count(*) from qc_player p where p.uuid != :pid and p.world_id = w.id) as active_players,\n" +
         "       ifnull((select max(timestamp) from qc_player_log l where l.world_id = w.id),0) as last_action\n" +
         "       from qc_world w\n" +
-        "       where w.id != "+NETHER_WORLD_ID+"\n" +
+        "       where w.id != "+ Config.NETHER_WORLD_ID+"\n" +
         "       and (active_players = 0 " +
-        " or last_action < "+MAX_RECYCLE_LAST_PLAYER_LOG_MS+")\n" +
+        " or last_action < "+ Config.MAX_RECYCLE_LAST_PLAYER_LOG_MS+")\n" +
         " order by active_players, last_action limit 1;\n"
                 ).setParameter(1,deadPlayerId);
         SqlRow sr = q.findUnique();
@@ -285,7 +223,7 @@ public class WorldManager {
 
     public void setupForNewInstall() {
         netherQCWorld = new QCWorld(WorldUtil.NETHER_WORLD_NAME,0,0,0,0,0,0);
-        netherQCWorld.setId(NETHER_WORLD_ID);
+        netherQCWorld.setId(Config.NETHER_WORLD_ID);
         qcp.db.insert(netherQCWorld);
         qcWorlds.add(netherQCWorld);
 
@@ -293,7 +231,7 @@ public class WorldManager {
         //we can't create qcWorlds adhoc, or it freezes the server while the creation is in process
         //so we create them ahead of time
         //TODO 2.5 different types of qcWorlds???
-        for (int i = 0; i < MAX_WORLDS; i++)
+        for (int i = 0; i < Config.MAX_WORLDS; i++)
             createNewWorld();
     }
 
@@ -322,7 +260,7 @@ public class WorldManager {
         World w = c.createWorld();
         qcp.getLogger().info("Finished world creation for " + name);
 
-        Location spawnLocation = WorldUtil.getRandomSpawnLocation(w, qcp.pm.OVERWORLD_SPAWN_RNP);
+        Location spawnLocation = WorldUtil.getRandomSpawnLocation(w, Config.OVERWORLD_SPAWN_RNP);
         Location randomNetherPortalLocation = createRandomNetherPortalLocation();
         QCWorld qcw = new QCWorld(name, spawnLocation, randomNetherPortalLocation);
         qcw.setId(id);
@@ -346,7 +284,7 @@ public class WorldManager {
     public Location createRandomNetherPortalLocation() {
         World w = getWorld(netherQCWorld);
 
-        return WorldUtil.getRandomSpawnLocation(w, NETHER_PORTAL_RNP);
+        return WorldUtil.getRandomSpawnLocation(w, Config.NETHER_PORTAL_RNP);
     }
 
     private World getWorld(QCWorld w) {
@@ -371,7 +309,7 @@ public class WorldManager {
             //we have to destroy the portal somehow. Otherwise people could
             //create long standing non working portals, and when someone with a portal
             //key walks by unknowningly, they portal would be created
-            WorldUtil.destroyPortal(event.getBlocks(), MathUtil.normalRandom(PORTAL_EXPLOSION_SIZE_PERC_RNP)/100f);
+            WorldUtil.destroyPortal(event.getBlocks(), MathUtil.normalRandom(Config.PORTAL_EXPLOSION_SIZE_PERC_RNP)/100f);
             return;
         }
 
@@ -388,7 +326,7 @@ public class WorldManager {
             event.setCancelled(true);
 
             WorldUtil.destroyPortal(event.getBlocks(), 
-                    MathUtil.normalRandom(PORTAL_EXPLOSION_SIZE_PERC_RNP));
+                    MathUtil.normalRandom(Config.PORTAL_EXPLOSION_SIZE_PERC_RNP));
             return;
         }//if creating portal from nether world
 
@@ -429,18 +367,18 @@ public class WorldManager {
     private void destroyPortalsForPortalLink(QCPortalLink pl) {
 
         //the block physics stuff will delete the portals from the db for us
-        WorldUtil.destroyPortal(pl.getLoc1(),MathUtil.normalRandom(PORTAL_EXPLOSION_SIZE_PERC_RNP));
-        WorldUtil.destroyPortal(pl.getLoc2(),MathUtil.normalRandom(PORTAL_EXPLOSION_SIZE_PERC_RNP));
+        WorldUtil.destroyPortal(pl.getLoc1(),MathUtil.normalRandom(Config.PORTAL_EXPLOSION_SIZE_PERC_RNP));
+        WorldUtil.destroyPortal(pl.getLoc2(),MathUtil.normalRandom(Config.PORTAL_EXPLOSION_SIZE_PERC_RNP));
     }
 
     /**
      * Creates a portal for the nether world
      */
     private void constructNetherWorldPortal(Location netherWorldLocation, boolean active) {
-        int width = MathUtil.normalRandomInt(NETHER_PORTAL_WIDTH_PARAMS);
+        int width = MathUtil.normalRandomInt(Config.NETHER_PORTAL_WIDTH_PARAMS);
 
         WorldUtil.constructPortal(netherWorldLocation, width,
-                (int)Math.round(width* PORTAL_HEIGHT_TO_WIDTH),
+                (int)Math.round(width* Config.PORTAL_HEIGHT_TO_WIDTH),
                 true, //TODO 3.5 if we let this be false, portal blocks face sideways
                 //Math.random() < .5,
                 active, true //we add ceilings to nether qcWorlds incase there is lava falling down
@@ -453,10 +391,10 @@ public class WorldManager {
      * Creates a portal for the overworld
      */
     private void constructOverWorldPortal(Location overWorldLocation, boolean active) {
-        int width = MathUtil.normalRandomInt(OVERWORLD_PORTAL_WIDTH_PARAMS);
+        int width = MathUtil.normalRandomInt(Config.OVERWORLD_PORTAL_WIDTH_PARAMS);
 
         WorldUtil.constructPortal(overWorldLocation, width,
-                (int)Math.round(width* PORTAL_HEIGHT_TO_WIDTH),
+                (int)Math.round(width* Config.PORTAL_HEIGHT_TO_WIDTH),
                 true, //TODO 3.5 if we let this be false, portal blocks face sideways
                 //Math.random() < .5,
                 active, false);
@@ -465,7 +403,7 @@ public class WorldManager {
     private String getWorldNameForPortalKey(ItemStack portalKey) {
         String s = portalKey.getItemMeta().getDisplayName();
 
-        return s.substring(0, s.length() - qcp.pm.PORTAL_KEY_DISPLAY_NAME_ENDING.length());
+        return s.substring(0, s.length() - Config.PORTAL_KEY_DISPLAY_NAME_ENDING.length());
     }
 
     /**
@@ -485,7 +423,7 @@ public class WorldManager {
 
         //we can't actually tell who let the fire, so we just look for nearby players
         //for the portal key
-        for(Player p : PlayerManager.getNearbyPlayers(ba.getCenter(),MAX_KEY_PORTAL_DISTANCE))
+        for(Player p : PlayerManager.getNearbyPlayers(ba.getCenter(), Config.MAX_KEY_PORTAL_DISTANCE))
         {
             ItemStack portalKey = qcp.pm.getPortalKey(p);
 

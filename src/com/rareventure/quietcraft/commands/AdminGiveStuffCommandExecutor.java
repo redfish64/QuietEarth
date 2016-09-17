@@ -8,7 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-public class HackGiveStuffCommandExecutor implements CommandExecutor {
+public class AdminGiveStuffCommandExecutor implements CommandExecutor {
 
     @Override
 

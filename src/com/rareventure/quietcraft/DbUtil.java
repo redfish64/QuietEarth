@@ -1,13 +1,9 @@
 package com.rareventure.quietcraft;
 
-import com.avaje.ebean.Query;
-import com.avaje.ebean.QueryIterator;
 import com.avaje.ebean.SqlQuery;
 import com.avaje.ebean.SqlRow;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
-
-import java.util.UUID;
 
 /**
  * database related calls
@@ -40,7 +36,7 @@ public class DbUtil {
                 createSqlQuery(
                         " select count(*) as c from qc_player_log where timestamp >= :time and " +
                                 "player_id = :pid and action = 'X' and visited_world_id != "+
-                                WorldManager.NETHER_WORLD_ID);
+                                Config.NETHER_WORLD_ID);
 
         q.setParameter(1,System.currentTimeMillis() - timeMs);
         q.setParameter(2,playerId);

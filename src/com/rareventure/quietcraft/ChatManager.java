@@ -13,19 +13,6 @@ import java.util.List;
  * nearby
  */
 public class ChatManager {
-    /**
-     * The percentage distance after max dist where the speaker can be identified, but the
-     * message not heard
-     */
-    private final double INAUDIBLE_DIST_RATIO_SQR =
-            MathUtil.sqr(QuietCraftPlugin.cfg.getDouble("chat_manager/inaudible_dist_perc")/100.);
-
-    /**
-     * The percentage distance after max dist where the speaker can't be identified, nor the
-     * message not heard
-     */
-    private final double INAUDIBLE_DIST_RATIO2_SQR =
-            MathUtil.sqr(QuietCraftPlugin.cfg.getDouble("chat_manager/inaudible_dist_perc2")/100.);
 
     private QuietCraftPlugin qcp;
 
@@ -75,9 +62,9 @@ public class ChatManager {
             //in the nether, sound travels infinitely far
             if (distSqr < maxDistSqr || isNetherWorld)
                 fullMessage = normalMessage;
-            else if (distSqr < maxDistSqr * INAUDIBLE_DIST_RATIO_SQR)
+            else if (distSqr < maxDistSqr * Config.INAUDIBLE_DIST_RATIO_SQR)
                 fullMessage = inaudibleMessage;
-            else if (distSqr < maxDistSqr * INAUDIBLE_DIST_RATIO2_SQR)
+            else if (distSqr < maxDistSqr * Config.INAUDIBLE_DIST_RATIO2_SQR)
                 fullMessage = inaudibleMessage2;
             else
                 return; // don't send a message past inaudible range

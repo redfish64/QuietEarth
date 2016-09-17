@@ -16,49 +16,13 @@ import java.util.*;
  * Contains standard procedures for handling interaction with the system state and database
  */
 public class PlayerManager {
-    private final MathUtil.RandomNormalParams NETHER_SPAWN_RNP =
-            new MathUtil.RandomNormalParams(
-                    QuietCraftPlugin.cfg.getInt("player_manager.nether_spawn.mean"),
-                    QuietCraftPlugin.cfg.getInt("player_manager.nether_spawn.std"),
-                    QuietCraftPlugin.cfg.getInt("player_manager.nether_spawn.min"),
-                    QuietCraftPlugin.cfg.getInt("player_manager.nether_spawn.max"));
-
-    public final MathUtil.RandomNormalParams OVERWORLD_SPAWN_RNP =
-            new MathUtil.RandomNormalParams(
-                    QuietCraftPlugin.cfg.getInt("player_manager.overworld_spawn.mean"),
-                    QuietCraftPlugin.cfg.getInt("player_manager.overworld_spawn.std"),
-                    QuietCraftPlugin.cfg.getInt("player_manager.overworld_spawn.min"),
-                    QuietCraftPlugin.cfg.getInt("player_manager.overworld_spawn.max"));
-
-    private final int SOULS_PER_REBIRTH = QuietCraftPlugin.cfg.getInt("player_manager.souls_per_rebirth");
-
-    private final Material SOUL_MATERIAL_TYPE =
-            Material.getMaterial(QuietCraftPlugin.cfg.getString("player_manager.soul_material_type"));
-
-    private final String SOUL_DISPLAY_NAME =
-            QuietCraftPlugin.cfg.getString("player_manager.soul_display_name");
 
     //TODO 2.1 open bugtracker account or create our own
     //TODO 3 make saying 'hello sailor' cause the person to be immediately transported to the nether
     //with no souls
 
+    //TODO 2 decide how to handle admin users for server
     //TODO 2 make commands to edit config. When config is editted, reinstantiate PlayerManager,ChatManager, etc.
-    private final List<String> SOUL_LORE =
-                    QuietCraftPlugin.cfg.getStringList("player_manager.soul_lore");
-
-    private final Material PORTAL_KEY_MATERIAL_TYPE =
-            Material.getMaterial(QuietCraftPlugin.cfg.getString("player_manager.portal_key_material_type"));
-
-    private final List<String> PORTAL_KEY_LORE =
-            QuietCraftPlugin.cfg.getStringList("player_manager.portal_key_lore");
-    public final String PORTAL_KEY_DISPLAY_NAME_ENDING =
-            QuietCraftPlugin.cfg.getString("player_manager.portal_key_display_name_ending");
-
-    /**
-     * The maximum net number of souls that can leave a world per hour by teleporting
-     */
-    private final float MAX_ALLOWED_SOUL_OUTFLOW_PER_HOUR =
-            (float) QuietCraftPlugin.cfg.getDouble("player_manager.max_allowed_soul_outflow_per_day")/24f;
 
     private final QuietCraftPlugin qcp;
 
@@ -114,8 +78,8 @@ public class PlayerManager {
         for(Iterator<ItemStack> isi = e.getDrops().listIterator(); isi.hasNext();)
         {
             ItemStack is = isi.next();
-            if(is.getType().equals(SOUL_MATERIAL_TYPE)
-                    && is.getItemMeta().getDisplayName().equals(SOUL_DISPLAY_NAME))
+            if(is.getType().equals(Config.SOUL_MATERIAL_TYPE)
+                    && is.getItemMeta().getDisplayName().equals(Config.SOUL_DISPLAY_NAME))
                 isi.remove();
         }
 
@@ -136,7 +100,7 @@ public class PlayerManager {
         {
             if(itemStack == null)
                 continue;
-            if(itemStack.getType() == SOUL_MATERIAL_TYPE) {
+            if(itemStack.getType() == Config.SOUL_MATERIAL_TYPE) {
                 ItemMeta im = itemStack.getItemMeta();
                 if(isSoulMeta(im))
                     souls += itemStack.getAmount();
@@ -147,7 +111,7 @@ public class PlayerManager {
     }
 
     private boolean isSoulMeta(ItemMeta im) {
-        return im.getDisplayName().equals(SOUL_DISPLAY_NAME);
+        return im.getDisplayName().equals(Config.SOUL_DISPLAY_NAME);
     }
 
     public QCPlayer getQCPlayer(Player player) {
@@ -155,7 +119,7 @@ public class PlayerManager {
     }
 
     public QCPlayer createQCPlayer(Player player, QCWorld w) {
-        QCPlayer qcPlayer = new QCPlayer(player.getUniqueId().toString(), w, SOULS_PER_REBIRTH);
+        QCPlayer qcPlayer = new QCPlayer(player.getUniqueId().toString(), w, Config.SOULS_PER_REBIRTH);
         db.insert(qcPlayer);
 
         synchronized (uuidToQCPlayerCache)
@@ -183,7 +147,7 @@ public class PlayerManager {
                 Location spawnLocation = Bukkit.getWorld(w.getName()).getSpawnLocation();
                 WorldUtil.makeTeleportLocationSafe(spawnLocation);
                 player.teleport(spawnLocation);
-                giveInitialPackageToPlayer(player, player.getWorld(), SOULS_PER_REBIRTH, true);
+                giveInitialPackageToPlayer(player, player.getWorld(), Config.SOULS_PER_REBIRTH, true);
 
                 addToPlayerLog(qcPlayer, QCPlayerLog.Action.JOIN);
             }
@@ -221,11 +185,11 @@ public class PlayerManager {
 
         if(isFirstAppearance)
         {
-            ItemStack is = new ItemStack(PORTAL_KEY_MATERIAL_TYPE);
+            ItemStack is = new ItemStack(Config.PORTAL_KEY_MATERIAL_TYPE);
             ItemMeta im = is.getItemMeta();
 
-            im.setDisplayName(world.getName()+PORTAL_KEY_DISPLAY_NAME_ENDING);
-            im.setLore(PORTAL_KEY_LORE);
+            im.setDisplayName(world.getName()+ Config.PORTAL_KEY_DISPLAY_NAME_ENDING);
+            im.setLore(Config.PORTAL_KEY_LORE);
 
             is.setItemMeta(im);
             i.addItem(is);
@@ -241,11 +205,11 @@ public class PlayerManager {
         while(soulCount != 0) {
             //in case the user has a lot of souls, we create a max stack of 64
             int sc = soulCount%64;
-            ItemStack is = new ItemStack(SOUL_MATERIAL_TYPE, sc);
+            ItemStack is = new ItemStack(Config.SOUL_MATERIAL_TYPE, sc);
             ItemMeta im = is.getItemMeta();
 
-            im.setDisplayName(SOUL_DISPLAY_NAME);
-            im.setLore(SOUL_LORE);
+            im.setDisplayName(Config.SOUL_DISPLAY_NAME);
+            im.setLore(Config.SOUL_LORE);
             is.setItemMeta(im);
             i.addItem(is);
             soulCount -= sc;
@@ -303,21 +267,21 @@ public class PlayerManager {
                     p.sendMessage("You have no souls left, you are not long for this world.");
                 else if(soulCount == 1)
                     p.sendMessage("You feel a lot less than whole. You have one soul left.");
-                else if(soulCount < SOULS_PER_REBIRTH)
+                else if(soulCount < Config.SOULS_PER_REBIRTH)
                     p.sendMessage("You feel a little less than whole. You have "+(soulCount)+" souls left.");
-                else if(soulCount == SOULS_PER_REBIRTH)
+                else if(soulCount == Config.SOULS_PER_REBIRTH)
                     p.sendMessage("You feel spiritually content. You have "+(soulCount)+" souls left.");
-                else if(soulCount < SOULS_PER_REBIRTH *2)
+                else if(soulCount < Config.SOULS_PER_REBIRTH *2)
                     p.sendMessage("You feel spiritually bloated, as if you are greater than mortal. You have "+(soulCount)+" souls left.");
-                else if(soulCount < SOULS_PER_REBIRTH *3)
+                else if(soulCount < Config.SOULS_PER_REBIRTH *3)
                     p.sendMessage("You feel like a ethereal king, fear your wrath! You have "+(soulCount)+" souls left.");
-                else if(soulCount < SOULS_PER_REBIRTH *4)
+                else if(soulCount < Config.SOULS_PER_REBIRTH *4)
                     p.sendMessage("You feel like a soul sucking demon, who has fallen so you may grow so large? You have "+(soulCount)+" souls left.");
-                else if(soulCount < SOULS_PER_REBIRTH *5)
+                else if(soulCount < Config.SOULS_PER_REBIRTH *5)
                     p.sendMessage("You've become almost immortal, flee, mortals, flee! You have "+(soulCount)+" souls left.");
-                else if(soulCount < SOULS_PER_REBIRTH *6)
+                else if(soulCount < Config.SOULS_PER_REBIRTH *6)
                     p.sendMessage("Are you a god? You have "+(soulCount)+" souls left.");
-                else if(soulCount < SOULS_PER_REBIRTH *7)
+                else if(soulCount < Config.SOULS_PER_REBIRTH *7)
                     p.sendMessage("Yes, you are a god. You have "+(soulCount)+" souls left.");
                 else
                     p.sendMessage("You can stop now... You have "+(soulCount)+" souls left.");
@@ -375,7 +339,7 @@ public class PlayerManager {
             //in the nether the spawn location is always random, to prevent someone from creating a booby
             //trap at a spawn location
             spawnLocation = WorldUtil.getRandomSpawnLocation(Bukkit.getWorld(WorldUtil.NETHER_WORLD_NAME),
-                    NETHER_SPAWN_RNP);
+                    Config.NETHER_SPAWN_RNP);
 
             giveNetherCarePack(p);
         }
@@ -383,7 +347,7 @@ public class PlayerManager {
         {
             World spawnedWorld = Bukkit.getWorld(w.getName());
 
-            giveInitialPackageToPlayer(p,spawnedWorld, SOULS_PER_REBIRTH, true);
+            giveInitialPackageToPlayer(p,spawnedWorld, Config.SOULS_PER_REBIRTH, true);
             p.sendMessage("You have been reborn into " + w.getName());
 
             spawnLocation = w.getSpawnLocation(spawnedWorld);
@@ -420,9 +384,9 @@ public class PlayerManager {
     public ItemStack getPortalKey(Player p) {
         for(ItemStack i : p.getInventory())
         {
-            if(i != null && i.getType() == PORTAL_KEY_MATERIAL_TYPE && i.getItemMeta() != null
+            if(i != null && i.getType() == Config.PORTAL_KEY_MATERIAL_TYPE && i.getItemMeta() != null
                     && i.getItemMeta().getDisplayName() != null
-                    && i.getItemMeta().getDisplayName().endsWith(PORTAL_KEY_DISPLAY_NAME_ENDING))
+                    && i.getItemMeta().getDisplayName().endsWith(Config.PORTAL_KEY_DISPLAY_NAME_ENDING))
                 return i;
         }
 
@@ -479,10 +443,10 @@ public class PlayerManager {
 
         //check if the outflow would be too much
         float outflow = fw.calcSoulOutflowHours(souls);
-        if(outflow > MAX_ALLOWED_SOUL_OUTFLOW_PER_HOUR)
+        if(outflow > Config.MAX_ALLOWED_SOUL_OUTFLOW_PER_HOUR)
         {
-            float waitTime = fw.calcSoulOutflowWaitHours(souls, MAX_ALLOWED_SOUL_OUTFLOW_PER_HOUR);
-            int soulsAllowedForTeleport = fw.calcSoulsAllowedForTeleport(MAX_ALLOWED_SOUL_OUTFLOW_PER_HOUR);
+            float waitTime = fw.calcSoulOutflowWaitHours(souls, Config.MAX_ALLOWED_SOUL_OUTFLOW_PER_HOUR);
+            int soulsAllowedForTeleport = fw.calcSoulsAllowedForTeleport(Config.MAX_ALLOWED_SOUL_OUTFLOW_PER_HOUR);
 
             if(soulsAllowedForTeleport >= 1 ) {
                 if(souls > 1)
@@ -495,7 +459,7 @@ public class PlayerManager {
             }
             else
             {
-                float oneSoulWaitTime = fw.calcSoulOutflowWaitHours(1, MAX_ALLOWED_SOUL_OUTFLOW_PER_HOUR);
+                float oneSoulWaitTime = fw.calcSoulOutflowWaitHours(1, Config.MAX_ALLOWED_SOUL_OUTFLOW_PER_HOUR);
                 player.sendMessage(String.format("You are trying to leave with too many souls. Wait %s" +
                     " or remove all souls from inventory and wait %s",
                         calcTimeFromHours(waitTime), calcTimeFromHours(oneSoulWaitTime)));

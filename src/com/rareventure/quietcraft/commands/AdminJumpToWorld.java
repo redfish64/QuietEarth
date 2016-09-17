@@ -10,10 +10,10 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class HackJumpToWorld implements CommandExecutor {
+public class AdminJumpToWorld implements CommandExecutor {
     private QuietCraftPlugin qcp;
 
-    public HackJumpToWorld(QuietCraftPlugin qcp) {
+    public AdminJumpToWorld(QuietCraftPlugin qcp) {
         this.qcp = qcp;
     }
 

@@ -1,11 +1,9 @@
 package com.rareventure.quietcraft;
 
-import com.avaje.ebean.SqlQuery;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Handles portal link stuff
@@ -118,10 +116,10 @@ public class PortalManager {
         Bukkit.getLogger().info("Destroying portal link "+pl+" p1 destroyed? "+destroyP1+", p2 destroyed? "+destroyP2);
 
         if(destroyP1) {
-            WorldUtil.destroyPortal(pl.getLoc1(),MathUtil.normalRandom(qcp.wm.PORTAL_EXPLOSION_SIZE_PERC_RNP));
+            WorldUtil.destroyPortal(pl.getLoc1(),MathUtil.normalRandom(Config.PORTAL_EXPLOSION_SIZE_PERC_RNP));
         }
         if(destroyP2) {
-            WorldUtil.destroyPortal(pl.getLoc2(),MathUtil.normalRandom(qcp.wm.PORTAL_EXPLOSION_SIZE_PERC_RNP));
+            WorldUtil.destroyPortal(pl.getLoc2(),MathUtil.normalRandom(Config.PORTAL_EXPLOSION_SIZE_PERC_RNP));
         }
 
     }

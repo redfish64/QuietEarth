@@ -13,8 +13,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
-public class HackNoisyBlock implements CommandExecutor {
-
+public class AdminNoisyBlock implements CommandExecutor {
+    //TODO 2.3 figure out a way people can change the spawn point of the world. Maybe the portal key and
+    // a special block or something?
     private Block lastCakeBlock;
 
     private static final double MAX_DIST_SQR = 20*20;
@@ -23,7 +24,7 @@ public class HackNoisyBlock implements CommandExecutor {
 
     private QuietCraftPlugin qcp;
 
-    public HackNoisyBlock(QuietCraftPlugin qcp) {
+    public AdminNoisyBlock(QuietCraftPlugin qcp) {
         this.qcp = qcp;
     }
 
