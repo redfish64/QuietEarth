@@ -24,6 +24,7 @@ public class PlayerManager {
     //TODO 2 decide how to handle admin users for server
     //TODO 2 make commands to edit config. When config is editted, reinstantiate PlayerManager,ChatManager, etc.
 
+    //TODO 2.5 investigate resource packs for making a custom item for a soul
     private final QuietCraftPlugin qcp;
 
     private EbeanServer db;

@@ -47,12 +47,14 @@ public class MainListener implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event)
     {
+        Bukkit.getLogger().info("onPlayerJoin: "+event.getPlayer());
         qcp.pm.onPlayerJoin(event.getPlayer());
     }
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event)
     {
+        Bukkit.getLogger().info("onPlayerQuit: "+event.getPlayer());
         qcp.pm.onPlayerQuit(event.getPlayer());
     }
 
@@ -61,6 +63,7 @@ public class MainListener implements Listener {
         if(e.getEntityType() != EntityType.PLAYER)
             return;
 
+        Bukkit.getLogger().info("onPlayerDeath: "+e.getEntity());
         qcp.pm.onPlayerDeath(e.getEntity(), e);
     }
 
@@ -68,6 +71,9 @@ public class MainListener implements Listener {
     public void onRespawn(PlayerRespawnEvent e) {
 
         Location l = qcp.pm.onRespawn(e.getPlayer());
+
+        Bukkit.getLogger().info(
+                String.format("onRespawn: %s respawned to %s",e.getPlayer().getName(),String.valueOf(l)));
 
         if(l != null)
             e.setRespawnLocation(l);
@@ -79,15 +85,15 @@ public class MainListener implements Listener {
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void onPortalCreate(PortalCreateEvent event) {
+        Bukkit.getLogger().info("onPortalCreate: "+event.getBlocks().get(0).getLocation());
+
         qcp.wm.onPortalCreate(event);
     }
-
-    //TODO 3 this class is a little silly, maybe just have WorldManager and PlayerManager
-    //listen directly
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void onPlayerPortalEvent(PlayerPortalEvent event)
     {
+        Bukkit.getLogger().info("onPlayerPortalCreate: "+event.getPlayer()+" "+event.getPlayer().getLocation());
         qcp.pm.onPlayerPortalEvent(event);
     }
 
@@ -99,6 +105,8 @@ public class MainListener implements Listener {
 
     @EventHandler
     public void onPlayerChat(AsyncPlayerChatEvent event) {
+        Bukkit.getLogger().info("onPlayerChat: "+event.getPlayer()+" "+event.getPlayer().getLocation()
+                +" msg: "+event.getMessage());
         qcp.chatManager.onPlayerChat(event);
     }
 }

@@ -2,6 +2,7 @@ package com.rareventure.quietcraft;
 
 import com.avaje.ebean.EbeanServer;
 import com.rareventure.quietcraft.commands.*;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.craftbukkit.libs.jline.internal.InputStreamReader;
@@ -12,6 +13,7 @@ import javax.persistence.PersistenceException;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.logging.FileHandler;
 
 //TODO 2.5 if a portal gets rebuilt in the same location as a previous one,
 //and it didn't have a special block before (because it was automatically created),
