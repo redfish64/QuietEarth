@@ -246,6 +246,8 @@ public class WorldManager {
         Location randomNetherPortalLocation = createRandomNetherPortalLocation();
         QCWorld qcw = new QCWorld(name, spawnLocation, randomNetherPortalLocation);
         qcw.setId(id);
+        w.setSpawnLocation(spawnLocation.getBlockX(),spawnLocation.getBlockY(),
+                spawnLocation.getBlockZ());
 
         qcWorlds.add(qcw);
         qcp.getDatabase().insert(qcw);
@@ -379,12 +381,6 @@ public class WorldManager {
                 active, false);
     }
 
-    private String getWorldNameForPortalKey(ItemStack portalKey) {
-        String s = portalKey.getItemMeta().getDisplayName();
-
-        return s.substring(0, s.length() - Config.PORTAL_KEY_DISPLAY_NAME_ENDING.length());
-    }
-
     /**
      * Looks for a player holding a portal key near the portal creation.
      *
@@ -444,10 +440,12 @@ public class WorldManager {
         }
 
 
-        //TODO 2 for multiple world portals linked to the same nether portal,
+        //TODO 2.5 for multiple world portals linked to the same nether portal,
         //each player gets a last portal link entered db field, so they go back the same
         //place they left. Maybe 1 out of every 20 times, they go to a random portal linked
         //to the same
+        //problem: we'd need a new table since this would need to be recorded for every player / world
+        //combination
     }
 
     /**

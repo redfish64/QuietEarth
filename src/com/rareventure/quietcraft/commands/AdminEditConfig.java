@@ -2,6 +2,7 @@ package com.rareventure.quietcraft.commands;
 
 import com.rareventure.quietcraft.Config;
 import com.rareventure.quietcraft.QuietCraftPlugin;
+import com.rareventure.quietcraft.StringUtil;
 import com.rareventure.quietcraft.WorldUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -33,24 +34,19 @@ public class AdminEditConfig implements CommandExecutor {
             String v = args[1];
             FileConfiguration c = qcp.getConfig();
 
-            if(!c.contains(k)) {
-                //assume its a regex
-                Pattern p = Pattern.compile(k);
-                List<String> l = c.getConfigurationSection("").getKeys(true).stream().
-                        filter(k2 -> p.matcher(k2).find()).collect(Collectors.toList());
+            List<String> l = StringUtil.findRegexMatches(k, c.getConfigurationSection("").getKeys(true));
 
-                if(l.size() == 0) {
-                    sender.sendMessage("Couldn't find key, " + k);
-                    return true;
-                }
-                if (l.size() > 1) {
-                    sender.sendMessage("Error, key matches multiple: " + l.stream().
-                            reduce((s, s2) -> s + " " + s2));
-                    return true;
-                }
-
-                k = l.get(0);
+            if(l.size() == 0) {
+                sender.sendMessage("Couldn't find key, " + k);
+                return true;
             }
+            if (l.size() > 1) {
+                sender.sendMessage("Error, key matches multiple: " + l.stream().
+                        reduce((s, s2) -> s + " " + s2));
+                return true;
+            }
+
+            k = l.get(0);
 
             Object oldValue = c.get(k);
 

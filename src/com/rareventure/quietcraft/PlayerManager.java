@@ -133,6 +133,8 @@ public class PlayerManager {
     public void onPlayerJoin(Player player) {
         QCPlayer qcPlayer = getQCPlayer(player);
 
+        displayWelcomeMsg(player);
+
         db.beginTransaction();
         try {
             //new player
@@ -167,6 +169,10 @@ public class PlayerManager {
         debugPrintPlayerInfo("onPlayerJoin",player);
     }
 
+    private void displayWelcomeMsg(Player player) {
+        Config.WELCOME_MSG.forEach(m -> player.sendMessage(m));
+    }
+
     private void debugPrintPlayerInfo(String message, Player player) {
         QCPlayer p = getQCPlayer(player);
         Bukkit.getLogger().info(message+", "+p);
@@ -184,35 +190,20 @@ public class PlayerManager {
 
         if(isFirstAppearance)
         {
-            ItemStack is = new ItemStack(Config.PORTAL_KEY_MATERIAL_TYPE);
-            ItemMeta im = is.getItemMeta();
-
-            im.setDisplayName(world.getName()+ Config.PORTAL_KEY_DISPLAY_NAME_ENDING);
-            im.setLore(Config.PORTAL_KEY_LORE);
-
-            is.setItemMeta(im);
-            i.addItem(is);
+            addPortalKeysToInventory(player, 1);
         }
 
         addSoulsToInventory(player, soulCount);
     }
 
-    private void addSoulsToInventory(Player player, int soulCount) {
-        Inventory i = player.getInventory();
+    public void addSoulsToInventory(Player player, int soulCount) {
+        WorldUtil.addItemsToInventory(player, soulCount, Config.SOUL_MATERIAL_TYPE,
+                Config.SOUL_DISPLAY_NAME, Config.SOUL_LORE);
+    }
 
-        //TODO 3 choose a better material type for souls
-        while(soulCount != 0) {
-            //in case the user has a lot of souls, we create a max stack of 64
-            int sc = soulCount%64;
-            ItemStack is = new ItemStack(Config.SOUL_MATERIAL_TYPE, sc);
-            ItemMeta im = is.getItemMeta();
-
-            im.setDisplayName(Config.SOUL_DISPLAY_NAME);
-            im.setLore(Config.SOUL_LORE);
-            is.setItemMeta(im);
-            i.addItem(is);
-            soulCount -= sc;
-        }
+    public void addPortalKeysToInventory(Player player, int count) {
+        WorldUtil.addItemsToInventory(player, count, Config.PORTAL_KEY_MATERIAL_TYPE,
+                Config.PORTAL_KEY_NAME, Config.PORTAL_KEY_LORE);
     }
 
     //TODO 3 make sure player can survive with nether care pack
@@ -391,7 +382,7 @@ public class PlayerManager {
         {
             if(i != null && i.getType() == Config.PORTAL_KEY_MATERIAL_TYPE && i.getItemMeta() != null
                     && i.getItemMeta().getDisplayName() != null
-                    && i.getItemMeta().getDisplayName().endsWith(Config.PORTAL_KEY_DISPLAY_NAME_ENDING))
+                    && i.getItemMeta().getDisplayName().equals(Config.PORTAL_KEY_NAME))
                 return i;
         }
 

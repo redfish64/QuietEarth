@@ -70,6 +70,7 @@ public class QuietCraftPlugin extends JavaPlugin {
         this.getCommand("lc").setExecutor(new AdminListConfig(this));
         this.getCommand("ec").setExecutor(new AdminEditConfig(this));
         this.getCommand("sc").setExecutor(new AdminSaveConfig(this));
+        this.getCommand("g").setExecutor(new AdminGive(this));
 
     }
 

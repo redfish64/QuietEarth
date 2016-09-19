@@ -21,7 +21,7 @@ portal_key_material_type: FLINT_AND_STEEL
 portal_key_lore:
   - This flint and steel seems
   - magical somehow...
-portal_key_display_name_ending: " portal key"
+portal_key_name: "portal key"
 
 #The maximum net number of souls that can leave a world per day by teleporting
 max_allowed_soul_outflow_per_day: 1
@@ -41,7 +41,8 @@ overworld_spawn:
   min: 0
   max: 100000
 
-max_worlds: 3
+#the number of worlds in the universe
+max_worlds: 30
 
 #The max distance from a portal for a player to have a portal key in order to
 #have the portal created when lit.
@@ -84,3 +85,10 @@ portal_explosion_perc:
 #log events before being recycled (with or without active players)
 max_recycle_last_player_log_days: 14
 
+welcome_msg:
+  - Hello, welcome to the beta test of
+  - §5The Quiet Craft§5!
+  -
+  - When you die, you lose a soul. If you lose all souls
+  - you'll be teleported to a new world permantantly.
+  - Go to http://thequietcraft.com to read more.

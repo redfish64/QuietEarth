@@ -10,6 +10,9 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
@@ -624,4 +627,25 @@ public class WorldUtil {
 
         return false;
     }
+
+    public static void addItemsToInventory(Player player, int count, Material itemType,
+                                           String displayName, List<String> lore) {
+        Inventory i = player.getInventory();
+
+        while(count != 0) {
+            //in case the user has a lot of items, we create a max stack of 64
+            int sc = count%64;
+            ItemStack is = new ItemStack(itemType, sc);
+
+            ItemMeta im = is.getItemMeta();
+            im.setDisplayName(displayName);
+            im.setLore(lore);
+
+            is.setItemMeta(im);
+            i.addItem(is);
+            count -= sc;
+        }
+    }
+
+
 }

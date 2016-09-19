@@ -67,6 +67,14 @@ commands:
     usage: |
            /sc
 
+  g:
+    aliases: []
+    description: gives portals or souls to another player
+    usage: |
+           /g <player_name> <portal_key|soul> [count (defaults to 1)]
+           Example:
+           /g engler soul 1000
+
   say_mode:
     aliases: []
     description: Chatting from now on can be heard by those nearby player.

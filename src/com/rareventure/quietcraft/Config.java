@@ -16,7 +16,7 @@ public class Config {
     private static final String DEFAULT_CONFIG_RESOURCE_PATH = "/default_config.yml";
     public static MathUtil.RandomNormalParams OVERWORLD_SPAWN_RNP;
 
-    public static String PORTAL_KEY_DISPLAY_NAME_ENDING;
+    public static String PORTAL_KEY_NAME;
     /**
      * When portals are destroyed and exploded, this specifies the ratio of width of portal
      * to explosion power (as defined by World.createExplosion())
@@ -80,6 +80,8 @@ public class Config {
      * */
     static long MAX_RECYCLE_LAST_PLAYER_LOG_MS;
 
+    public static List<String> WELCOME_MSG;
+
     public static void reloadConfig()
     {
         OVERWORLD_SPAWN_RNP =
@@ -89,8 +91,8 @@ public class Config {
                         QuietCraftPlugin.cfg.getInt("overworld_spawn.min"),
                         QuietCraftPlugin.cfg.getInt("overworld_spawn.max"));
 
-        PORTAL_KEY_DISPLAY_NAME_ENDING =
-                QuietCraftPlugin.cfg.getString("portal_key_display_name_ending");
+        PORTAL_KEY_NAME =
+                QuietCraftPlugin.cfg.getString("portal_key_name");
 
         PORTAL_EXPLOSION_SIZE_PERC_RNP =
                 new MathUtil.RandomNormalParams(
@@ -167,6 +169,8 @@ public class Config {
                 (long)(QuietCraftPlugin.cfg.getDouble("max_recycle_last_player_log_days")
                         * 1000 * 3600 * 24);
 
+        WELCOME_MSG =
+                QuietCraftPlugin.cfg.getStringList("welcome_msg");
 
 
     }
