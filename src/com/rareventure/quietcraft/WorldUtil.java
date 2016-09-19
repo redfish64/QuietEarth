@@ -625,5 +625,3 @@ public class WorldUtil {
         return false;
     }
 }
-
-//TODO 2 logging, set up a current player thread local and give some context so that we can interpret logging better

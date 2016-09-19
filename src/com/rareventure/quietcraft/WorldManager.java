@@ -70,8 +70,6 @@ public class WorldManager {
         }
     }
 
-    //TODO 2 create table indexes
-
     /**
      * Finds the visited world that:
      * <ul>

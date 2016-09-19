@@ -35,17 +35,10 @@ public class QCPlayerLog {
         PERMA_DEATH,
 
         /**
-         * Player moved to a new world, either due to perma death,
-         * or using a portal
+         * Player moved to a new world, due to perma death
          */
         @EnumValue("M")
         MOVED_TO_WORLD,
-
-        /**
-         * Player left a world using a portal
-         */
-        @EnumValue("L")
-        MOVED_FROM_WORLD,
 
     }
 

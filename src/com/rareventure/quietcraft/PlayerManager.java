@@ -519,12 +519,19 @@ public class PlayerManager {
             Bukkit.getLogger().info("Moving player "+event.getPlayer().getName()+" to world "
                     +bedWorld.getName()
             +" because they slept in a bed");
-            qcPlayer.setWorld(bedWorld);
-            qcp.db.update(qcPlayer);
+
+            qcp.db.beginTransaction();
+            try {
+                qcPlayer.setWorld(bedWorld);
+                qcp.db.update(qcPlayer);
+                addToPlayerLog(qcPlayer, QCPlayerLog.Action.MOVED_TO_WORLD);
+                qcp.db.commitTransaction();
+            }
+            finally
+            {
+                qcp.db.endTransaction();
+            }
         }
     }
 
-    //TODO 2 when a player sleeps in a bed in a new world, we change their worldId
-    //TODO 2 figure out what we want in the qcplayerlog, we no longer are using
-    // MOVE_TO_WORLD, MOVE_FROM_WORLD actions
 }

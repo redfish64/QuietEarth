@@ -1,13 +1,19 @@
 package com.rareventure.quietcraft;
 
 import com.avaje.ebean.EbeanServer;
+import com.avaje.ebean.Transaction;
 import com.rareventure.quietcraft.commands.*;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.plugin.IllegalPluginAccessException;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.persistence.PersistenceException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.Exchanger;
 
 //TODO 2.5 if a portal gets rebuilt in the same location as a previous one,
 //and it didn't have a special block before (because it was automatically created),
@@ -78,7 +84,23 @@ public class QuietCraftPlugin extends JavaPlugin {
         } catch (PersistenceException ex) {
             System.out.println("Installing database for " + getDescription().getName() + " due to first time usage");
             super.installDDL();
+            setupDatabaseIndexes();
             return true;
+        }
+    }
+
+    private void setupDatabaseIndexes() {
+        try {
+            DbUtil.createIndex("qc_player","world_id");
+            DbUtil.createIndex("qc_player_log","player_id");
+            DbUtil.createIndex("qc_player_log","timestamp");
+            DbUtil.createIndex("qc_player_log","world_id");
+            //qc_portal_links are cached in memory, so no index is necessary
+            //qc_world is too small to worry about it
+        }
+        catch(Exception e)
+        {
+            throw new IllegalStateException(e);
         }
     }
 

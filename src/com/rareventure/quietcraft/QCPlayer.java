@@ -15,7 +15,7 @@ public class QCPlayer {
     @Id
     private String uuid;
 
-//TODO 2 get rid of displaying world names... or do something with them
+//TODO 2.1 get rid of displaying world names... or do something with them
     /**
      * The home world of the player
      */
