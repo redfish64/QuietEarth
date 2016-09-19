@@ -93,7 +93,7 @@ public class MainListener implements Listener {
     @EventHandler(priority = EventPriority.NORMAL)
     public void onPlayerPortalEvent(PlayerPortalEvent event)
     {
-        Bukkit.getLogger().info("onPlayerPortalCreate: "+event.getPlayer()+" "+event.getPlayer().getLocation());
+        Bukkit.getLogger().info("onPlayerPortalEvent: "+event.getPlayer()+" "+event.getPlayer().getLocation());
         qcp.pm.onPlayerPortalEvent(event);
     }
 

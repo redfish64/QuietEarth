@@ -418,7 +418,7 @@ public class WorldManager {
     public void onBlockPhysicsEvent(BlockPhysicsEvent e) {
         clearStaleConstructedPortals();
 
-        if(e.getChangedType() == Material.PORTAL && e.getBlock().getType() != Material.PORTAL) {
+        if(e.getBlock().getType() == Material.PORTAL) {
             //look to see if we have recently begun constructing any portals (automatically)
             //and if so, cancel any physics events associated with them
             synchronized (WorldUtil.recentConstructedPortalAreas) {
