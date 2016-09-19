@@ -109,4 +109,13 @@ public class MainListener implements Listener {
                 +" msg: "+event.getMessage());
         qcp.chatManager.onPlayerChat(event);
     }
+
+    @EventHandler
+    public void onPlayerBedEnterEvent(PlayerBedEnterEvent event)
+    {
+        Bukkit.getLogger().info("onPlayerBedEnterEvent: "+event.getPlayer()+" "+
+                event.getPlayer().getLocation());
+        qcp.pm.onPlayerBedEnterEvent(event);
+
+    }
 }

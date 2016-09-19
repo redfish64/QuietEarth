@@ -5,6 +5,7 @@ import com.rareventure.quietcraft.utils.BlockArea;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerPortalEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -20,8 +21,6 @@ public class PlayerManager {
     //TODO 2.1 open bugtracker account or create our own
     //TODO 3 make saying 'hello sailor' cause the person to be immediately transported to the nether
     //with no souls
-
-    //TODO 2 make commands to edit config. When config is editted, reinstantiate PlayerManager,ChatManager, etc.
 
     //TODO 2.5 investigate resource packs for making a custom item for a soul
     private final QuietCraftPlugin qcp;
@@ -241,7 +240,11 @@ public class PlayerManager {
         debugPrintPlayerInfo("onPlayerQuit",player);
     }
 
-    //TODO 2 lose half + 1 souls in nether and teleported to bed
+    //TODO 2.5 maybe lose half + 1 souls in nether and teleported to bed...
+    //problem: what if the user only has one soul in inventory.. do they die,
+    //or do we drop their soul and teleport them back. If we do the second,
+    //then hell is even safer then that normal world if you have one soul in
+    //inventory.
 
     //TODO 3 eliminate "bed obstructed" message... difficult, may need to filter packets???
     /**
@@ -507,6 +510,18 @@ public class PlayerManager {
             return String.format("%8.3f minutes",waitTime*60);
         }
         return String.format("%8.3f seconds",waitTime*3600);
+    }
+
+    public void onPlayerBedEnterEvent(PlayerBedEnterEvent event) {
+        QCWorld bedWorld = qcp.wm.getQCWorld(event.getBed().getWorld().getName());
+        QCPlayer qcPlayer = getQCPlayer(event.getPlayer());
+        if(qcPlayer.getWorldId() != bedWorld.getId()) {
+            Bukkit.getLogger().info("Moving player "+event.getPlayer().getName()+" to world "
+                    +bedWorld.getName()
+            +" because they slept in a bed");
+            qcPlayer.setWorld(bedWorld);
+            qcp.db.update(qcPlayer);
+        }
     }
 
     //TODO 2 when a player sleeps in a bed in a new world, we change their worldId

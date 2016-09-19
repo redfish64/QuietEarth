@@ -229,5 +229,22 @@ public class QCWorld {
 
         return totalAllowedOutflow - (-this.soulInflowOutflow);
     }
+
+    @Override
+    public String toString() {
+        return "QCWorld{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", spawnLocX=" + spawnLocX +
+                ", spawnLocY=" + spawnLocY +
+                ", spawnLocZ=" + spawnLocZ +
+                ", netherLocX=" + netherLocX +
+                ", netherLocY=" + netherLocY +
+                ", netherLocZ=" + netherLocZ +
+                ", recycleCounter=" + recycleCounter +
+                ", lastRecycleTimestamp=" + lastRecycleTimestamp +
+                ", soulInflowOutflow=" + soulInflowOutflow +
+                '}';
+    }
 }
 
