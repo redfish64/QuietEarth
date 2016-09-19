@@ -20,7 +20,7 @@ public class AdminJumpToWorld implements CommandExecutor {
     @Override
 
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (sender instanceof Player) {
+        if (WorldUtil.testAdminPlayer(sender)) {
             Player player = (Player) sender;
 
             if(args.length != 1)
@@ -41,8 +41,6 @@ public class AdminJumpToWorld implements CommandExecutor {
             player.teleport(l);
 
             sender.sendMessage("Jumped to world "+w.getName());
-        } else {
-            sender.sendMessage("You can only perform this command as a player");
         }
 
         return true;

@@ -18,20 +18,12 @@ import java.util.*;
 //TODO 3 delete all player logs where visit ids no longer exist to save space??
 
 
-//TODO 2 decide on random distance for the following. Do we want them close or far away from each other?:
-//  nether spawn
-//  portals to nether
-//  portals from nether (wild portals)
-//  reused world spawn
-
 //TODO 3 flying admin user
 
 //TODO 3 new rule: when in nether with at least one soul, all souls drop in nether,
 // player is teleported back to world (so dying in nether isn't so harsh and allows player to
 // try and recover souls)
 
-
-//TODO 2 see if we can change configuration on the fly so we can properly alpha
 
 /**
  * Manages qcWorlds and visited qcWorlds.
@@ -138,14 +130,6 @@ public class WorldManager {
 
         return bestWToRecycle;
     }
-
-    //TODO 2 can't create a portal until 5 days have passed (prevent soul farming)
-
-    //TODO 2 player doesn't switch qcWorlds unless they sleep in a bed in the new one
-
-    //TODO 2 qcWorlds don't allow there exit flow of souls to increase a certain amount
-    //per day. The number of souls in/out and date of last recycle is recorded in world
-    //to do this
 
     /**
      * Recycles the world. This changes the spawn and nether points, increments
@@ -271,9 +255,6 @@ public class WorldManager {
         return qcw;
     }
 
-    //TODO 2 when a world is recycled, all the old portals must be destroyed. Otherwise
-    //it would allow random people to enter the world if the new owners didn't know about
-    //the old portals
 
     /**
      * Creates a random portal location in the nether world.
@@ -347,7 +328,7 @@ public class WorldManager {
 
             //create a link from the current location to the nether world.
             QCPortalLink pl = qcp.portalManager.createPortalLink(
-                    qcPlayer.getWorldId(),
+                    qcp.wm.getQCWorld(event.getWorld().getName()).getId(),
                     portalLocation,
                     netherQCWorld.getId(),
                     netherWorldLocation);
@@ -359,7 +340,7 @@ public class WorldManager {
             QuietCraftPlugin.db.endTransaction();
         }
     }
-//TODO 2 make sure that players spawn in populated qcWorlds first!
+//TODO 2.5 test that players spawn in populated qcWorlds first!
     /**
      * Destroys portals on both sides of a portal link, and then deletes the portal link,
      * and qclocations from the database
@@ -437,7 +418,7 @@ public class WorldManager {
     public void onBlockPhysicsEvent(BlockPhysicsEvent e) {
         clearStaleConstructedPortals();
 
-        if(e.getBlock().getType() == Material.PORTAL) {
+        if(e.getChangedType() == Material.PORTAL && e.getBlock().getType() != Material.PORTAL) {
             //look to see if we have recently begun constructing any portals (automatically)
             //and if so, cancel any physics events associated with them
             synchronized (WorldUtil.recentConstructedPortalAreas) {
@@ -445,6 +426,7 @@ public class WorldManager {
                 if(
                     WorldUtil.recentConstructedPortalAreas.stream().anyMatch(ba -> {
                         if (ba.containsBlock(e.getBlock())) {
+                            Bukkit.getLogger().info("cancelled destruction of portal for "+e.getBlock());
                             e.setCancelled(true);
                             return true;
                         }
@@ -457,7 +439,10 @@ public class WorldManager {
             //now we need to check if any existing portals link to the given nether block
             //if so, we need to delete the link and possibly delete the other side of the portal
             qcp.portalManager.getPortalLinksForLocation(e.getBlock().getLocation())
-                    .forEach(pl -> qcp.portalManager.destroyPortalLink(pl));
+                    .forEach(pl -> {
+                        Bukkit.getLogger().info("PORTAL block physics event caused pl destruction");
+                        qcp.portalManager.destroyPortalLink(pl);
+                    });
         }
 
 

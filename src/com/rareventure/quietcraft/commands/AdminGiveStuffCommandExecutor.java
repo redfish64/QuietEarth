@@ -1,5 +1,6 @@
 package com.rareventure.quietcraft.commands;
 
+import com.rareventure.quietcraft.WorldUtil;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -13,7 +14,7 @@ public class AdminGiveStuffCommandExecutor implements CommandExecutor {
     @Override
 
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (sender instanceof Player) {
+        if (WorldUtil.testAdminPlayer(sender)) {
             Player player = (Player) sender;
 
             Inventory i = player.getInventory();
@@ -36,8 +37,6 @@ public class AdminGiveStuffCommandExecutor implements CommandExecutor {
             i.addItem(new ItemStack(Material.PAPER, 64));
 
             sender.sendMessage("Here you go...");
-        } else {
-            sender.sendMessage("You can only perform this command as a player");
         }
 
         return true;

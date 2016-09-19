@@ -8,6 +8,8 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
@@ -441,8 +443,10 @@ public class WorldUtil {
         BlockArea ba = findPortal(loc,true);
         if(ba == null) ba = findPortal(loc,false);
 
-        if(ba == null)
+        if(ba == null) {
+            Bukkit.getLogger().info("No portal to destroy at " + loc);
             return false;
+        }
 
         destroyPortal(loc.getWorld(),ba, explosionSize);
 
@@ -608,6 +612,18 @@ public class WorldUtil {
         return result.append(HORIZONTAL_DIRS[index]).toString();
     }
 
+    public static boolean testAdminPlayer(CommandSender sender) {
+        if(sender instanceof Player)
+        {
+            if(sender.hasPermission("quietcraftadmin"))
+                return true;
+            sender.sendMessage("You don't have quietcraftadmin permissions");
+        }
+        else
+            sender.sendMessage("Only a player can do that");
+
+        return false;
+    }
 }
 
 //TODO 2 logging, set up a current player thread local and give some context so that we can interpret logging better

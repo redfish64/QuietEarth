@@ -21,7 +21,6 @@ public class PlayerManager {
     //TODO 3 make saying 'hello sailor' cause the person to be immediately transported to the nether
     //with no souls
 
-    //TODO 2 decide how to handle admin users for server
     //TODO 2 make commands to edit config. When config is editted, reinstantiate PlayerManager,ChatManager, etc.
 
     //TODO 2.5 investigate resource packs for making a custom item for a soul
@@ -394,8 +393,6 @@ public class PlayerManager {
         return null;
     }
 
-    //TODO 2 create some reasonable logging messages so when we go alpha we'll have more to go on
-    //TODO 2 configuration
     /**
      * Called when a player is about to be teleported by a portal
      */

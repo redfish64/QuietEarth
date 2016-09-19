@@ -2,7 +2,6 @@ package com.rareventure.quietcraft;
 
 import com.avaje.ebean.EbeanServer;
 import com.rareventure.quietcraft.commands.*;
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.craftbukkit.libs.jline.internal.InputStreamReader;
@@ -13,7 +12,6 @@ import javax.persistence.PersistenceException;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.logging.FileHandler;
 
 //TODO 2.5 if a portal gets rebuilt in the same location as a previous one,
 //and it didn't have a special block before (because it was automatically created),
@@ -62,7 +60,7 @@ public class QuietCraftPlugin extends JavaPlugin {
 
         this.getCommand("kill").setExecutor(new KillCommandExecutor());
         this.getCommand("gm").setExecutor(new AdminGiveStuffCommandExecutor());
-        this.getCommand("w").setExecutor(new WorldCommandExecutor());
+        this.getCommand("w").setExecutor(new AdminWorldCommandExecutor(this));
         this.getCommand("cp").setExecutor(new AdminCreatePortal());
         this.getCommand("nb").setExecutor(new AdminNoisyBlock(this));
         this.getCommand("jw").setExecutor(new AdminJumpToWorld(this));
@@ -78,8 +76,7 @@ public class QuietCraftPlugin extends JavaPlugin {
             File configFile = new File(getDataFolder(),CONFIG_FILENAME);
             if(!configFile.exists()) {
                 this.getConfig().load(new InputStreamReader(this.getClass().getResourceAsStream(DEFAULT_CONFIG_RESOURCE_PATH)));
-                //TODO 2 reenable this after we finished default_config.yml
-                //this.getConfig().save(configFile);
+                this.getConfig().save(configFile);
             }
             else
                 this.getConfig().load(configFile);

@@ -2,6 +2,7 @@ package com.rareventure.quietcraft.commands;
 
 import com.rareventure.quietcraft.MathUtil;
 import com.rareventure.quietcraft.QuietCraftPlugin;
+import com.rareventure.quietcraft.WorldUtil;
 import it.unimi.dsi.fastutil.Hash;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -30,7 +31,7 @@ public class AdminNoisyBlock implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (sender instanceof Player) {
+        if (WorldUtil.testAdminPlayer(sender)) {
             Player player = (Player) sender;
 
             if(lastCakeBlock != null)
@@ -67,8 +68,6 @@ public class AdminNoisyBlock implements CommandExecutor {
             Bukkit.getLogger().info("CAKE_BLOCK appeared at "+b2);
 
             qcp.chatManager.speak(null,"!!NOISY BLOCK!!","says",b2.getLocation(),MAX_DIST_SQR,"Hi there!");
-        } else {
-            sender.sendMessage("You can only perform this command as a player");
         }
 
         return true;
