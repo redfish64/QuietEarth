@@ -241,6 +241,8 @@ public class PlayerManager {
         debugPrintPlayerInfo("onPlayerQuit",player);
     }
 
+    //TODO 2 lose half + 1 souls in nether and teleported to bed
+
     //TODO 3 eliminate "bed obstructed" message... difficult, may need to filter packets???
     /**
      * This is called after onDeath() when the player has clicked the respawn button
@@ -276,7 +278,7 @@ public class PlayerManager {
                 else if(soulCount < Config.SOULS_PER_REBIRTH *3)
                     p.sendMessage("You feel like a ethereal king, fear your wrath! You have "+(soulCount)+" souls left.");
                 else if(soulCount < Config.SOULS_PER_REBIRTH *4)
-                    p.sendMessage("You feel like a soul sucking demon, who has fallen so you may grow so large? You have "+(soulCount)+" souls left.");
+                    p.sendMessage("You feel like a soul sucking demon. Who has fallen so you may grow so large? You have "+(soulCount)+" souls left.");
                 else if(soulCount < Config.SOULS_PER_REBIRTH *5)
                     p.sendMessage("You've become almost immortal, flee, mortals, flee! You have "+(soulCount)+" souls left.");
                 else if(soulCount < Config.SOULS_PER_REBIRTH *6)

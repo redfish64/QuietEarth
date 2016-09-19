@@ -1,13 +1,19 @@
 package com.rareventure.quietcraft;
 
 import org.bukkit.Material;
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.craftbukkit.libs.jline.internal.InputStreamReader;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 /**
  * Configurable parameters are all stored here for convenience and speed.
  */
 public class Config {
+    private static final String CONFIG_FILENAME = "config.yml";
+    private static final String DEFAULT_CONFIG_RESOURCE_PATH = "/default_config.yml";
     public static MathUtil.RandomNormalParams OVERWORLD_SPAWN_RNP;
 
     public static String PORTAL_KEY_DISPLAY_NAME_ENDING;
@@ -163,5 +169,31 @@ public class Config {
 
 
 
+    }
+
+    public static void saveConfig(QuietCraftPlugin qcp) throws IOException {
+        File configFile = new File(qcp.getDataFolder(), CONFIG_FILENAME);
+        qcp.getConfig().save(configFile);
+    }
+
+    static void readConfigFile(QuietCraftPlugin qcp) {
+        //look for normal config file first. If it doesn't exist, read default hardcoded one
+        try {
+            File configFile = new File(qcp.getDataFolder(), CONFIG_FILENAME);
+            if (!configFile.exists()) {
+                qcp.getConfig().load(new InputStreamReader(Config.class.
+                        getResourceAsStream(DEFAULT_CONFIG_RESOURCE_PATH)));
+                qcp.getConfig().save(configFile);
+            } else
+                qcp.getConfig().load(configFile);
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        } catch (InvalidConfigurationException e) {
+            throw new IllegalStateException(e);
+        }
+
+        qcp.cfg = qcp.getConfig();
+
+        reloadConfig();
     }
 }

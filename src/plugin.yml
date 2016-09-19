@@ -36,16 +36,37 @@ commands:
     aliases: []
     description: ... create a cake nearby in a random direction ..
     usage: |
-           /nb [dist]
+           /nb <dist>
            Example: /nb
               ...
   jw:
     aliases: []
     description: ... jumps to world specified by id..
     usage: |
-           /jw [world_id]
-           Example: /jw
-              ...
+           /jw <world_id>
+           world_id goes from 1 to the maximum worlds on the server, 1 is always the nether
+           Example: /jw 2
+              you now are in the second world of the server
+  lc:
+    aliases: []
+    description: lists the config variables
+    usage: |
+           /lc [regex]
+           Example: /lc whisper
+           whisper_dist: 5
+  ec:
+    aliases: []
+    description: edits a config variable
+    usage: |
+           /ec <key> <value>
+           Example: /ec whisper_dist 10
+           whisper_dist: 10
+  sc:
+    aliases: []
+    description: saves the config file
+    usage: |
+           /sc
+
   say_mode:
     aliases: []
     description: Chatting from now on can be heard by those nearby player.
