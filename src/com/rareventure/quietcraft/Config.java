@@ -81,6 +81,7 @@ public class Config {
     static long MAX_RECYCLE_LAST_PLAYER_LOG_MS;
 
     public static List<String> WELCOME_MSG;
+    public static List<String> SPAWN_SIGN_MSG;
 
     public static void reloadConfig()
     {
@@ -171,6 +172,9 @@ public class Config {
 
         WELCOME_MSG =
                 QuietCraftPlugin.cfg.getStringList("welcome_msg");
+
+        SPAWN_SIGN_MSG =
+                QuietCraftPlugin.cfg.getStringList("spawn_sign_msg");
 
 
     }

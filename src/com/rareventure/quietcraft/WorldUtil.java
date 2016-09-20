@@ -7,7 +7,10 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
+
+import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -189,11 +192,6 @@ public class WorldUtil {
     }
 
     private static final int MAX_ACTIVE_PORTAL_LOC_DIST = 3;
-
-    public static void createPortal()
-    {
-
-    }
 
     public static BlockArea getPortalArea(List<Block> blocks)
     {
@@ -647,5 +645,44 @@ public class WorldUtil {
         }
     }
 
+    /**
+     * Adds a signpost along with a torch and a sandstone floor near the world spawn location marking it
+     */
+    public static void addSpawnLocationSign(Location l) {
+        Block lb = l.getBlock();
+        Block signBlock = lb.getRelative(-2,0,0);
 
+        BlockArea floor = new BlockArea();
+
+        //put floor below sign
+        floor.expandArea(signBlock.getRelative(-2,-1,-2));
+        floor.expandArea(signBlock.getRelative(2,-1,2));
+        floor.getBlocks(l.getWorld()).forEach(b -> b.setType(Material.SANDSTONE));
+
+        //put air around sign
+        BlockArea signArea = new BlockArea();
+        signArea.expandArea(signBlock.getRelative(-2,0,-2));
+        signArea.expandArea(signBlock.getRelative(2,1,2));
+        signArea.getBlocks(l.getWorld()).forEach(b -> b.setType(Material.AIR));
+
+        signBlock.getRelative(BlockFace.EAST).setType(Material.TORCH);
+
+        signBlock.setType(Material.SIGN_POST);
+
+        BlockState s = signBlock.getState();
+        if(s instanceof org.bukkit.block.Sign) {
+            org.bukkit.block.Sign bs = (org.bukkit.block.Sign) s;
+
+            for (int i = 0; i < Config.SPAWN_SIGN_MSG.size(); i++)
+                bs.setLine(i, Config.SPAWN_SIGN_MSG.get(i));
+            org.bukkit.material.Sign sign = (org.bukkit.material.Sign) s.getData();
+            sign.setFacingDirection(BlockFace.EAST);
+
+            s.update();
+            Bukkit.getLogger().info("Created spawn sign at "+l);
+        }
+        else {
+            Bukkit.getLogger().warning("Couldn't create sign, block state is "+s+" at "+l);
+        }
+    }
 }

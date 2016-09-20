@@ -63,6 +63,9 @@ public class AdminNoisyBlock implements CommandExecutor {
             b2.setType(Material.DIAMOND_BLOCK);
             b2.getRelative(0,1,0).setType(Material.TORCH);
 
+            //HACK
+            WorldUtil.addSpawnLocationSign(b2.getLocation());
+
             lastCakeBlock = b2;
 
             Bukkit.getLogger().info("CAKE_BLOCK appeared at "+b2);

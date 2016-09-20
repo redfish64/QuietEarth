@@ -143,8 +143,11 @@ public class WorldManager {
         w.setRecycleCounter(w.getRecycleCounter()+1);
         w.setLastRecycleTimestamp(new Date());
         w.setSoulInflowOutflow(0);
-        qcp.db.save(w);
+        qcp.db.update(w);
 
+        Bukkit.getLogger().info("Recycling world "+w);
+
+        WorldUtil.addSpawnLocationSign(spawnLocation);
 
         //destroy all the old portal links, so that the recycled world won't be
         //enterable from the nether
@@ -248,6 +251,7 @@ public class WorldManager {
         qcw.setId(id);
         w.setSpawnLocation(spawnLocation.getBlockX(),spawnLocation.getBlockY(),
                 spawnLocation.getBlockZ());
+        WorldUtil.addSpawnLocationSign(spawnLocation);
 
         qcWorlds.add(qcw);
         qcp.getDatabase().insert(qcw);

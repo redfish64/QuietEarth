@@ -92,3 +92,7 @@ welcome_msg:
   - When you die, you lose a soul. If you lose all souls
   - you'll be teleported to a new world permantantly.
   - Go to http://thequietcraft.com to read more.
+
+spawn_sign_msg:
+  - Spawn
+  - Point
