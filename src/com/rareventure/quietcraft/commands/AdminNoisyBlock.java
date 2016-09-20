@@ -64,7 +64,7 @@ public class AdminNoisyBlock implements CommandExecutor {
             b2.getRelative(0,1,0).setType(Material.TORCH);
 
             //HACK
-            WorldUtil.addSpawnLocationSign(b2.getLocation());
+            //WorldUtil.addSpawnLocationSign(b2.getLocation());
 
             lastCakeBlock = b2;
 

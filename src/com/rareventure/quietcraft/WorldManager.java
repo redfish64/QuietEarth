@@ -74,6 +74,7 @@ public class WorldManager {
      * Finds the visited world that:
      * <ul>
      * <li>either has the most live players currently,
+     * or if tied, then the most players that have logged in (and have or have not quit)
      * or if tied, then the world with the most events,</li>
      * <li>and the player hasn't visited the latest recycled version of the world</li>
      * <li>and is not the nether world</li>
@@ -86,14 +87,17 @@ public class WorldManager {
         //see javadoc of this method for a description of what this does
         SqlQuery q = qcp.db.
                 createSqlQuery(
-                        " select id,\n" +
-                                "   (select count(*) from qc_player p where p.world_id = w.id) as pc, \n" +
-                                "   (select count (*) from qc_player_log where world_id = w.id) as plc\n" +
-                                "  from qc_world w where not exists \n" +
-                                "    (select 'x' from qc_player_log l where player_id = :pid and " +
-                                "       l.world_id = w.id and l.world_recycle_counter = w.recycle_counter)\n" +
-                                "    and w.id != "+ Config.NETHER_WORLD_ID+"\n" +
-                                "    order by pc desc,plc desc limit 1;\n");
+                        "select id,\n" +
+                                " (select count('x') from qc_player_log pl1 where pl1.action = 'J' and pl1.timestamp > " +
+                                "(select max(pl2.timestamp) from qc_player_log pl2 where pl1.player_id = pl2.player_id " +
+                                "and pl2.action = 'Q') and pl1.world_id = w.id) as lpc,\n" +
+                                " (select count(*) from qc_player p where p.world_id = w.id) as pc,\n" +
+                                " (select count (*) from qc_player_log where world_id = w.id) as plc\n" +
+                                "                                  from qc_world w where not exists \n" +
+                                "                                    (select 'x' from qc_player_log l where player_id = :pid and\n" +
+                                "                                       l.world_id = w.id and l.world_recycle_counter = w.recycle_counter)\n" +
+                                "                                    and w.id != "+ Config.NETHER_WORLD_ID+"\n" +
+                                "                                    order by lpc desc, pc desc,plc desc limit 1;");
 
         q.setParameter(1,playerId);
         SqlRow sr = q.findUnique();

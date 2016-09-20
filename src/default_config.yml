@@ -5,9 +5,9 @@ inaudible_dist_perc: 150
 #The percentage distance after max dist where the speaker can't be identified, nor the
 #message heard
 inaudible_dist_perc2: 200
-shout_speech_dist: 100
-normal_speech_dist: 30
-whisper_speech_dist: 5
+shout_speech_dist: 1000
+normal_speech_dist: 100
+whisper_speech_dist: 10
 
 #number of souls given per rebirth
 souls_per_rebirth: 4
@@ -96,3 +96,6 @@ welcome_msg:
 spawn_sign_msg:
   - Spawn
   - Point
+
+overworld_gives_soul_on_death: true
+

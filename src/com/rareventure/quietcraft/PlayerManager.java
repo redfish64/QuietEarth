@@ -39,6 +39,7 @@ public class PlayerManager {
 
     private void addToPlayerLog(QCPlayer qcPlayer, QCPlayerLog.Action action)
     {
+        Bukkit.getLogger().info("Player log "+qcPlayer+" action "+action);
         QCWorld w = qcPlayer.getWorld();
         db.insert(new QCPlayerLog(qcPlayer.getUuid(),new Date(),
                 w.getId(), w.getRecycleCounter(),
@@ -80,6 +81,15 @@ public class PlayerManager {
             if(is.getType().equals(Config.SOUL_MATERIAL_TYPE)
                     && is.getItemMeta().getDisplayName().equals(Config.SOUL_DISPLAY_NAME))
                 isi.remove();
+        }
+
+        //add one soul to give to whoever killed the player
+        if(Config.OVERWORLD_GIVES_SOULS_ON_DEATH)
+        {
+            Bukkit.getLogger().info("Dropping one soul on death for "+p);
+            p.getWorld().dropItemNaturally(p.getLocation(), createSoulGem(1));
+
+            addSoulsToInventory(p,1);
         }
 
         debugPrintPlayerInfo("onPlayerDeath",p);
@@ -194,6 +204,11 @@ public class PlayerManager {
         }
 
         addSoulsToInventory(player, soulCount);
+    }
+
+    public ItemStack createSoulGem(int soulCount) {
+        return WorldUtil.createSpecialItem(Config.SOUL_MATERIAL_TYPE,
+                Config.SOUL_DISPLAY_NAME, Config.SOUL_LORE, soulCount);
     }
 
     public void addSoulsToInventory(Player player, int soulCount) {

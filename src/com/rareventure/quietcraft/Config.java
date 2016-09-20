@@ -82,6 +82,7 @@ public class Config {
 
     public static List<String> WELCOME_MSG;
     public static List<String> SPAWN_SIGN_MSG;
+    public static boolean OVERWORLD_GIVES_SOULS_ON_DEATH;
 
     public static void reloadConfig()
     {
@@ -176,6 +177,7 @@ public class Config {
         SPAWN_SIGN_MSG =
                 QuietCraftPlugin.cfg.getStringList("spawn_sign_msg");
 
+        OVERWORLD_GIVES_SOULS_ON_DEATH = QuietCraftPlugin.cfg.getBoolean("overworld_gives_soul_on_death",false);
 
     }
 
