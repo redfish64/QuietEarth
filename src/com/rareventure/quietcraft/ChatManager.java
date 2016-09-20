@@ -67,8 +67,9 @@ public class ChatManager {
             else if (distSqr < maxDistSqr * Config.INAUDIBLE_DIST_RATIO2_SQR)
                 fullMessage = inaudibleMessage2;
             else
-                return; // don't send a message past inaudible range
+                continue; // don't send a message past inaudible range
 
+            Bukkit.getLogger().info(toPlayer.getName()+" received msg: "+fullMessage);
             toPlayer.sendMessage(String.format("\u00A7d%s\u00A7f %s",
                         WorldUtil.
                         getTextDirectionFromSource(vecToSoundSource, toPlayerLoc.getYaw())
