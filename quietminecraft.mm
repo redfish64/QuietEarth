@@ -78,7 +78,7 @@
 </node>
 </node>
 </node>
-<node CREATED="1467995679929" ID="ID_1767029268" MODIFIED="1473989296657" TEXT="7/8/16">
+<node CREATED="1467995679929" ID="ID_1767029268" MODIFIED="1474444810915" TEXT="7/8/16">
 <node CREATED="1467996547870" ID="ID_1741852940" MODIFIED="1467996552931" TEXT="startup">
 <node CREATED="1467996554087" ID="ID_1545746531" MODIFIED="1467996557883" TEXT="create/open database"/>
 <node CREATED="1473081969417" ID="ID_845212550" MODIFIED="1473081976021" TEXT="initialize worlds"/>
@@ -529,8 +529,7 @@
       &#160;((souls out) -&#160;(souls in)) / (time user alive) = (soul farming per ms)
     </p>
   </body>
-</html>
-</richcontent>
+</html></richcontent>
 </node>
 <node CREATED="1474007899819" ID="ID_1857470490" MODIFIED="1474007921087" TEXT="except that if a merchant gets a lot of souls from other people (not from farming) we shouldn&apos;t lock him out from teleporting"/>
 <node CREATED="1474007921531" ID="ID_1639508668" MODIFIED="1474007944863" TEXT="So the only souls that should count are the ones created in a world"/>

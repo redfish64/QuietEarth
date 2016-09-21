@@ -5,9 +5,9 @@ inaudible_dist_perc: 150
 #The percentage distance after max dist where the speaker can't be identified, nor the
 #message heard
 inaudible_dist_perc2: 200
-shout_speech_dist: 1000
-normal_speech_dist: 100
-whisper_speech_dist: 10
+shout_speech_dist: 100000
+normal_speech_dist: 10000
+whisper_speech_dist: 20
 
 #number of souls given per rebirth
 souls_per_rebirth: 4
@@ -17,6 +17,12 @@ soul_lore:
   - This is a soul.
   - It is very valuable if you
   - like living in this world
+
+soul_shard_display_name: Soul Shard
+soul_shard_lore:
+  - This is a soul shard.
+  - With 9 of these, you can craft a soul
+
 portal_key_material_type: FLINT_AND_STEEL
 portal_key_lore:
   - This flint and steel seems
@@ -97,5 +103,6 @@ spawn_sign_msg:
   - Spawn
   - Point
 
-overworld_gives_soul_on_death: true
+overworld_gives_soul_on_death: false
 
+soul_shard_giveaway_minutes: 6.666666667

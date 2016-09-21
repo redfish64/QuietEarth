@@ -1,11 +1,20 @@
 package com.rareventure.quietcraft;
 
+import com.google.common.collect.Lists;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.craftbukkit.libs.jline.internal.Configuration;
 import org.bukkit.craftbukkit.libs.jline.internal.InputStreamReader;
+import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -14,6 +23,10 @@ import java.util.List;
 public class Config {
     private static final String CONFIG_FILENAME = "config.yml";
     private static final String DEFAULT_CONFIG_RESOURCE_PATH = "/default_config.yml";
+    public static final Material SOUL_SHARD_MATERIAL = Material.PRISMARINE_SHARD;
+    public static final Material FAKE_SOUL_SHARD_RESULT = Material.WOOD_BUTTON;
+    public static final String FAKE_SOUL_RESULT_DISPLAY_NAME = "Cracked soul gem";
+    public static final List<String> FAKE_SOUL_RESULT_LORE = Arrays.asList("Thee dare taunt the gods????");
     public static MathUtil.RandomNormalParams OVERWORLD_SPAWN_RNP;
 
     public static String PORTAL_KEY_NAME;
@@ -48,6 +61,10 @@ public class Config {
     static String SOUL_DISPLAY_NAME;
 
     static List<String> SOUL_LORE;
+
+    public static String SOUL_SHARD_DISPLAY_NAME;
+    public static List<String> SOUL_SHARD_LORE;
+
 
     static Material PORTAL_KEY_MATERIAL_TYPE;
 
@@ -84,101 +101,150 @@ public class Config {
     public static List<String> SPAWN_SIGN_MSG;
     public static boolean OVERWORLD_GIVES_SOULS_ON_DEATH;
 
+    /**
+     * Every so often, every player on the server earns a soul shard while playing.
+     */
+    public static double SOUL_SHARD_GIVEAWAY_MINUTES;
+
     public static void reloadConfig()
     {
         OVERWORLD_SPAWN_RNP =
                 new MathUtil.RandomNormalParams(
-                        QuietCraftPlugin.cfg.getInt("overworld_spawn.mean"),
-                        QuietCraftPlugin.cfg.getInt("overworld_spawn.std"),
-                        QuietCraftPlugin.cfg.getInt("overworld_spawn.min"),
-                        QuietCraftPlugin.cfg.getInt("overworld_spawn.max"));
+                        getConfigInt("overworld_spawn.mean"),
+                        getConfigInt("overworld_spawn.std"),
+                        getConfigInt("overworld_spawn.min"),
+                        getConfigInt("overworld_spawn.max"));
 
         PORTAL_KEY_NAME =
-                QuietCraftPlugin.cfg.getString("portal_key_name");
+                getConfigString("portal_key_name");
 
         PORTAL_EXPLOSION_SIZE_PERC_RNP =
                 new MathUtil.RandomNormalParams(
-                        QuietCraftPlugin.cfg.getDouble("portal_explosion_perc.mean"),
-                        QuietCraftPlugin.cfg.getDouble("portal_explosion_perc.std"),
-                        QuietCraftPlugin.cfg.getDouble("portal_explosion_perc.min"),
-                        QuietCraftPlugin.cfg.getDouble("portal_explosion_perc.max"));
+                        getConfigDouble("portal_explosion_perc.mean"),
+                        getConfigDouble("portal_explosion_perc.std"),
+                        getConfigDouble("portal_explosion_perc.min"),
+                        getConfigDouble("portal_explosion_perc.max"));
 
         NETHER_PORTAL_RNP =
                 new MathUtil.RandomNormalParams(
-                        QuietCraftPlugin.cfg.getInt("nether_portal.mean"),
-                        QuietCraftPlugin.cfg.getInt("nether_portal.std"),
-                        QuietCraftPlugin.cfg.getInt("nether_portal.min"),
-                        QuietCraftPlugin.cfg.getInt("nether_portal.max"));
+                        getConfigInt("nether_portal.mean"),
+                        getConfigInt("nether_portal.std"),
+                        getConfigInt("nether_portal.min"),
+                        getConfigInt("nether_portal.max"));
 
         INAUDIBLE_DIST_RATIO_SQR =
-                MathUtil.sqr(QuietCraftPlugin.cfg.getDouble("inaudible_dist_perc")/100.);
+                MathUtil.sqr(getConfigDouble("inaudible_dist_perc")/100.);
 
         INAUDIBLE_DIST_RATIO2_SQR =
-                MathUtil.sqr(QuietCraftPlugin.cfg.getDouble("inaudible_dist_perc2")/100.);
+                MathUtil.sqr(getConfigDouble("inaudible_dist_perc2")/100.);
 
         NETHER_SPAWN_RNP =
                 new MathUtil.RandomNormalParams(
-                        QuietCraftPlugin.cfg.getInt("nether_spawn.mean"),
-                        QuietCraftPlugin.cfg.getInt("nether_spawn.std"),
-                        QuietCraftPlugin.cfg.getInt("nether_spawn.min"),
-                        QuietCraftPlugin.cfg.getInt("nether_spawn.max"));
+                        getConfigInt("nether_spawn.mean"),
+                        getConfigInt("nether_spawn.std"),
+                        getConfigInt("nether_spawn.min"),
+                        getConfigInt("nether_spawn.max"));
 
-        SOULS_PER_REBIRTH = QuietCraftPlugin.cfg.getInt("souls_per_rebirth");
+        SOULS_PER_REBIRTH = getConfigInt("souls_per_rebirth");
 
         SOUL_MATERIAL_TYPE =
-                Material.getMaterial(QuietCraftPlugin.cfg.getString("soul_material_type"));
+                Material.getMaterial(getConfigString("soul_material_type"));
 
         SOUL_DISPLAY_NAME =
-                QuietCraftPlugin.cfg.getString("soul_display_name");
-
+                getConfigString("soul_display_name");
         SOUL_LORE =
-                QuietCraftPlugin.cfg.getStringList("soul_lore");
+                getConfigStringList("soul_lore");
+
+        SOUL_SHARD_DISPLAY_NAME =
+                getConfigString("soul_shard_display_name");
+        SOUL_SHARD_LORE =
+                getConfigStringList("soul_shard_lore");
 
         PORTAL_KEY_MATERIAL_TYPE =
-                Material.getMaterial(QuietCraftPlugin.cfg.getString("portal_key_material_type"));
+                Material.getMaterial(getConfigString("portal_key_material_type"));
 
         PORTAL_KEY_LORE =
-                QuietCraftPlugin.cfg.getStringList("portal_key_lore");
+                getConfigStringList("portal_key_lore");
 
         MAX_ALLOWED_SOUL_OUTFLOW_PER_HOUR =
-                (float) QuietCraftPlugin.cfg.getDouble("max_allowed_soul_outflow_per_day")/24f;
+                (float) getConfigDouble("max_allowed_soul_outflow_per_day")/24f;
 
         MAX_WORLDS =
-                QuietCraftPlugin.cfg.getInt("max_worlds");
+                getConfigInt("max_worlds");
 
         MAX_KEY_PORTAL_DISTANCE =
-                QuietCraftPlugin.cfg.getInt("max_key_portal_distance");
+                getConfigInt("max_key_portal_distance");
 
         NETHER_PORTAL_WIDTH_PARAMS =
                 new MathUtil.RandomNormalParams(
-                        QuietCraftPlugin.cfg.getInt("nether_portal_width.mean"),
-                        QuietCraftPlugin.cfg.getInt("nether_portal_width.std"),
-                        QuietCraftPlugin.cfg.getInt("nether_portal_width.min"),
-                        QuietCraftPlugin.cfg.getInt("nether_portal_width.max"));
+                        getConfigInt("nether_portal_width.mean"),
+                        getConfigInt("nether_portal_width.std"),
+                        getConfigInt("nether_portal_width.min"),
+                        getConfigInt("nether_portal_width.max"));
 
         PORTAL_HEIGHT_TO_WIDTH =
-                QuietCraftPlugin.cfg.getDouble("portal_height_to_width");
+                getConfigDouble("portal_height_to_width");
 
         OVERWORLD_PORTAL_WIDTH_PARAMS =
                 new MathUtil.RandomNormalParams(
-                        QuietCraftPlugin.cfg.getInt("overworld_portal_width.mean"),
-                        QuietCraftPlugin.cfg.getInt("overworld_portal_width.std"),
-                        QuietCraftPlugin.cfg.getInt("overworld_portal_width.min"),
-                        QuietCraftPlugin.cfg.getInt("overworld_portal_width.max"));
+                        getConfigInt("overworld_portal_width.mean"),
+                        getConfigInt("overworld_portal_width.std"),
+                        getConfigInt("overworld_portal_width.min"),
+                        getConfigInt("overworld_portal_width.max"));
 
 
         MAX_RECYCLE_LAST_PLAYER_LOG_MS =
-                (long)(QuietCraftPlugin.cfg.getDouble("max_recycle_last_player_log_days")
+                (long)(getConfigDouble("max_recycle_last_player_log_days")
                         * 1000 * 3600 * 24);
 
         WELCOME_MSG =
-                QuietCraftPlugin.cfg.getStringList("welcome_msg");
+                getConfigStringList("welcome_msg");
 
         SPAWN_SIGN_MSG =
-                QuietCraftPlugin.cfg.getStringList("spawn_sign_msg");
+                getConfigStringList("spawn_sign_msg");
 
-        OVERWORLD_GIVES_SOULS_ON_DEATH = QuietCraftPlugin.cfg.getBoolean("overworld_gives_soul_on_death",false);
+        OVERWORLD_GIVES_SOULS_ON_DEATH = getConfigBoolean("overworld_gives_soul_on_death");
+        SOUL_SHARD_GIVEAWAY_MINUTES = getConfigDouble("soul_shard_giveaway_minutes");
 
+    }
+
+    private static void configTest(String s) {
+        if(QuietCraftPlugin.cfg.contains(s))
+        {
+            QuietCraftPlugin.w("Overriding "+s+" to "+QuietCraftPlugin.cfg.get(s));
+        }
+        if(!QuietCraftPlugin.defaultCfg.contains(s))
+            throw new IllegalStateException("Can't find config field "+s+" in "+DEFAULT_CONFIG_RESOURCE_PATH);
+    }
+
+    private static int getConfigInt(String s) {
+        configTest(s);
+        return QuietCraftPlugin.cfg.getInt(s, QuietCraftPlugin.defaultCfg.getInt(s));
+    }
+
+    private static double getConfigDouble(String s) {
+        configTest(s);
+        return QuietCraftPlugin.cfg.getDouble(s, QuietCraftPlugin.defaultCfg.getDouble(s));
+    }
+
+    private static boolean getConfigBoolean(String s) {
+        configTest(s);
+        return QuietCraftPlugin.cfg.getBoolean(s, QuietCraftPlugin.defaultCfg.getBoolean(s));
+    }
+
+    private static String getConfigString(String s) {
+        configTest(s);
+        return QuietCraftPlugin.cfg.getString(s, QuietCraftPlugin.defaultCfg.getString(s));
+    }
+
+    private static List<String> getConfigStringList(String s) {
+        configTest(s);
+
+        List<String> r = QuietCraftPlugin.cfg.getStringList(s);
+        if(r.isEmpty())
+            return QuietCraftPlugin.defaultCfg.getStringList(s);
+
+        return r;
     }
 
     public static void saveConfig(QuietCraftPlugin qcp) throws IOException {
@@ -187,22 +253,25 @@ public class Config {
     }
 
     static void readConfigFile(QuietCraftPlugin qcp) {
-        //look for normal config file first. If it doesn't exist, read default hardcoded one
+        qcp.cfg = new YamlConfiguration();
+        qcp.defaultCfg = new YamlConfiguration();
+
+        //we use the default config as a fallback and config.yml for overrides
         try {
+            qcp.defaultCfg.load(new InputStreamReader(Config.class.
+                    getResourceAsStream(DEFAULT_CONFIG_RESOURCE_PATH)));
+
             File configFile = new File(qcp.getDataFolder(), CONFIG_FILENAME);
             if (!configFile.exists()) {
-                qcp.getConfig().load(new InputStreamReader(Config.class.
-                        getResourceAsStream(DEFAULT_CONFIG_RESOURCE_PATH)));
-                qcp.getConfig().save(configFile);
+                qcp.i("Creating config file: %s", configFile);
+                new FileOutputStream(configFile).close();
             } else
-                qcp.getConfig().load(configFile);
+                qcp.cfg.load(configFile);
         } catch (IOException e) {
             throw new IllegalStateException(e);
         } catch (InvalidConfigurationException e) {
             throw new IllegalStateException(e);
         }
-
-        qcp.cfg = qcp.getConfig();
 
         reloadConfig();
     }

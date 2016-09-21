@@ -15,6 +15,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.entity.EntityCreatePortalEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.event.world.PortalCreateEvent;
 import org.bukkit.inventory.ItemStack;
@@ -117,5 +118,11 @@ public class MainListener implements Listener {
                 event.getPlayer().getLocation());
         qcp.pm.onPlayerBedEnterEvent(event);
 
+    }
+
+    @EventHandler
+    public void onPrepareItemCraftEvent(PrepareItemCraftEvent event)
+    {
+        qcp.craftManager.onPrepareItemCraftEvent(event);
     }
 }

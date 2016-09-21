@@ -3,17 +3,20 @@ package com.rareventure.quietcraft;
 import com.avaje.ebean.EbeanServer;
 import com.avaje.ebean.Transaction;
 import com.rareventure.quietcraft.commands.*;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.IllegalPluginAccessException;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.persistence.PersistenceException;
+import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.Exchanger;
+import java.util.logging.Level;
 
 //TODO 2.5 if a portal gets rebuilt in the same location as a previous one,
 //and it didn't have a special block before (because it was automatically created),
@@ -22,11 +25,13 @@ import java.util.concurrent.Exchanger;
 
 public class QuietCraftPlugin extends JavaPlugin {
     public static EbeanServer db;
+    public static FileConfiguration defaultCfg;
     public WorldManager wm;
     public PlayerManager pm;
     public PortalManager portalManager;
     public ChatManager chatManager;
     public static FileConfiguration cfg;
+    public CraftManager craftManager;
 
     public void onEnable() {
         Config.readConfigFile(this);
@@ -71,6 +76,11 @@ public class QuietCraftPlugin extends JavaPlugin {
         this.getCommand("ec").setExecutor(new AdminEditConfig(this));
         this.getCommand("sc").setExecutor(new AdminSaveConfig(this));
         this.getCommand("g").setExecutor(new AdminGive(this));
+
+        SoulShardTimer soulShardTimer = new SoulShardTimer(this);
+        soulShardTimer.start();
+
+        craftManager = new CraftManager(this);
 
     }
 
@@ -138,5 +148,25 @@ public class QuietCraftPlugin extends JavaPlugin {
     public void onDisable(){
 
     }
+
+    public static void i(String s, Object ... f) {
+        log(Level.INFO, s, f);
+    }
+
+    public static void w(String s, Object ... f) {
+        log(Level.WARNING, s, f);
+    }
+
+    public static void e(String s, Object ... f) {
+        log(Level.SEVERE, s, f);
+    }
+
+    public static void log(Level l, String s, Object ... f) {
+        if(f.length > 0)
+            Bukkit.getLogger().log(l,String.format(s, f));
+        else
+            Bukkit.getLogger().log(l,s);
+    }
+
 
 }

@@ -32,7 +32,7 @@ public class QCPlayer {
     private int soulsKeptDuringDeath;
 
     @Transient
-    public ChatManager.SpeakStyle defaultSpeakStyle = ChatManager.SpeakStyle.SHOUT;
+    public ChatManager.SpeakStyle defaultSpeakStyle = ChatManager.SpeakStyle.SAY;
 
     public QCPlayer() {
     }

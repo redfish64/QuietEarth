@@ -53,6 +53,11 @@ public class WorldUtil {
      * remove nether material blocks as we add them
      */
     static final List<BlockArea> recentConstructedPortalAreas = new ArrayList<>();
+
+    /**
+     * bukkit ticks per second (standard measure of minecraft is a tick)
+     */
+    public static final int TICKS_PER_SECOND = 20;
     /**
      * The last time a portal began automatic construction
      */
@@ -691,5 +696,10 @@ public class WorldUtil {
         else {
             Bukkit.getLogger().warning("Couldn't create sign, block state is "+s+" at "+l);
         }
+    }
+
+    public static ItemStack createSoulGem(int soulCount) {
+        return createSpecialItem(Config.SOUL_MATERIAL_TYPE,
+                Config.SOUL_DISPLAY_NAME, Config.SOUL_LORE, soulCount);
     }
 }

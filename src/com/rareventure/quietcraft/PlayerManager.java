@@ -87,9 +87,7 @@ public class PlayerManager {
         if(Config.OVERWORLD_GIVES_SOULS_ON_DEATH)
         {
             Bukkit.getLogger().info("Dropping one soul on death for "+p);
-            p.getWorld().dropItemNaturally(p.getLocation(), createSoulGem(1));
-
-            addSoulsToInventory(p,1);
+            p.getWorld().dropItemNaturally(p.getLocation(), WorldUtil.createSoulGem(1));
         }
 
         debugPrintPlayerInfo("onPlayerDeath",p);
@@ -201,14 +199,13 @@ public class PlayerManager {
         if(isFirstAppearance)
         {
             addPortalKeysToInventory(player, 1);
+
+            //we give a bed to a player so they don't end up spawning at the spawn point and getting killed all the
+            //ti1me if some griefer kills them
+            i.addItem(new ItemStack(Material.BED));
         }
 
         addSoulsToInventory(player, soulCount);
-    }
-
-    public ItemStack createSoulGem(int soulCount) {
-        return WorldUtil.createSpecialItem(Config.SOUL_MATERIAL_TYPE,
-                Config.SOUL_DISPLAY_NAME, Config.SOUL_LORE, soulCount);
     }
 
     public void addSoulsToInventory(Player player, int soulCount) {

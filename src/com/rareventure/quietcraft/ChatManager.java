@@ -50,6 +50,7 @@ public class ChatManager {
         for (Player toPlayer : allPlayers) {
             if(self != null && toPlayer.equals(self))
             {
+                Bukkit.getLogger().info(toPlayer.getName()+" is self");
                 continue;
             }
 
@@ -66,17 +67,18 @@ public class ChatManager {
                 fullMessage = inaudibleMessage;
             else if (distSqr < maxDistSqr * Config.INAUDIBLE_DIST_RATIO2_SQR)
                 fullMessage = inaudibleMessage2;
-            else
+            else {
+                Bukkit.getLogger().info(toPlayer.getName()+" is out of range");
                 continue; // don't send a message past inaudible range
-
-            Bukkit.getLogger().info(toPlayer.getName()+" received msg: "+fullMessage);
+            }
+            Bukkit.getLogger().info(toPlayer.getName()+" received msg2: "+fullMessage);
             toPlayer.sendMessage(String.format("\u00A7d%s\u00A7f %s",
                         WorldUtil.
                         getTextDirectionFromSource(vecToSoundSource, toPlayerLoc.getYaw())
                         ,fullMessage));
         }
 
-        Bukkit.getLogger().info("Message: "+name+" "+message+" at "+loc);
+        Bukkit.getLogger().info("Message: "+name+" "+message+" at "+loc+" maxDistSqr "+maxDistSqr);
     }
 
     public void speak(SpeakStyle speakStyle, Player player, String message) {
@@ -87,9 +89,9 @@ public class ChatManager {
 
     }
 
-    public enum SpeakStyle { SHOUT("shouts","shout","chat_manager.shout_speech_dist"),
-                             SAY("says","say","chat_manager.normal_speech_dist"),
-                             WHISPER("whispers","whisper","chat_manager.whisper_speech_dist");
+    public enum SpeakStyle { SHOUT("shouts","shout","shout_speech_dist"),
+                             SAY("says","say","normal_speech_dist"),
+                             WHISPER("whispers","whisper","whisper_speech_dist");
 
         public final String action;
         public final String selfAction;
