@@ -177,6 +177,15 @@ public class PlayerManager {
 
                 player.sendMessage("You are in world '" +
                         player.getWorld().getName() + "'");
+
+                int soulCount = getSoulCount(player);
+                if(soulCount > Config.MAX_SOULS_HELD_THROUGH_DEATH)
+                {
+                    player.sendMessage(ChatColor.RED+"WARNING!!! "+ChatColor.WHITE+"You are carrying over "
+                            +Config.MAX_SOULS_HELD_THROUGH_DEATH+" souls. If you die, you'll drop "
+                            +(soulCount - Config.MAX_SOULS_HELD_THROUGH_DEATH)+" of your "+soulCount+
+                    " souls on the ground.");
+                }
             }
             db.commitTransaction();
         }

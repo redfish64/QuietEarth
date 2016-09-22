@@ -1,0 +1,67 @@
+.menu_ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #333;
+    position: fixed;
+    top: 0;
+    width: 100%;
+}
+
+.menu_li {
+    float: left;
+}
+
+.menu_li a {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+
+/* Change the link color to #111 (black) on hover */
+.menu_li a:hover {
+    background-color: #111;
+}
+
+.content {
+    margin: 20px;
+    display: none;
+}
+
+.active {
+    background-color: #4CAF50;
+}
+.inactive {
+    background-color: #333;
+}
+
+#warn
+{
+    color: #FF0000;
+    font-style: italic;
+    font-weight: bold;
+}
+#highlight
+{
+    font-style: italic;
+    font-weight: bold;
+}
+#speech_table_mode
+{
+    font-style: italic;
+}
+#speech_table_header
+{
+    font-weight: bold;
+    font-style: italic;
+}
+#speech_dir_style
+{
+    font-style: italic;
+    font-weight: bold;
+    color: #FF00C3;
+}
+
