@@ -105,6 +105,7 @@ public class Config {
      * Every so often, every player on the server earns a soul shard while playing.
      */
     public static double SOUL_SHARD_GIVEAWAY_MINUTES;
+    public static int MAX_SOULS_HELD_THROUGH_DEATH;
 
     public static void reloadConfig()
     {
@@ -206,6 +207,8 @@ public class Config {
         OVERWORLD_GIVES_SOULS_ON_DEATH = getConfigBoolean("overworld_gives_soul_on_death");
         SOUL_SHARD_GIVEAWAY_MINUTES = getConfigDouble("soul_shard_giveaway_minutes");
 
+        MAX_SOULS_HELD_THROUGH_DEATH= getConfigInt("max_souls_held_through_death");
+
     }
 
     private static void configTest(String s) {
@@ -222,7 +225,7 @@ public class Config {
         return QuietCraftPlugin.cfg.getInt(s, QuietCraftPlugin.defaultCfg.getInt(s));
     }
 
-    private static double getConfigDouble(String s) {
+    public static double getConfigDouble(String s) {
         configTest(s);
         return QuietCraftPlugin.cfg.getDouble(s, QuietCraftPlugin.defaultCfg.getDouble(s));
     }

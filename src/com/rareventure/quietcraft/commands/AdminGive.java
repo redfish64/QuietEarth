@@ -62,3 +62,7 @@ public class AdminGive implements CommandExecutor {
         return true;
     }
 }
+
+//TODO 2 make it so if you have more than 10 souls, any more will be dropped when you die
+//this will force people to store souls away, and maybe other people can find them
+//soul armor, soul weapons...

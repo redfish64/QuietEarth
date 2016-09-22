@@ -67,14 +67,7 @@ public class PlayerManager {
 
         int soulCount = getSoulCount(p);
 
-        QCPlayer qcPlayer = getQCPlayer(p.getUniqueId().toString());
-
-        qcPlayer.setSoulsKeptDuringDeath(soulCount);
-
-        db.update(qcPlayer);
-
-        //remove the souls from inventory, so they don't spray out everywhere allowing someone else
-        //to collect them
+        //remove all souls from inventory. We'll place any that shouldn't go with the player as drops later
         for(Iterator<ItemStack> isi = e.getDrops().listIterator(); isi.hasNext();)
         {
             ItemStack is = isi.next();
@@ -83,11 +76,25 @@ public class PlayerManager {
                 isi.remove();
         }
 
-        //add one soul to give to whoever killed the player
-        if(Config.OVERWORLD_GIVES_SOULS_ON_DEATH)
+        int droppedSouls = 0;
+
+        if(soulCount > Config.MAX_SOULS_HELD_THROUGH_DEATH)
         {
-            Bukkit.getLogger().info("Dropping one soul on death for "+p);
-            p.getWorld().dropItemNaturally(p.getLocation(), WorldUtil.createSoulGem(1));
+            droppedSouls = soulCount - Config.MAX_SOULS_HELD_THROUGH_DEATH;
+            soulCount = Config.MAX_SOULS_HELD_THROUGH_DEATH;
+
+        }
+
+        QCPlayer qcPlayer = getQCPlayer(p.getUniqueId().toString());
+
+        qcPlayer.setSoulsKeptDuringDeath(soulCount);
+
+        db.update(qcPlayer);
+
+        if(droppedSouls > 0)
+        {
+            Bukkit.getLogger().info("Dropping "+droppedSouls+" soul(s) on death for "+p);
+            p.getWorld().dropItemNaturally(p.getLocation(), WorldUtil.createSoulGem(droppedSouls));
         }
 
         debugPrintPlayerInfo("onPlayerDeath",p);
@@ -100,6 +107,9 @@ public class PlayerManager {
         }
     }
 
+    /**
+     * Returns souls held in inventory
+     */
     private int getSoulCount(Player p) {
         int souls = 0;
 
@@ -281,15 +291,15 @@ public class PlayerManager {
                     p.sendMessage("You feel spiritually content. You have "+(soulCount)+" souls left.");
                 else if(soulCount < Config.SOULS_PER_REBIRTH *2)
                     p.sendMessage("You feel spiritually bloated, as if you are greater than mortal. You have "+(soulCount)+" souls left.");
-                else if(soulCount < Config.SOULS_PER_REBIRTH *3)
-                    p.sendMessage("You feel like a ethereal king, fear your wrath! You have "+(soulCount)+" souls left.");
-                else if(soulCount < Config.SOULS_PER_REBIRTH *4)
-                    p.sendMessage("You feel like a soul sucking demon. Who has fallen so you may grow so large? You have "+(soulCount)+" souls left.");
                 else if(soulCount < Config.SOULS_PER_REBIRTH *5)
-                    p.sendMessage("You've become almost immortal, flee, mortals, flee! You have "+(soulCount)+" souls left.");
-                else if(soulCount < Config.SOULS_PER_REBIRTH *6)
-                    p.sendMessage("Are you a god? You have "+(soulCount)+" souls left.");
+                    p.sendMessage("You feel like a ethereal king, fear your wrath! You have "+(soulCount)+" souls left.");
                 else if(soulCount < Config.SOULS_PER_REBIRTH *7)
+                    p.sendMessage("You feel like a soul sucking demon. Who has fallen so you may grow so large? You have "+(soulCount)+" souls left.");
+                else if(soulCount < Config.SOULS_PER_REBIRTH *9)
+                    p.sendMessage("You've become almost immortal, flee, mortals, flee! You have "+(soulCount)+" souls left.");
+                else if(soulCount < Config.SOULS_PER_REBIRTH *11)
+                    p.sendMessage("Are you a god? You have "+(soulCount)+" souls left.");
+                else if(soulCount < Config.SOULS_PER_REBIRTH *13)
                     p.sendMessage("Yes, you are a god. You have "+(soulCount)+" souls left.");
                 else
                     p.sendMessage("You can stop now... You have "+(soulCount)+" souls left.");

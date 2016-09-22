@@ -106,3 +106,5 @@ spawn_sign_msg:
 overworld_gives_soul_on_death: false
 
 soul_shard_giveaway_minutes: 6.666666667
+
+max_souls_held_through_death: 10

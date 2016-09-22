@@ -105,7 +105,7 @@ public class ChatManager {
         }
 
         public double getDistSqr() {
-            return MathUtil.sqr(QuietCraftPlugin.cfg.getDouble(configPath));
+            return MathUtil.sqr(Config.getConfigDouble(configPath));
         }
     }
 
