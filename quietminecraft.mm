@@ -409,7 +409,7 @@
 <node CREATED="1473905417043" ID="ID_1118500889" MODIFIED="1473905443359" TEXT="This is necessary, otherwise people can farm souls by dying and making their way back to the world they like, dropping off souls and going back again"/>
 </node>
 </node>
-<node CREATED="1473906601612" ID="ID_161333668" MODIFIED="1473989610632" TEXT="thoughts3">
+<node CREATED="1473906601612" FOLDED="true" ID="ID_161333668" MODIFIED="1474624464323" TEXT="thoughts3">
 <node CREATED="1473906606924" ID="ID_260224220" MODIFIED="1473906608895" TEXT="world reuse">
 <node CREATED="1473779873601" ID="ID_1205514430" MODIFIED="1473779880661" TEXT="worlds will be reused oldest first"/>
 <node CREATED="1473780627921" ID="ID_1527181915" MODIFIED="1473780639453" TEXT="players that log in from an old visiting world">
@@ -573,6 +573,48 @@
 <node CREATED="1473994943217" ID="ID_306956184" MODIFIED="1473994974805" TEXT="No, we still need visited worlds, otherwise we can&apos;t tell when a player has visited a world already"/>
 <node CREATED="1473994975305" ID="ID_132945468" MODIFIED="1473994996702" TEXT="Unless we add a special counter indicating everytime we recycled the world"/>
 <node CREATED="1473995299977" ID="ID_1525107835" MODIFIED="1473995324789" TEXT="Also we may want to have multiple visited worlds active at once one day"/>
+</node>
+</node>
+<node CREATED="1474624464954" ID="ID_993992756" MODIFIED="1474624467534" TEXT="thoughts4">
+<node CREATED="1474624468793" ID="ID_1489702621" MODIFIED="1474624471141" TEXT="portals">
+<node CREATED="1474624472185" ID="ID_900195672" MODIFIED="1474624475493" TEXT="can&apos;t use travel agent">
+<node CREATED="1474624476593" ID="ID_1145121066" MODIFIED="1474624491373" TEXT="Travel agent can only be used with a player enters a portal"/>
+<node CREATED="1474624905401" ID="ID_1643029459" MODIFIED="1474624933996" TEXT="We could use it, actually"/>
+</node>
+<node CREATED="1474624831090" ID="ID_1948233382" MODIFIED="1474624834014" TEXT="using nether">
+<node CREATED="1474624835370" ID="ID_99236904" MODIFIED="1474624851958" TEXT="some people may want stuff from nether, special things you can only get there"/>
+<node CREATED="1474624852338" ID="ID_297538562" MODIFIED="1474624860070" TEXT="nether is very harsh place right now"/>
+<node CREATED="1474624861378" ID="ID_1316081174" MODIFIED="1474624867678" TEXT="we can&apos;t create a nether per world"/>
+<node CREATED="1474624868122" ID="ID_1339873429" MODIFIED="1474624876621" TEXT="so it has to be used as the meeting place"/>
+</node>
+<node CREATED="1474624946464" ID="ID_1987635375" MODIFIED="1474624950012" TEXT="portal links">
+<node CREATED="1474624951016" ID="ID_41300195" MODIFIED="1474624957316" TEXT="definitely necessary"/>
+<node CREATED="1474625022759" ID="ID_549564721" MODIFIED="1474625036938" TEXT="we need to shutdown portals on the otherside, or there will be no way to close portals"/>
+</node>
+<node CREATED="1474625060838" ID="ID_839934120" MODIFIED="1474625073890" TEXT="keep fixed portal places?">
+<node CREATED="1474625076734" ID="ID_1587064842" MODIFIED="1474625080802" TEXT="I think its a bad idea."/>
+<node CREATED="1474625081109" ID="ID_629664596" MODIFIED="1474625108969" TEXT="Experienced players will not like this and may quit"/>
+<node CREATED="1474625086822" ID="ID_1085454686" MODIFIED="1474625096809" TEXT="They won&apos;t like dying in the nether either">
+<node CREATED="1474625098653" ID="ID_536620203" MODIFIED="1474625102593" TEXT="This can&apos;t be helped"/>
+<node CREATED="1474625123461" ID="ID_1064883705" MODIFIED="1474625164032" TEXT="Chnage it so dying in the nether loses all souls, and keeps same world"/>
+<node CREATED="1474625164604" ID="ID_882126473" MODIFIED="1474625171280" TEXT="If no souls, of course, teleport"/>
+<node CREATED="1474625341897" ID="ID_530180683" MODIFIED="1474625347868" TEXT="Notify user something special happened!"/>
+</node>
+</node>
+<node CREATED="1474625370544" ID="ID_862204128" MODIFIED="1474625371212" TEXT="idea">
+<node CREATED="1474625518061" ID="ID_481087574" MODIFIED="1474625529329" TEXT="portals are based on distance, just like original"/>
+<node CREATED="1474625372696" ID="ID_766815672" MODIFIED="1474625409363" TEXT="find nearby portal location">
+<node CREATED="1474625411384" ID="ID_1162274753" MODIFIED="1474625435827" TEXT="distance + random normalized vector">
+<node CREATED="1474625440543" ID="ID_1174442474" MODIFIED="1474625450563" TEXT="increase distance with each try"/>
+</node>
+</node>
+<node CREATED="1474625452607" ID="ID_1681819134" MODIFIED="1474625459594" TEXT="enter nether portal">
+<node CREATED="1474625460615" ID="ID_588764286" MODIFIED="1474625462034" TEXT="warn user"/>
+</node>
+<node CREATED="1474625465255" ID="ID_783535372" MODIFIED="1474625470170" TEXT="death inside nether">
+<node CREATED="1474625470982" ID="ID_1551743335" MODIFIED="1474625473530" TEXT="explain to user"/>
+</node>
+</node>
 </node>
 </node>
 <node CREATED="1473329224300" ID="ID_999690107" MODIFIED="1473329225537" TEXT="portals">

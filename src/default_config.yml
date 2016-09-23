@@ -71,13 +71,6 @@ overworld_portal_width:
   min: 4
   max: 7
 
-#the rng params for the spawning location in the overworld
-nether_portal:
-  mean: 1000
-  std: 500
-  min: 10
-  max: 5000
-
 #When deciding whether to recycle a world, the time a visited world must have no
 #log events before being recycled (with or without active players)
 max_recycle_last_player_log_days: 14
@@ -99,3 +92,6 @@ overworld_gives_soul_on_death: false
 soul_shard_giveaway_minutes: 6.666666667
 
 max_souls_held_through_death: 10
+
+enter_nether_warning: §4You have entered the nether! If you die, you'll drop all souls§4.
+nether_death_with_souls_msg: §5All your souls have been dropped in the nether!§5

@@ -23,6 +23,8 @@ public class QCWorld {
      */
     private int spawnLocX,spawnLocY,spawnLocZ;
 
+    //TODO 3: remove this field, we no longer have static nether locations, because it's surprising
+    // to new players
     /**
      * Where portals go to in the nether. We have a static location for this, so that nether
      * people can monitor their borders, too, just like overworld people.

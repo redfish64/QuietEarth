@@ -116,8 +116,10 @@ public class WorldManager {
         //find the best world that already exists
         QCWorld bestW = findBestActiveWorldForPlayer(player.getUniqueId().toString());
 
-        if(bestW != null)
+        if(bestW != null) {
+            qcp.i("using active world for dead player "+bestW);
             return bestW;
+        }
 
         //recycle a visited world (if we can)
         QCWorld bestWToRecycle = findBestWorldToRecycle(player.getUniqueId().toString());
@@ -128,6 +130,8 @@ public class WorldManager {
             return netherQCWorld;
         }
 
+        qcp.i("using recycled world for dead player "+bestWToRecycle);
+
         recycleWorld(bestWToRecycle);
 
         return bestWToRecycle;
@@ -137,25 +141,30 @@ public class WorldManager {
      * Recycles the world. This changes the spawn and nether points, increments
      * the world counter, and destroys all previous portals
      */
-    private void recycleWorld(QCWorld w) {
-        Location spawnLocation = WorldUtil.getRandomSpawnLocation(w.getWorld(), Config.OVERWORLD_SPAWN_RNP);
-        Location randomNetherPortalLocation = createRandomNetherPortalLocation();
+    private void recycleWorld(QCWorld qcWorld) {
+        Location spawnLocation = WorldUtil.getRandomSpawnLocation(qcWorld.getWorld(), Config.OVERWORLD_SPAWN_RNP);
 
-        w.setSpawnLocation(spawnLocation);
-        w.setNetherLocation(randomNetherPortalLocation);
+        //TODO 3 we no longer use a fixed nether portal location
+        Location randomNetherPortalLocation = WorldUtil.getRandomSpawnLocation(WorldUtil.getNetherWorld(), Config.OVERWORLD_SPAWN_RNP);
 
-        w.setRecycleCounter(w.getRecycleCounter()+1);
-        w.setLastRecycleTimestamp(new Date());
-        w.setSoulInflowOutflow(0);
-        qcp.db.update(w);
+        qcWorld.setSpawnLocation(spawnLocation);
+        qcWorld.setNetherLocation(randomNetherPortalLocation);
 
-        Bukkit.getLogger().info("Recycling world "+w);
+        qcWorld.setRecycleCounter(qcWorld.getRecycleCounter()+1);
+        qcWorld.setLastRecycleTimestamp(new Date());
+        qcWorld.setSoulInflowOutflow(0);
+        qcp.db.update(qcWorld);
+
+        Bukkit.getLogger().info("Recycling world "+qcWorld);
 
         WorldUtil.addSpawnLocationSign(spawnLocation);
 
         //destroy all the old portal links, so that the recycled world won't be
         //enterable from the nether
-        getAllPortalLinks(w.getId()). forEach( pl -> destroyPortalsForPortalLink(pl));
+        getAllPortalLinks(qcWorld.getId()). forEach( pl -> destroyPortalsForPortalLink(pl));
+
+        //update the spawn location of the world
+        qcWorld.getWorld().setSpawnLocation(spawnLocation.getBlockX(),spawnLocation.getBlockY(),spawnLocation.getBlockZ());
     }
 
     private List<QCPortalLink> getAllPortalLinks(int worldId) {
@@ -250,7 +259,9 @@ public class WorldManager {
         qcp.getLogger().info("Finished world creation for " + name);
 
         Location spawnLocation = WorldUtil.getRandomSpawnLocation(w, Config.OVERWORLD_SPAWN_RNP);
-        Location randomNetherPortalLocation = createRandomNetherPortalLocation();
+        //TODO 3 we no longer use a fixed nether portal location
+        Location randomNetherPortalLocation = WorldUtil.getRandomSpawnLocation(WorldUtil.getNetherWorld(), Config.OVERWORLD_SPAWN_RNP);
+
         QCWorld qcw = new QCWorld(name, spawnLocation, randomNetherPortalLocation);
         qcw.setId(id);
         w.setSpawnLocation(spawnLocation.getBlockX(),spawnLocation.getBlockY(),
@@ -263,18 +274,6 @@ public class WorldManager {
         return qcw;
     }
 
-
-    /**
-     * Creates a random portal location in the nether world.
-     * All world portals will come here
-     *
-     * @return created location
-     */
-    public Location createRandomNetherPortalLocation() {
-        World w = getWorld(netherQCWorld);
-
-        return WorldUtil.getRandomSpawnLocation(w, Config.NETHER_PORTAL_RNP);
-    }
 
     private World getWorld(QCWorld w) {
         return Bukkit.getWorld(w.getName());
@@ -292,12 +291,12 @@ public class WorldManager {
 
         //portal was created without a portal key
         if(playerAndPortalKey == null) {
-            qcp.getLogger().info("denied portal creation");
+            qcp.getLogger().info("denied portal creation, no portal key");
             event.setCancelled(true);
 
             //we have to destroy the portal somehow. Otherwise people could
             //create long standing non working portals, and when someone with a portal
-            //key walks by unknowningly, they portal would be created
+            //key walks by unknowningly, the portal would be created
             WorldUtil.destroyPortal(event.getBlocks());
             return;
         }
@@ -307,14 +306,33 @@ public class WorldManager {
         BlockArea ba = WorldUtil.getPortalArea(event.getBlocks());
         Location portalLocation = WorldUtil.getRepresentativePortalLocation(ba);
 
-        //we don't allow portals from the nether, because it gets out of control
-        //if a worlds portal keys gets distributed outside the world
         if(WorldUtil.isNetherWorld(event.getWorld().getName()))
         {
-            qcp.getLogger().info("denied portal creation");
-            event.setCancelled(true);
+            //portals from the nether always go to home world, and at the particular spot considering 8:1
+            //distance conversion
+            World overWorld = getWorld(qcPlayer.getWorld());
 
-            WorldUtil.destroyPortal(event.getBlocks());
+            Location overWorldPortalLocation =
+                    WorldUtil.getOverworldPortalLocationFromNetherLocation(overWorld,portalLocation);
+
+            constructOverWorldPortal(overWorldPortalLocation, true);
+
+            QuietCraftPlugin.db.beginTransaction();
+            try {
+                //create a link from the current location to the overworld world.
+                QCPortalLink pl =
+                        qcp.portalManager.createPortalLink(netherQCWorld.getId(),
+                                portalLocation,
+                                qcPlayer.getWorldId(),
+                                overWorldPortalLocation);
+                QuietCraftPlugin.db.save(pl);
+
+                QuietCraftPlugin.db.commitTransaction();
+            }
+            finally {
+                QuietCraftPlugin.db.endTransaction();
+            }
+
             return;
         }//if creating portal from nether world
 
@@ -322,16 +340,9 @@ public class WorldManager {
 
         QuietCraftPlugin.db.beginTransaction();
         try {
-            Location netherWorldLocation =
-                    qcWorld.getNetherLocation();
+            Location netherWorldLocation = WorldUtil.getNetherPortalLocationFromOverworldLocation(portalLocation);
 
-            QCPortalLink existingPortalLink = qcp.portalManager.
-                    getPortalLinkForLocation(netherWorldLocation);
-            if(existingPortalLink == null)
-                constructNetherWorldPortal(netherWorldLocation, true);
-            else
-                Bukkit.getLogger().info("Not constructing nether world portal because " +
-                        "a portal link already exists: "+existingPortalLink);
+            constructNetherWorldPortal(netherWorldLocation, true);
 
             //create a link from the current location to the nether world.
             QCPortalLink pl = qcp.portalManager.createPortalLink(
@@ -347,6 +358,9 @@ public class WorldManager {
             QuietCraftPlugin.db.endTransaction();
         }
     }
+    //TODO 2 players should lose all their souls but still stay same world if death in nether
+    //TODO 2 warn players when entering nether will lose all souls
+    //TODO 2 notify player lost all souls after death in nether
 //TODO 2.5 test that players spawn in populated qcWorlds first!
     /**
      * Destroys portals on both sides of a portal link, and then deletes the portal link,
@@ -463,7 +477,7 @@ public class WorldManager {
     private void clearStaleConstructedPortals() {
         synchronized(WorldUtil.recentConstructedPortalAreas) {
             //we give them one second
-            if (WorldUtil.lastPortalConstructionMS + 1000 < System.currentTimeMillis())
+            if (WorldUtil.lastPortalConstructionMS + Config.TIME_TO_CLEAR_STALE_PORTAL_AREAS_MS < System.currentTimeMillis())
                 WorldUtil.recentConstructedPortalAreas.clear();
         }
     }

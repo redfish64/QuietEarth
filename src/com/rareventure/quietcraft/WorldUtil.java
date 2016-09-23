@@ -454,10 +454,15 @@ public class WorldUtil {
         return true;
     }
 
+
     /**
      * Finds a semi safe place to put a spawn location.
      */
     public static Location getRandomSpawnLocation(World w, MathUtil.RandomNormalParams rnp) {
+        return getRandomSpawnLocation(new Location(w,0,0,0), rnp);
+    }
+
+    public static Location getRandomSpawnLocation(Location center, MathUtil.RandomNormalParams rnp) {
         Location loc;
         int y;
         do {
@@ -465,11 +470,11 @@ public class WorldUtil {
                     //TODO 3 maybe make this allow for rare occurrences of spawning at far away places
                     // (x+k)^2 or something
 
-                    new Location(w,
+                    new Location(center.getWorld(),
                             MathUtil.normalRandomInt(rnp),
                             0,
                             MathUtil.normalRandomInt(rnp)
-                    );
+                    ).add(center);
 
             loc.getChunk().load();
 
@@ -698,4 +703,48 @@ public class WorldUtil {
         return createSpecialItem(Config.SOUL_MATERIAL_TYPE,
                 Config.SOUL_DISPLAY_NAME, Config.SOUL_LORE, soulCount);
     }
+
+    /**
+     * Finds the closest place to put a nether portal at the expected coordinates (1:8) ratio, of the overworld
+     */
+    public static Location getNetherPortalLocationFromOverworldLocation(Location portalLocation) {
+        Location netherLocation = portalLocation.clone().multiply(1./Config.OVERWORLD_TO_NETHER_DIST_RATIO);
+        netherLocation.setWorld(getNetherWorld());
+        return findNearbyGoodPortalLocation(netherLocation);
+    }
+
+    /**
+     * Finds the closest place to put an overworld portal at the expected coordinates (1:8) ratio, of the overworld
+     */
+    public static Location getOverworldPortalLocationFromNetherLocation(World overWorld, Location portalLocation) {
+        Location overworldLocation = portalLocation.clone().multiply(Config.OVERWORLD_TO_NETHER_DIST_RATIO);
+        overworldLocation.setWorld(overWorld);
+        return findNearbyGoodPortalLocation(overworldLocation);
+    }
+    /**
+     * Finds a nearby location that is a good place for a portal. Uses a random walk with
+     * a continually increasing distance.
+     */
+    private static Location findNearbyGoodPortalLocation(Location startingLoc) {
+        double dist = Config.GOOD_PORTAL_STARTING_DIST * 2;
+
+        Location loc = startingLoc.clone();
+
+        int count = 0;
+        for(;;) {
+            int y = getValidHighestY(loc, SPAWN_LOCATION_BLACKLIST);
+            count++;
+            if (y != -1) {
+                loc.setY(y);
+                QuietCraftPlugin.i("findNearbyGoodPortalLocation: found after %d tries: %s",count,loc);
+                return loc;
+            }
+            //not quite walking distance here, on average will be dist/2, but good enough
+            Vector v = new Vector(Math.random(), 0, Math.random()).multiply(dist);
+            loc.add(v);
+
+            dist *= Config.GOOD_PORTAL_DIST_MULTIPLER;
+        }
+    }
+
 }

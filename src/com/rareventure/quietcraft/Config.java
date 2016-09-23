@@ -27,11 +27,20 @@ public class Config {
     public static final Material FAKE_SOUL_SHARD_RESULT = Material.WOOD_BUTTON;
     public static final String FAKE_SOUL_RESULT_DISPLAY_NAME = "Cracked soul gem";
     public static final List<String> FAKE_SOUL_RESULT_LORE = Arrays.asList("Thee dare taunt the gods????");
+    public static final double OVERWORLD_TO_NETHER_DIST_RATIO = 8.;
+    public static final double GOOD_PORTAL_STARTING_DIST = 5.;
+    public static final double GOOD_PORTAL_DIST_MULTIPLER = 1.3;
+
+    /**
+     * Automatically created portals are protected from physics events for up to the given time
+     * to prevent them being destroyed by the minecraft engine while we creating them.
+     */
+    // 10 seconds (in case of server lags causing portals to be destroyed)
+    public static final long TIME_TO_CLEAR_STALE_PORTAL_AREAS_MS = 10000;
     public static MathUtil.RandomNormalParams OVERWORLD_SPAWN_RNP;
 
     public static String PORTAL_KEY_NAME;
 
-    public static MathUtil.RandomNormalParams NETHER_PORTAL_RNP;
     /**
      * The id of the nether world
      */
@@ -101,6 +110,8 @@ public class Config {
      */
     public static double SOUL_SHARD_GIVEAWAY_MINUTES;
     public static int MAX_SOULS_HELD_THROUGH_DEATH;
+    public static String ENTER_NETHER_WARNING;
+    public static String NETHER_DEATH_WITH_SOULS_MSG;
 
     public static void reloadConfig()
     {
@@ -114,13 +125,6 @@ public class Config {
         PORTAL_KEY_NAME =
                 getConfigString("portal_key_name");
 
-        NETHER_PORTAL_RNP =
-                new MathUtil.RandomNormalParams(
-                        getConfigInt("nether_portal.mean"),
-                        getConfigInt("nether_portal.std"),
-                        getConfigInt("nether_portal.min"),
-                        getConfigInt("nether_portal.max"));
-
         INAUDIBLE_DIST_RATIO_SQR =
                 MathUtil.sqr(getConfigDouble("inaudible_dist_perc")/100.);
 
@@ -128,6 +132,13 @@ public class Config {
                 MathUtil.sqr(getConfigDouble("inaudible_dist_perc2")/100.);
 
         NETHER_SPAWN_RNP =
+                new MathUtil.RandomNormalParams(
+                        getConfigInt("nether_spawn.mean"),
+                        getConfigInt("nether_spawn.std"),
+                        getConfigInt("nether_spawn.min"),
+                        getConfigInt("nether_spawn.max"));
+
+        OVERWORLD_SPAWN_RNP =
                 new MathUtil.RandomNormalParams(
                         getConfigInt("nether_spawn.mean"),
                         getConfigInt("nether_spawn.std"),
@@ -197,6 +208,11 @@ public class Config {
 
         MAX_SOULS_HELD_THROUGH_DEATH= getConfigInt("max_souls_held_through_death");
 
+        ENTER_NETHER_WARNING =
+                getConfigString("enter_nether_warning");
+
+        NETHER_DEATH_WITH_SOULS_MSG =
+                getConfigString("nether_death_with_souls_msg");
     }
 
     private static void configTest(String s) {

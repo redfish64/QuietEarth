@@ -49,23 +49,31 @@ public class PlayerManager {
     public void onPlayerDeath(Player p, PlayerDeathEvent e) {
         EbeanServer db = QuietCraftPlugin.db;
 
-        if(WorldUtil.isNetherWorld(p.getWorld().getName())) {
+        int soulCount = getSoulCount(p);
+
+        if(WorldUtil.isNetherWorld(p.getWorld())) {
             //in the nether, souls aren't removed from inventory (are collectable), and the player
             //loses all their souls
             QCPlayer qcPlayer = getQCPlayer(p.getUniqueId().toString());
 
-            qcPlayer.setSoulsKeptDuringDeath(0);
+            if(soulCount > 0) {
+                //if they die with at least one soul, they get to go back to their world
+                p.sendMessage(Config.NETHER_DEATH_WITH_SOULS_MSG);
+                qcPlayer.setSoulsKeptDuringDeath(1);
+            }
+            else {
+                //death with no souls.. well we know what happens here
+                qcPlayer.setSoulsKeptDuringDeath(0);
 
-            //we also add one extra soul. This makes it so winning any PVP in the nether
-            //gives the victor at least one soul
-            addSoulsToInventory(p,1);
+                //we add one soul. This makes it so winning any PVP in the nether
+                //gives the victor at least one soul
+                addSoulsToInventory(p, 1);
+            }
 
             db.update(qcPlayer);
             return;
         }
 
-
-        int soulCount = getSoulCount(p);
 
         //remove all souls from inventory. We'll place any that shouldn't go with the player as drops later
         for(Iterator<ItemStack> isi = e.getDrops().listIterator(); isi.hasNext();)
@@ -342,8 +350,6 @@ public class PlayerManager {
             db.update(player);
             Bukkit.getLogger().info("onRespawn set world "+w+","+player);
 
-            debugPrintPlayerInfo("onRespawn without souls left",p);
-
             addToPlayerLog(player, QCPlayerLog.Action.MOVED_TO_WORLD);
 
            db.commitTransaction();
@@ -510,6 +516,14 @@ public class PlayerManager {
         }
         finally {
             qcp.db.endTransaction();
+        }
+
+        //TODO 2.1 fix user getting pushed into a wall a little after teleporting (I know this, because one time
+        // I teleported with 1/2 heart, and died, and the reason was suffication in dirt wall)
+        if(WorldUtil.isNetherWorld(tw.getName()))
+        {
+            if(Config.ENTER_NETHER_WARNING.length() > 0)
+                player.sendMessage(Config.ENTER_NETHER_WARNING);
         }
 
         Location teleportLocation = WorldUtil.findPortalTeleportPlaceForUser(otherLocation);
