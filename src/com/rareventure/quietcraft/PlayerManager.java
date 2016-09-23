@@ -182,7 +182,7 @@ public class PlayerManager {
                 if(soulCount > Config.MAX_SOULS_HELD_THROUGH_DEATH)
                 {
                     player.sendMessage(ChatColor.RED+"WARNING!!! "+ChatColor.WHITE+"You are carrying over "
-                            +Config.MAX_SOULS_HELD_THROUGH_DEATH+" souls. If you die, you'll drop "
+                            +"the maximum number of souls. If you die, you'll drop "
                             +(soulCount - Config.MAX_SOULS_HELD_THROUGH_DEATH)+" of your "+soulCount+
                     " souls on the ground.");
                 }
@@ -440,7 +440,7 @@ public class PlayerManager {
 
         if(pl == null) {
             Bukkit.getLogger().info("Could not find link for " +l);
-            WorldUtil.destroyPortal(l, 0);
+            WorldUtil.destroyPortal(l);
             return;
         }
 

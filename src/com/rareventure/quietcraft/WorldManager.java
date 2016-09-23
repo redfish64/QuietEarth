@@ -298,7 +298,7 @@ public class WorldManager {
             //we have to destroy the portal somehow. Otherwise people could
             //create long standing non working portals, and when someone with a portal
             //key walks by unknowningly, they portal would be created
-            WorldUtil.destroyPortal(event.getBlocks(), MathUtil.normalRandom(Config.PORTAL_EXPLOSION_SIZE_PERC_RNP)/100f);
+            WorldUtil.destroyPortal(event.getBlocks());
             return;
         }
 
@@ -314,8 +314,7 @@ public class WorldManager {
             qcp.getLogger().info("denied portal creation");
             event.setCancelled(true);
 
-            WorldUtil.destroyPortal(event.getBlocks(), 
-                    MathUtil.normalRandom(Config.PORTAL_EXPLOSION_SIZE_PERC_RNP));
+            WorldUtil.destroyPortal(event.getBlocks());
             return;
         }//if creating portal from nether world
 
@@ -356,8 +355,8 @@ public class WorldManager {
     private void destroyPortalsForPortalLink(QCPortalLink pl) {
 
         //the block physics stuff will delete the portals from the db for us
-        WorldUtil.destroyPortal(pl.getLoc1(),MathUtil.normalRandom(Config.PORTAL_EXPLOSION_SIZE_PERC_RNP));
-        WorldUtil.destroyPortal(pl.getLoc2(),MathUtil.normalRandom(Config.PORTAL_EXPLOSION_SIZE_PERC_RNP));
+        WorldUtil.destroyPortal(pl.getLoc1());
+        WorldUtil.destroyPortal(pl.getLoc2());
     }
 
     /**

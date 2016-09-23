@@ -78,15 +78,6 @@ nether_portal:
   min: 10
   max: 5000
 
-#When portals are destroyed and exploded, this specifies the percentage of width of portal
-#to explosion power (as defined by World.createExplosion()). So if the width of a portal
-#is 6, this value is 150%, then the total power would be 9
-portal_explosion_perc:
-  mean: 100
-  std: 50
-  min: 0
-  max: 500
-
 #When deciding whether to recycle a world, the time a visited world must have no
 #log events before being recycled (with or without active players)
 max_recycle_last_player_log_days: 14

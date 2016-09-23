@@ -223,18 +223,14 @@ public class WorldUtil {
         throw new IllegalArgumentException("Blocks don't contain any difference in X or Z!");
     }
 
-    public static void destroyPortal(World w, BlockArea portalArea, double explosionSize) {
+    public static void destroyPortal(World w, BlockArea portalArea) {
         portalArea.getBlocks(w).stream().filter(b -> b.getType() == Material.OBSIDIAN).
                 forEach(b -> b.setType(Material.SAND));
 
-        if(explosionSize > 0)
-            w.createExplosion(portalArea.getCenter(), (float) (explosionSize
-                                * portalArea.getLengthX()));
-
     }
 
-    public static void destroyPortal(List<Block> blocks, double explosionSize) {
-        destroyPortal(blocks.get(0).getWorld(), getPortalArea(blocks), explosionSize);
+    public static void destroyPortal(List<Block> blocks) {
+        destroyPortal(blocks.get(0).getWorld(), getPortalArea(blocks));
     }
 
     /**
@@ -444,7 +440,7 @@ public class WorldUtil {
     /**
      * Destroys the portal near the given location
      */
-    public static boolean destroyPortal(Location loc, double explosionSize) {
+    public static boolean destroyPortal(Location loc) {
         BlockArea ba = findPortal(loc,true);
         if(ba == null) ba = findPortal(loc,false);
 
@@ -453,7 +449,7 @@ public class WorldUtil {
             return false;
         }
 
-        destroyPortal(loc.getWorld(),ba, explosionSize);
+        destroyPortal(loc.getWorld(),ba);
 
         return true;
     }

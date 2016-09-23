@@ -30,11 +30,6 @@ public class Config {
     public static MathUtil.RandomNormalParams OVERWORLD_SPAWN_RNP;
 
     public static String PORTAL_KEY_NAME;
-    /**
-     * When portals are destroyed and exploded, this specifies the ratio of width of portal
-     * to explosion power (as defined by World.createExplosion())
-     */
-    public static MathUtil.RandomNormalParams PORTAL_EXPLOSION_SIZE_PERC_RNP;
 
     public static MathUtil.RandomNormalParams NETHER_PORTAL_RNP;
     /**
@@ -118,13 +113,6 @@ public class Config {
 
         PORTAL_KEY_NAME =
                 getConfigString("portal_key_name");
-
-        PORTAL_EXPLOSION_SIZE_PERC_RNP =
-                new MathUtil.RandomNormalParams(
-                        getConfigDouble("portal_explosion_perc.mean"),
-                        getConfigDouble("portal_explosion_perc.std"),
-                        getConfigDouble("portal_explosion_perc.min"),
-                        getConfigDouble("portal_explosion_perc.max"));
 
         NETHER_PORTAL_RNP =
                 new MathUtil.RandomNormalParams(
