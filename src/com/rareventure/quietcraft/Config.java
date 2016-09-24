@@ -37,6 +37,11 @@ public class Config {
      */
     // 10 seconds (in case of server lags causing portals to be destroyed)
     public static final long TIME_TO_CLEAR_STALE_PORTAL_AREAS_MS = 10000;
+
+    /**
+     * Area around spawn point where soul shards are put
+     */
+    public static final MathUtil.RandomNormalParams SOUL_SHARD_RNP = new MathUtil.RandomNormalParams(0, 1, -15, 15);
     public static MathUtil.RandomNormalParams OVERWORLD_SPAWN_RNP;
 
     public static String PORTAL_KEY_NAME;
