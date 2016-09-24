@@ -80,6 +80,9 @@ public class QuietCraftPlugin extends JavaPlugin {
         SoulShardTimer soulShardTimer = new SoulShardTimer(this);
         soulShardTimer.start();
 
+        SoulTimer soulTimer = new SoulTimer(this);
+        soulTimer.start();
+
         craftManager = new CraftManager(this);
 
     }

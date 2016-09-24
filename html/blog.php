@@ -11,6 +11,12 @@
    $active='blog';
    include('menu.php');
    ?>
+  <h3>2016/09/24</h3>
+  <p>The Quiet Craft has been missing something that important for good games, and narratives. There is no resources to fight for.</p>
+  <p>QC is basically a wrapper for Minecraft. It allows you to play Minecraft within it, but you can play it infinitely and everywhere. 
+  If you want to play Minecraft within QC, you need to find a plot of land, and resources... wood, stone, iron, food, etc. to develop
+  that land, and your character.</p>
+  <p>I need to </p>
   <h3>2016/09/21</h3>
   <h4>Soul Shards</h4>
   <p>A big problem with QC right now is that the longer you spend

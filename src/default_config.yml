@@ -95,3 +95,5 @@ max_souls_held_through_death: 10
 
 enter_nether_warning: §4You have entered the nether! If you die, you'll drop all souls§4.
 nether_death_with_souls_msg: §5All your souls have been dropped in the nether!§5
+
+soul_drop_minutes: 60

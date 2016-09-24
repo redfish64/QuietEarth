@@ -1,6 +1,6 @@
 <map version="1.0.1">
 <!-- To view this file, download free mind mapping software FreeMind from http://freemind.sourceforge.net -->
-<node CREATED="1467879125437" ID="ID_1423198636" MODIFIED="1467921769582" TEXT="New Mindmap">
+<node CREATED="1467879125437" ID="ID_1423198636" MODIFIED="1474702136120" TEXT="f">
 <node CREATED="1456401391710" ID="ID_429240407" MODIFIED="1467429279611" POSITION="right" TEXT="TheQuietMineCraft">
 <node CREATED="1456401402686" ID="ID_381598210" MODIFIED="1456401409642" TEXT="Based on &quot;The Quiet Earth&quot; movie"/>
 <node CREATED="1456401409942" ID="ID_1907732955" MODIFIED="1456401464570" TEXT="Worlds are visited in a certain order every time the player dies. Based on ip/username, the same world will never be visited again">
@@ -615,7 +615,32 @@
 <node CREATED="1474625470982" ID="ID_1551743335" MODIFIED="1474625473530" TEXT="explain to user"/>
 </node>
 </node>
+<node CREATED="1474627242510" ID="ID_98147970" MODIFIED="1474627244818" TEXT="blog ideas">
+<node CREATED="1474627245886" ID="ID_368143422" MODIFIED="1474627245886" TEXT=""/>
 </node>
+</node>
+<node CREATED="1474702634945" ID="ID_539672074" MODIFIED="1474702637588" TEXT="resources">
+<node CREATED="1474702638681" ID="ID_707368912" MODIFIED="1474702647964" TEXT="Everyone has all the resources they need to do whatever they want"/>
+<node CREATED="1474702648224" ID="ID_1537083005" MODIFIED="1474702658476" TEXT="There is no conflict over resources to do something special"/>
+<node CREATED="1474703250180" ID="ID_1440805813" MODIFIED="1474703266744" TEXT="The only thing special in these worlds is the spawn point"/>
+<node CREATED="1474703330236" ID="ID_477836476" MODIFIED="1474703338151" TEXT="soul shards at spawn point">
+<node CREATED="1474703340036" ID="ID_1675390500" MODIFIED="1474703353759" TEXT="Users like happy elf who stay far away may not like it">
+<node CREATED="1474703355451" ID="ID_847712111" MODIFIED="1474703371495" TEXT="This might be a good thing, we don&apos;t want users to stay away and have everything they want"/>
+<node CREATED="1474703371827" ID="ID_1593280025" MODIFIED="1474703378695" TEXT="We want them to need to come to the spawn point">
+<node CREATED="1474703708033" ID="ID_1173001710" MODIFIED="1474703717125" TEXT="We can&apos;t let users be content"/>
+<node CREATED="1474703842912" ID="ID_879649490" MODIFIED="1474703842912" TEXT=""/>
+<node CREATED="1474703720297" ID="ID_864068766" MODIFIED="1474703724461" TEXT="They must always want something"/>
+<node CREATED="1474703850360" ID="ID_232395190" MODIFIED="1474703858364" TEXT="They have to strategize against other users"/>
+<node CREATED="1474703859128" ID="ID_1710927227" MODIFIED="1474703877260" TEXT="The way it is now, they never have to do anything to beat others (besides stay on the server)"/>
+<node CREATED="1474703890840" ID="ID_1195966841" MODIFIED="1474703895227" TEXT="What about both?">
+<node CREATED="1474703896112" ID="ID_1691635290" MODIFIED="1474703911363" TEXT="Soul shards and giveaway  a soul at the spawn point every so often"/>
+<node CREATED="1474703943928" ID="ID_1565777845" MODIFIED="1474703943928" TEXT=""/>
+</node>
+</node>
+</node>
+</node>
+</node>
+<node CREATED="1474703385771" ID="ID_1410859823" MODIFIED="1474703388807" TEXT="getting more users"/>
 </node>
 <node CREATED="1473329224300" ID="ID_999690107" MODIFIED="1473329225537" TEXT="portals">
 <node CREATED="1473344962057" ID="ID_224671769" MODIFIED="1473759613455" TEXT="each user gets a special portal key. when a portal is made, this key must be nearby">
@@ -667,7 +692,7 @@
 <node CREATED="1473763636541" ID="ID_713038597" MODIFIED="1473763638161" TEXT="nether">
 <node CREATED="1473763640949" ID="ID_412189619" MODIFIED="1473763650769" TEXT="souls drop when player dies"/>
 <node CREATED="1473905613907" ID="ID_492955853" MODIFIED="1473905615983" TEXT="nether death">
-<node CREATED="1473905617059" ID="ID_1823471153" MODIFIED="1473905619567" TEXT="nether care pack">
+<node CREATED="1473905617059" ID="ID_1823471153" MODIFIED="1474702381406" TEXT="nether care pack">
 <node CREATED="1473905627979" ID="ID_1209532824" MODIFIED="1473905628880" TEXT="wood"/>
 <node CREATED="1473905631115" ID="ID_1969183150" MODIFIED="1473905633023" TEXT="cobblestone"/>
 <node CREATED="1473905633331" ID="ID_952445658" MODIFIED="1473905636080" TEXT="tree samplings"/>
@@ -675,7 +700,7 @@
 <node CREATED="1473905638451" ID="ID_456377512" MODIFIED="1473905641351" TEXT="wheat seeds"/>
 <node CREATED="1473905641755" ID="ID_501111257" MODIFIED="1473905643151" TEXT="coal"/>
 <node CREATED="1473905643739" ID="ID_422413575" MODIFIED="1473905645279" TEXT="dirt"/>
-<node CREATED="1473905645603" ID="ID_371013394" MODIFIED="1473905647735" TEXT="strings"/>
+<node CREATED="1473905645603" ID="ID_371013394" MODIFIED="1474702563645" TEXT="strings"/>
 </node>
 </node>
 <node CREATED="1473905655131" ID="ID_411406373" MODIFIED="1473905672319" TEXT="sound travels everywhere in nether, be careful when speaking"/>

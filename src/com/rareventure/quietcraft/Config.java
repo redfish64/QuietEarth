@@ -112,6 +112,7 @@ public class Config {
     public static int MAX_SOULS_HELD_THROUGH_DEATH;
     public static String ENTER_NETHER_WARNING;
     public static String NETHER_DEATH_WITH_SOULS_MSG;
+    public static double SOUL_DROP_MINUTES;
 
     public static void reloadConfig()
     {
@@ -213,6 +214,9 @@ public class Config {
 
         NETHER_DEATH_WITH_SOULS_MSG =
                 getConfigString("nether_death_with_souls_msg");
+
+        SOUL_DROP_MINUTES =
+                getConfigDouble("soul_drop_minutes");
     }
 
     private static void configTest(String s) {
