@@ -5,7 +5,6 @@ import com.avaje.ebean.Transaction;
 import com.rareventure.quietcraft.commands.*;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.IllegalPluginAccessException;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -82,6 +81,7 @@ public class QuietCraftPlugin extends JavaPlugin {
         soulShardTimer.start();
 
         craftManager = new CraftManager(this);
+
     }
 
     /**

@@ -747,12 +747,4 @@ public class WorldUtil {
         }
     }
 
-    static ItemStack createSoulShard() {
-        return
-                createSpecialItem(
-                        Config.SOUL_SHARD_MATERIAL,
-                        Config.SOUL_SHARD_DISPLAY_NAME,
-                        Config.SOUL_SHARD_LORE, 1
-                        );
-    }
 }

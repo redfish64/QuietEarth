@@ -1,9 +1,12 @@
 package com.rareventure.quietcraft;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
+
+import java.util.HashMap;
 
 /**
  * Periodically gives soul shards to everyone on the server.
@@ -20,6 +23,7 @@ public class SoulShardTimer {
         BukkitRunnable br = new BukkitRunnable() {
             @Override
             public void run() {
+                qcp.i("Giving soul shards to players");
                 giveawaySoulShards();
             }
         };
@@ -30,18 +34,33 @@ public class SoulShardTimer {
         }
 
     private void giveawaySoulShards() {
-        qcp.i("Putting soul shard in worlds");
-        qcp.wm.qcWorlds.stream().filter(w -> !WorldUtil.isNetherWorld(w.getName()))
-                .forEach(w -> putShardNearSpawnPoint(
-                        WorldUtil.getRandomSpawnLocation(w.getSpawnLocation(w.getWorld()),
-                                Config.SOUL_SHARD_RNP)));
-        Bukkit.broadcastMessage("A Soul shard has appeared at the spawn point...");
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            giveSoulShardToPlayer(player);
+        }
     }
 
-    private void putShardNearSpawnPoint(Location spawnLocation) {
-        ItemStack soulShard = WorldUtil.createSoulShard();
-        spawnLocation.getWorld().dropItemNaturally(spawnLocation, soulShard);
-        qcp.i("Spawned soul shard at "+spawnLocation);
+    private void giveSoulShardToPlayer(Player player) {
+        qcp.i("Giving soul shard to %s",player.getName());
+        player.sendMessage("You've earned a soul shard");
+
+        ItemStack soulShard = createSoulShard();
+
+        HashMap<Integer, ItemStack> leftOverItems = player.getInventory().addItem(soulShard);
+
+        //if we couldn't save the soul shard to inventory, drop it at their feet
+        if(!leftOverItems.isEmpty()) {
+            player.sendMessage("Soul shard couldn't fit in inventory, dropped");
+            player.getWorld().dropItemNaturally(player.getLocation(), soulShard);
+        }
+    }
+
+    private ItemStack createSoulShard() {
+        return
+                WorldUtil.createSpecialItem(
+                        Config.SOUL_SHARD_MATERIAL,
+                        Config.SOUL_SHARD_DISPLAY_NAME,
+                        Config.SOUL_SHARD_LORE, 1
+                        );
     }
 
 }
